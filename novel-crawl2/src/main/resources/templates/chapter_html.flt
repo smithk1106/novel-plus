@@ -1,0 +1,22 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>${title}</title>
+  <meta charset="UTF-8">
+  <link href="https://cdn.staticfile.net/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <h1>${title}</h1>
+  <div class="content">
+    ${content}
+  </div>
+  <div class="bottom-bar d-flex justify-content-between">
+    <button id="btn-pre" type="button" class="btn btn-primary btn-lg w-25" onclick="turnPage('pre')">上一页</button>
+    <button id="btn-next" type="button" class="btn btn-primary btn-lg w-25" onclick="turnPage('next')">下一页</button>
+  </div>
+</body>
+
+<script src="https://cdn.staticfile.net/bootstrap/5.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="/js/chapter.js" type="text/javascript"></script>
+</html>

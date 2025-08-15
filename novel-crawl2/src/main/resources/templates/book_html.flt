@@ -1,0 +1,41 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>${bookName}</title>
+  <meta charset="UTF-8">
+  <link href="https://cdn.staticfile.net/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+        <h3 class="mytitle">
+          ${bookName} 详细
+        </h3>
+        <div class="bookbox">
+            <div class="bookimg2"><img src="${coverUrl}" alt="${bookName}"></div>
+            <div class="booknav2">
+                <h1>${bookName}</h1>
+                <p>作者：${author}</p>
+                <p>分类：${category}</p>
+                <p>状态：${status}</p>
+                <p>更新：${lastUpdate}</p>
+            </div>
+        </div>
+        <div class="bookintro">
+          ${intro}
+        </div>
+    </div>
+  </div>
+  <div class="row">
+    <ul class="text-center">
+        <li class="active"><i class="iconfont icon-list"></i>目录</li>
+    </ul>
+    <div class="col">
+        ${chapters}
+    </div>
+  </div>
+</body>
+
+<script src="https://cdn.staticfile.net/bootstrap/5.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+</html>

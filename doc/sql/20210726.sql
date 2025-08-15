@@ -1,1 +1,0 @@
-alter table news add column `read_count` BIGINT NOT NULL DEFAULT '0' COMMENT '阅读量' after content;

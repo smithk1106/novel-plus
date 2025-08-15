@@ -3,7 +3,11 @@ server:
   port: 8088
 spring:
   redis:
-    host: 127.0.0.1
+    #Redis服务器IP
+    host: novel-redis
+    #Redis服务器连接端口
     port: 6379
-    password: test123456
-
+    #Redis服务器连接密码
+    password: Demo_20250808
+    #连接超时时间（毫秒）
+    timeout: 10000

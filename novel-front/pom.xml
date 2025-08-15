@@ -122,12 +122,12 @@
                                         <include name="*.bat"/>
                                     </fileset>
                                 </copy>
-                                <zip destfile='${project.build.directory}/build/${project.artifactId}.zip'>
+                                <!-- <zip destfile='${project.build.directory}/build/${project.artifactId}.zip'>
                                     <zipfileset filemode="755" dir='${project.build.directory}/build/'/>
                                 </zip>
 
                                 <copy file="${basedir}/src/main/build/docker/Dockerfile"
-                                      tofile="${project.build.directory}/build/Dockerfile"/>
+                                      tofile="${project.build.directory}/build/Dockerfile"/> -->
                             </tasks>
                         </configuration>
                     </execution>

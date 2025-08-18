@@ -6,6 +6,7 @@ import com.java2nb.novel.core.serialize.TimeAgoFormatSerialize;
 import com.java2nb.novel.core.utils.DateUtil;
 import com.java2nb.novel.entity.BookComment;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
@@ -13,6 +14,7 @@ import java.util.Date;
  * @author 11797
  */
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class BookCommentVO extends BookComment {
 
     @JsonSerialize(using = CommentUserNameSerialize.class)

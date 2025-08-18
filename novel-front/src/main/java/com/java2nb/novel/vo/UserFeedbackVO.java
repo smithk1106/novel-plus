@@ -3,6 +3,7 @@ package com.java2nb.novel.vo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.java2nb.novel.entity.UserFeedback;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
@@ -10,6 +11,7 @@ import java.util.Date;
  * @author Administrator
  */
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class UserFeedbackVO extends UserFeedback {
 
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")

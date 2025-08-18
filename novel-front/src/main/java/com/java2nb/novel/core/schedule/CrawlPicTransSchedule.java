@@ -32,15 +32,11 @@ public class CrawlPicTransSchedule {
     @Value("${pic.save.path}")
     private String picSavePath;
 
-    /**
-     * 10分钟转一次
-     */
-    @Scheduled(fixedRate = 1000 * 60 * 10)
+    //@Scheduled(fixedRate = 1000 * 60 * 10)    // 10分钟转一次
+    @Scheduled(cron = "0 0 1 * * ?")    // 每天凌晨1点
     @SneakyThrows
     public void trans() {
-
         log.info("Network2LocalPicSchedule。。。。。。。。。。。。");
-
 
         List<Book> networkPicBooks = bookService.queryNetworkPicBooks(Constants.LOCAL_PIC_PREFIX,100);
         for (Book book : networkPicBooks) {
@@ -48,7 +44,5 @@ public class CrawlPicTransSchedule {
             //3秒钟转化一张图片，10分钟转化200张
             Thread.sleep(3000);
         }
-
-
     }
 }

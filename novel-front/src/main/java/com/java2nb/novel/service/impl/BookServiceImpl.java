@@ -249,6 +249,8 @@ public class BookServiceImpl implements BookService {
             .where(BookIndexDynamicSqlSupport.bookId, isEqualTo(bookId));
         if ("index_num desc".equals(orderBy)) {
             where.orderBy(BookIndexDynamicSqlSupport.indexNum.descending());
+        } else {
+            where.orderBy(BookIndexDynamicSqlSupport.indexNum);
         }
         return bookIndexMapper.selectMany(where
             .build()

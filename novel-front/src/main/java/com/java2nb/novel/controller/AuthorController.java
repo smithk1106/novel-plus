@@ -12,15 +12,10 @@ import com.java2nb.novel.entity.AuthorIncomeDetail;
 import com.java2nb.novel.entity.Book;
 import com.java2nb.novel.service.AuthorService;
 import com.java2nb.novel.service.BookService;
-import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -119,8 +114,9 @@ public class AuthorController extends BaseController {
         HttpServletRequest request) {
         Author author = checkAuthor(request);
 
-        content = content.replaceAll("\\n", "<br>")
-            .replaceAll("\\s", "&nbsp;");
+        content = content.replaceAll("(\\n|</p>|</div>)", "<br>")
+            .replaceAll("\\s", "&nbsp;")
+            .replaceAll("<(p|div)[^>]*?>", "");
         //发布章节内容
         bookService.addBookContent(bookId, indexName, content, isVip, author.getId());
 

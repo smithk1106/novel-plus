@@ -6,7 +6,6 @@ import cn.hutool.extra.template.TemplateConfig;
 import cn.hutool.extra.template.TemplateEngine;
 import cn.hutool.extra.template.TemplateUtil;
 
-import com.ideaflow.noveldownload.novel.core.ChapterFilter;
 import com.ideaflow.noveldownload.novel.core.ChapterFormatter;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.Chapter;
@@ -17,8 +16,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-
 @AllArgsConstructor
 public class ChapterConverter {
 
@@ -27,11 +24,7 @@ public class ChapterConverter {
 
     public Chapter convert(Chapter chapter) {
         String extName = config.getExtName();
-        // 转换前过滤
-        String filteredContent = new ChapterFilter(config).filter(chapter);
-        String content = new ChapterFormatter(config).format(filteredContent);
-
-        chapter.setCleanContent(content);  // 设置清理后的内容
+        String content = new ChapterFormatter(config).format(chapter.getContent());
 
         if ("txt".equals(extName)) {
             // 全角空格，用于首行缩进

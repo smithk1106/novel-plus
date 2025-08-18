@@ -30,6 +30,7 @@ public class WebSocketAutoConfiguration {
     public WebSocketConfigurer webSocketConfigurer(HandshakeInterceptor[] handshakeInterceptors,
                                                    WebSocketHandler webSocketHandler,
                                                    WebSocketProperties webSocketProperties) {
+        log.warn("WebSocket 配置: {}", webSocketProperties);
         return registry -> registry
                 // 第一步:添加 WebSocketHandler
                 .addHandler(webSocketHandler, webSocketProperties.getPath())

@@ -13,7 +13,7 @@ public class BookContext {
 
     public void set(Book book) {
         book.setBookName(FileUtils.sanitizeFileName(book.getBookName()));
-        book.setAuthor(FileUtils.sanitizeFileName(book.getAuthor()));
+        book.setAuthorName(FileUtils.sanitizeFileName(book.getAuthorName()));
         currentBook.set(book);
     }
 

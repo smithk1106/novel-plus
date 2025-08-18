@@ -40,12 +40,12 @@ public class ChineseConverter {
     private <T> T applyConversion(T obj, Function<String, String> convertFunc) {
         if (obj instanceof Book book) {
             book.setBookName(convertIfNotNull(book.getBookName(), convertFunc));
-            book.setAuthor(convertIfNotNull(book.getAuthor(), convertFunc));
-            book.setIntro(convertIfNotNull(book.getIntro(), convertFunc));
-            book.setCategory(convertIfNotNull(book.getCategory(), convertFunc));
-            book.setLatestChapter(convertIfNotNull(book.getLatestChapter(), convertFunc));
-            book.setLastUpdateTime(convertIfNotNull(book.getLastUpdateTime(), convertFunc));
-            book.setStatus(convertIfNotNull(book.getStatus(), convertFunc));
+            book.setAuthorName(convertIfNotNull(book.getAuthorName(), convertFunc));
+            book.setBookDesc(convertIfNotNull(book.getBookDesc(), convertFunc));
+            book.setCatName(convertIfNotNull(book.getCatName(), convertFunc));
+            book.setLastChapterName(convertIfNotNull(book.getLastChapterName(), convertFunc));
+            //book.setLastUpdateTime(book.getLastUpdateTime());
+            //book.setBookStatus(convertIfNotNull(book.getBookStatus(), convertFunc));
             return (T) book;
         }
 

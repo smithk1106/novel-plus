@@ -25,7 +25,7 @@ public class CrawlerPostHandler {
     public void handle(File saveDir) {
         Book book = BookContext.get();
         String extName = config.getExtName();
-        StringBuilder s = new StringBuilder(StrUtil.format("\n[i]《{}》（{}）下载完毕，", book.getBookName(), book.getAuthor()));
+        StringBuilder s = new StringBuilder(StrUtil.format("\n[i]《{}》（{}）下载完毕，", book.getBookName(), book.getAuthorName()));
 
         if (ALLOWED_EXTENSIONS.contains(extName.toLowerCase())) {
             s.append("[i]正在合并为 ").append(extName.toUpperCase());

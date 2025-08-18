@@ -11,4 +11,6 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "spring.app")
 public class AppProperties {
     private String contentBase;
+    private String coverPath;
+    private String coverUrlPrefix;
 }

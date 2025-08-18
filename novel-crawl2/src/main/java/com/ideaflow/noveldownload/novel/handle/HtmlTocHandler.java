@@ -7,11 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.ideaflow.noveldownload.config.AppProperties;
 import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.util.FileUtils;
+import com.ideaflow.noveldownload.novel.util.FormatUtils;
+import com.ideaflow.noveldownload.service.BookService;
 
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
@@ -21,11 +20,15 @@ import cn.hutool.extra.template.Template;
 import cn.hutool.extra.template.TemplateConfig;
 import cn.hutool.extra.template.TemplateEngine;
 import cn.hutool.extra.template.TemplateUtil;
+import jakarta.annotation.Resource;
 
 
 public class HtmlTocHandler implements PostProcessingHandler {
 
     private final TemplateEngine engine = TemplateUtil.createEngine(new TemplateConfig("templates", TemplateConfig.ResourceMode.CLASSPATH));
+
+    @Resource
+    private BookService bookService;
 
     @Override
     public void handle(Book book, File saveDir) {
@@ -45,12 +48,12 @@ public class HtmlTocHandler implements PostProcessingHandler {
         Template template = engine.getTemplate("book_html.flt");
         Map<String, String> map = new HashMap<>();
         map.put("bookName", book.getBookName());
-        map.put("author", book.getAuthor());
-        map.put("category", book.getCategory());
-        map.put("intro", book.getIntro());
-        map.put("status", book.getStatus());
-        map.put("coverUrl", book.getCoverUrl().startsWith("http") ? book.getCoverUrl() : (book.getCoverUrl().startsWith("/") ? book.getCoverUrl() : "/" + book.getCoverUrl()));
-        map.put("lastUpdate", book.getLastUpdateTime());
+        map.put("author", book.getAuthorName());
+        map.put("category", book.getCatName());
+        map.put("intro", book.getBookDesc());
+        map.put("status", book.getBookStatus() == 1 ? "已完结" : "连载中");
+        map.put("coverUrl", book.getPicUrl().startsWith("http") ? book.getPicUrl() : (book.getPicUrl().startsWith("/") ? book.getPicUrl() : "/" + book.getPicUrl()));
+        map.put("lastUpdate", FormatUtils.formatDate(book.getLastUpdateTime(), null));
         map.put("chapters", String.join("\n", chapterList));
 
         String bookDetail = template.render(map);

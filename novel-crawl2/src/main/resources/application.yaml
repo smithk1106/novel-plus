@@ -3,6 +3,10 @@ spring:
    name: novelDownloadServer
   profiles:
     active: dev
+  app:
+    #图片保存路径
+    coverPath: pic/localPic
+    coverUrlPrefix: /localPic
 
 server:
   port: 30000

@@ -11,6 +11,7 @@ public class CommonConst {
     public static final String SAVE_TYPE_TEXT = "txt";
     public static final String SAVE_TYPE_EPUB = "epub";
     public static final String SAVE_TYPE_PDF = "pdf";
+    public static final String SAVE_TYPE_DB = "db";
 
-    public static final String BOOK_DIR_PREFIX = "book";
+    public static final String BOOK_DIR_PREFIX = "books";
 }

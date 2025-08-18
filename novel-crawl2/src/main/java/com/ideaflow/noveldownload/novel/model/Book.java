@@ -1,5 +1,7 @@
 package com.ideaflow.noveldownload.novel.model;
 
+import java.util.Date;
+
 import lombok.Data;
 
 
@@ -8,15 +10,16 @@ public class Book {
     private Long id;
     private String url;
     private String bookName;
-    private String author;
-    private String intro;
-    private String category;
-    private int categoryId = 0;
-    private String coverUrl;
-    private String latestChapter;
-    private String lastUpdateTime;
-    private String status;
-    private Long wordCount = 0L;
+    private String authorName;
+    private String bookDesc;
+    private int catId = 0;
+    private String catName;
+    private String picUrl;
+    private String lastChapterName;
+    private Long lastChapterId = 0L;
+    private Date lastUpdateTime;
+    private Byte bookStatus = 0;
+    private Integer wordCount = 0;
     private String saveType;
     private String downloadUrl;
 }

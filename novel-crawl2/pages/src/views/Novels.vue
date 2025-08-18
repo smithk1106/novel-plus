@@ -63,8 +63,8 @@
             <!-- 封面图片 -->
             <div class="relative mb-6 overflow-hidden rounded-2xl">
               <img 
-                :src="getCoverUrl(novel.cover)"
-                :alt="novel.name"
+                :src="getCoverUrl(novel.picUrl)"
+                :alt="novel.bookName"
                 class="w-full aspect-[3/4] object-cover transition-transform duration-500 group-hover:scale-105"
                 @error="handleImageError"
               />
@@ -95,8 +95,8 @@
             
             <!-- 书籍信息 -->
             <div class="text-center">
-              <h3 class="font-semibold text-slate-800 text-lg mb-2 line-clamp-2">{{ novel.name }}</h3>
-              <p class="text-slate-600 text-sm font-light">{{ novel.author }}</p>
+              <h3 class="font-semibold text-slate-800 text-lg mb-2 line-clamp-2">{{ novel.bookName }}</h3>
+              <p class="text-slate-600 text-sm font-light">{{ novel.authorName }}</p>
             </div>
           </div>
         </div>
@@ -156,7 +156,7 @@
           <div class="absolute inset-0 bg-white/20 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl"></div>
           <div class="relative p-8">
             <h3 class="text-2xl font-semibold text-slate-800 mb-4">确认删除</h3>
-            <p class="text-slate-800 mb-8 font-light">确定要删除《{{ deleteDialog.novel?.name }}》吗？此操作不可恢复。</p>
+            <p class="text-slate-800 mb-8 font-light">确定要删除《{{ deleteDialog.novel?.bookName }}》吗？此操作不可恢复。</p>
             <div class="flex justify-end space-x-4">
               <button 
                 @click="deleteDialog.show = false"
@@ -313,7 +313,7 @@ const confirmDelete = (novel) => {
 const handleDownload = (novel) => {
   if (novel.saveType === 'html') {
     // HTML格式直接打开
-    window.open(novel.downloadUrl, novel.name)
+    window.open(novel.downloadUrl, novel.bookName)
   } else {
     // 其他格式下载
     const url = getFullUrl(API_URLS.NOVEL.VIEW(novel.id))

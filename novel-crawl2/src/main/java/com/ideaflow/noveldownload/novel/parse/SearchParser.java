@@ -29,6 +29,7 @@ import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessag
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.lang.ConsoleTable;
 import cn.hutool.core.util.ArrayUtil;
@@ -159,9 +160,9 @@ public class SearchParser extends Source {
                         .sourceId(this.rule.getId())
                         .url(bookUrl)
                         .bookName(book.getBookName())
-                        .author(book.getAuthor())
-                        .latestChapter(book.getLatestChapter())
-                        .lastUpdateTime(book.getLastUpdateTime())
+                        .author(book.getAuthorName())
+                        .latestChapter(book.getLastChapterName())
+                        .lastUpdateTime(DateUtil.format(book.getLastUpdateTime(), "yyyy-MM-dd HH:mm:ss"))
                         .build();
                 list.add(ChineseConverter.convert(sr, this.rule.getLanguage(), config.getLanguage()));
                 Thread.sleep(CrawlUtils.randomInterval(config));

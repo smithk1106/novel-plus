@@ -88,9 +88,10 @@
                 <label class="form-label">文件格式</label>
                 <div class="glass-select">
                   <select v-model="config.extName">
+                    <option value="db">仅DB</option>
+                    <option value="html">HTML</option>
                     <option value="epub">EPUB</option>
                     <option value="txt">TXT</option>
-<!--                    <option value="html">HTML</option>-->
                   </select>
                 </div>
               </div>

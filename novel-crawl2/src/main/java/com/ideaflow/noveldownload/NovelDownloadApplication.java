@@ -34,7 +34,7 @@ public class NovelDownloadApplication {
                 "application is running! Access URLs:\n\t" +
                 "Local: \t\thttp://localhost:" + port + path + "/\n\t" +
                 "前端页面: \thttp://" + ip + ":" + port + path + "/\n\t" +
-                "websocketPath: \thttp://" + ip + ":" + port + websocketPath + "/\n\t" +
+                "websocketPath: \tws://" + ip + ":" + port + websocketPath + "/\n\t" +
                 "/h2-console: \thttp://" + ip + ":" + port + h2 + "/\n\t" +
                 "----------------------------------------------------------");
     }

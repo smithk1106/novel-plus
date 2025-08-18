@@ -10,6 +10,7 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+
 import com.hankcs.hanlp.HanLP;
 import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.util.RandomUA;
@@ -35,9 +36,9 @@ public class CoverUpdater {
      */
     public String fetchCover(Book book, String coverUrl) {
         // 无封面，使用默认封面
-        book.setCoverUrl(StrUtil.isEmpty(coverUrl) ? "https://bookcover.yuewen.com/qdbimg/no-cover" : coverUrl);
+        book.setPicUrl(StrUtil.isEmpty(coverUrl) ? "https://bookcover.yuewen.com/qdbimg/no-cover" : coverUrl);
         if (StrUtil.isEmpty(book.getBookName())) {
-            return book.getCoverUrl();
+            return book.getPicUrl();
         }
         return Stream.<Supplier<String>>of(
                         () -> fetchQidian(book),
@@ -46,7 +47,7 @@ public class CoverUpdater {
                 ).map(Supplier::get)
                 .filter(CoverUpdater::isValidCover)
                 .findFirst()
-                .orElse(book.getCoverUrl());
+                .orElse(book.getPicUrl());
     }
 
     /**
@@ -135,7 +136,7 @@ public class CoverUpdater {
 
     private boolean matchBook(Book book, String name, String author) {
         String sourceName = HanLP.convertToSimplifiedChinese(book.getBookName());
-        String sourceAuthor = HanLP.convertToSimplifiedChinese(book.getAuthor());
+        String sourceAuthor = HanLP.convertToSimplifiedChinese(book.getAuthorName());
         name = HtmlUtil.cleanHtmlTag(name);
         author = HtmlUtil.cleanHtmlTag(author);
         return StrUtil.equals(sourceName, name) && StrUtil.equals(sourceAuthor, author);

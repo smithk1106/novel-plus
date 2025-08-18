@@ -6,10 +6,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ideaflow.noveldownload.config.AppProperties;
 import com.ideaflow.noveldownload.constans.CommonConst;
 import com.ideaflow.noveldownload.entity.BookEntity;
-import com.ideaflow.noveldownload.mapper.ChapterMapper;
+import com.ideaflow.noveldownload.mapper.BookIndexMapper;
 import com.ideaflow.noveldownload.mapper.BookMapper;
 import com.ideaflow.noveldownload.pojo.CommonResult;
 import com.ideaflow.noveldownload.pojo.NovelWebSearch;
+
+import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +26,11 @@ import java.util.Objects;
 @RequestMapping("/novel")
 public class NovelController {
 
-    @jakarta.annotation.Resource
+    @Resource
     private BookMapper novelMapper;
 
     @jakarta.annotation.Resource
-    private ChapterMapper chapterMapper;
+    private BookIndexMapper bookIndexMapper;
 
     @Autowired
     private AppProperties appProperties;
@@ -43,7 +45,7 @@ public class NovelController {
         
         // 如果name不为空，添加name的模糊查询条件
         if (StringUtils.hasText(novelWebSearch.getName())) {
-            queryWrapper.like(BookEntity::getName, novelWebSearch.getName());
+            queryWrapper.like(BookEntity::getBookName, novelWebSearch.getName());
         }
         queryWrapper.orderByDesc(BookEntity::getId);
         // 执行分页查询
@@ -52,12 +54,12 @@ public class NovelController {
             // 调整下载地址
             if (CommonConst.SAVE_TYPE_HTML.equalsIgnoreCase(novelEntity.getSaveType()) && StringUtils.hasText(novelEntity.getDownloadUrl())) {
                 if (!novelEntity.getDownloadUrl().startsWith("http")) {
-                    novelEntity.setDownloadUrl(appProperties.getContentBase() + novelEntity.getDownloadUrl());
+                    novelEntity.setDownloadUrl(appProperties.getContentBase() + "book/" + novelEntity.getId());
                 }
             }
             // 调整封面地址
-            if (StringUtils.hasText(novelEntity.getCover()) && !novelEntity.getCover().startsWith("http")) {
-                novelEntity.setCover(appProperties.getContentBase() + novelEntity.getCover());
+            if (StringUtils.hasText(novelEntity.getPicUrl()) && !novelEntity.getPicUrl().startsWith("http")) {
+                novelEntity.setPicUrl(appProperties.getContentBase() + novelEntity.getPicUrl());
             }
         });
         
@@ -82,7 +84,7 @@ public class NovelController {
         }
         
         // 删除章节信息
-        if (chapterMapper.deleteByMap(Map.of("book_id", id)) > 0) {
+        if (bookIndexMapper.deleteByMap(Map.of("book_id", id)) > 0) {
             // 删除小说信息
             if (novelMapper.deleteById(id) == 0) {
                 return CommonResult.error("删除小说信息失败");

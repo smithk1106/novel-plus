@@ -1,6 +1,10 @@
 package com.ideaflow.noveldownload.novel.parse;
 
-import cn.hutool.core.util.StrUtil;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+import com.ideaflow.noveldownload.constans.CommonConst;
+import com.ideaflow.noveldownload.constans.EnumBookCategory;
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
 import com.ideaflow.noveldownload.novel.convert.ChineseConverter;
 import com.ideaflow.noveldownload.novel.core.CoverUpdater;
@@ -10,12 +14,13 @@ import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.ContentType;
 import com.ideaflow.noveldownload.novel.model.Rule;
 import com.ideaflow.noveldownload.novel.util.CrawlUtils;
+import com.ideaflow.noveldownload.novel.util.FormatUtils;
 import com.ideaflow.noveldownload.novel.util.JsoupUtils;
+
+import cn.hutool.core.util.StrUtil;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 
 public class BookParser extends Source {
@@ -50,19 +55,16 @@ public class BookParser extends Source {
         Book book = new Book();
         book.setUrl(url);
         book.setBookName(bookName);
-        book.setAuthor(author);
-        book.setIntro(intro);
-        book.setCoverUrl(CoverUpdater.fetchCover(book, coverUrl));
-        book.setCategory(category);
-        book.setCategoryId(guessCategory(category).getCode());
-        book.setLatestChapter(latestChapter);
-        book.setLastUpdateTime(lastUpdateTime);
-        book.setStatus(status);
-        try {
-            book.setWordCount(Long.parseLong(wordCount));
-        } catch (NumberFormatException e) {
-            book.setWordCount(0L);
-        }
+        book.setAuthorName(author);
+        book.setBookDesc(intro);
+        book.setPicUrl(CoverUpdater.fetchCover(book, coverUrl));
+        book.setCatId(guessCategory(category).getCode());
+        book.setCatName(guessCategory(category).getDescription());
+        book.setLastChapterName(latestChapter);
+        book.setLastUpdateTime(FormatUtils.parseDate(lastUpdateTime, null));
+        book.setBookStatus(status != null && status.contains("完结") ? (byte)1 : (byte)0);
+        book.setWordCount(FormatUtils.parseInt(wordCount, 0));
+        book.setSaveType(CommonConst.SAVE_TYPE_HTML);
 
         return ChineseConverter.convert(book, this.rule.getLanguage(), config.getLanguage());
     }
@@ -73,14 +75,14 @@ public class BookParser extends Source {
      * @param categoryString 分类字符串
      * @return 猜测的分类
      */
-    public BookCategory guessCategory(String categoryString) {
-        BookCategory bookCategory = BookCategory.UNKNOWN;
+    public EnumBookCategory guessCategory(String categoryString) {
+        EnumBookCategory bookCategory = EnumBookCategory.UNKNOWN;
         
         if (categoryString == null || categoryString.isEmpty()) {
             return bookCategory;
         }
         // 遍历所有枚举值，匹配包含的分类
-        for (BookCategory cat : BookCategory.values()) {
+        for (EnumBookCategory cat : EnumBookCategory.values()) {
             String[] categories = cat.getDescription().split(",");
             for (String catDesc : categories) {
                 if (categoryString.contains(catDesc)) {
@@ -88,7 +90,7 @@ public class BookParser extends Source {
                     break;
                 }
             }
-            if (bookCategory != BookCategory.UNKNOWN) {
+            if (bookCategory != EnumBookCategory.UNKNOWN) {
                 break;
             }
         }

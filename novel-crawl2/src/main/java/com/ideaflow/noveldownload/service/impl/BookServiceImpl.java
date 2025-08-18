@@ -1,16 +1,26 @@
 package com.ideaflow.noveldownload.service.impl;
 
-import java.sql.Date;
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.ideaflow.noveldownload.entity.ChapterEntity;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.ideaflow.noveldownload.config.DynamicTableHelper;
+import com.ideaflow.noveldownload.constans.CommonConst;
+import com.ideaflow.noveldownload.entity.BookCategoryEntity;
+import com.ideaflow.noveldownload.entity.BookContentEntity;
 import com.ideaflow.noveldownload.entity.BookEntity;
-import com.ideaflow.noveldownload.mapper.ChapterMapper;
+import com.ideaflow.noveldownload.entity.BookIndexEntity;
+import com.ideaflow.noveldownload.mapper.BookCategoryMapper;
+import com.ideaflow.noveldownload.mapper.BookContentMapper;
+import com.ideaflow.noveldownload.mapper.BookIndexMapper;
 import com.ideaflow.noveldownload.mapper.BookMapper;
 import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.Chapter;
@@ -25,35 +35,42 @@ public class BookServiceImpl implements BookService {
     private BookMapper novelMapper;
 
     @Resource
-    private ChapterMapper chapterMapper;
+    private BookIndexMapper bookIndexMapper;
+
+    @Resource
+    private BookContentMapper bookContentMapper;
+
+    @Resource
+    private BookCategoryMapper bookCategoryMapper;
 
     @Override
     public Long saveBook(Book book) {
         // 书名不能为空
-        if (book.getBookName() == null || book.getBookName().isEmpty()) {
+        if (!StringUtils.hasText(book.getBookName())) {
             return 0L;
         }
-        BookEntity novelEntity = getEntityFromBook(book);
-        Map<String, Object> keyMap;
-        if (StringUtils.hasText(novelEntity.getAuthor())) {
-            keyMap = Map.of(
-                "name", novelEntity.getName(),
-                "author", novelEntity.getAuthor()
-            );
+
+        LambdaQueryWrapper<BookEntity> queryWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(book.getAuthorName())) {
+            queryWrapper.allEq(Map.of(
+                BookEntity::getBookName, book.getBookName(),
+                BookEntity::getAuthorName, book.getAuthorName()
+            ));
         } else {
-            keyMap = Map.of("name", novelEntity.getName());
+            queryWrapper.eq(BookEntity::getBookName, book.getBookName());
         }
-        List<BookEntity> list = novelMapper.selectByMap(keyMap);
-        if (list.isEmpty()) {
-            if (novelMapper.insert(novelEntity) > 0){
-                book.setId(novelEntity.getId());
+        List<BookEntity> bookEntityList = novelMapper.selectList(queryWrapper);
+        if (bookEntityList.isEmpty()) {
+            BookEntity bookEntity = mergeBookToEntity(book, null);
+            if (novelMapper.insert(bookEntity) > 0){
+                book.setId(bookEntity.getId());
             } else {
                 book.setId(0L);
             }
         } else {
-            book.setId(list.get(0).getId());
-            novelEntity.setId(book.getId());
-            novelMapper.updateById(novelEntity);
+            BookEntity bookEntity = mergeBookToEntity(book, bookEntityList.get(0));
+            book.setId(bookEntity.getId());
+            novelMapper.updateById(bookEntity);
         }
 
         return book.getId();
@@ -61,11 +78,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book getBookById(Long id) {
-        BookEntity novelEntity = novelMapper.selectById(id);
-        if (novelEntity == null) {
+        BookEntity bookEntity = novelMapper.selectById(id);
+        if (bookEntity == null) {
             return null;
         }
-        return getBookFromEntity(novelEntity);
+        return getBookFromEntity(bookEntity);
     }
 
     @Override
@@ -78,145 +95,299 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Long updateBook(Book book) {
-        Long bookId = 0L;
-        BookEntity novelEntity = getEntityFromBook(book);
-        if (novelMapper.updateById(novelEntity) > 0) {
-            bookId = novelEntity.getId();
-        }
-        return bookId;
-    }
-
-    @Override
     public Long saveChapter(Chapter chapter) {
-        ChapterEntity chapterEntity = getEntityFromChapter(chapter);
-
-        Map<String, Object> keyMap = Map.of(
-            "book_id", chapter.getBookId(),
-            "title", chapter.getTitle()
-        );
-        List<ChapterEntity> list = chapterMapper.selectByMap(keyMap);
-        if (list.isEmpty()) {
-            if (chapterMapper.insert(chapterEntity) > 0){
-                chapter.setId(chapterEntity.getId());
+        LambdaQueryWrapper<BookIndexEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.allEq(Map.of(
+            BookIndexEntity::getBookId, chapter.getBookId(),
+            BookIndexEntity::getIndexName, chapter.getTitle()
+        ));
+        Boolean isOK = true;
+        BookIndexEntity entity = bookIndexMapper.selectOne(queryWrapper);
+        if (entity == null) {
+            BookIndexEntity bookIndexEntity = mergeChapterToEntity(chapter, null);
+            if (bookIndexMapper.insert(bookIndexEntity) > 0) {
+                chapter.setId(bookIndexEntity.getId());
             } else {
                 chapter.setId(0L);
+                isOK = false;
             }
         } else {
-            chapter.setId(list.get(0).getId());
-            chapterEntity.setId(chapter.getId());
-            chapterMapper.updateById(chapterEntity);
+            BookIndexEntity bookIndexEntity = mergeChapterToEntity(chapter, entity);
+            chapter.setId(bookIndexEntity.getId());
+            bookIndexMapper.updateById(bookIndexEntity);
+        }
+
+        // 保存章节内容
+        if (isOK && StringUtils.hasText(chapter.getContent())) {
+            DynamicTableHelper.setRequestData(Map.of("index_id", chapter.getId()));
+            BookContentEntity bookContentEntity = new BookContentEntity();
+            bookContentEntity.setIndexId(chapter.getId());
+            bookContentEntity.setContent(chapter.getCleanContent());
+
+            LambdaQueryWrapper<BookContentEntity> contentWrapper = new LambdaQueryWrapper<>();
+            contentWrapper.eq(BookContentEntity::getIndexId, chapter.getId());
+            List<BookContentEntity> bookContentList = bookContentMapper.selectList(contentWrapper);
+            if (bookContentList.isEmpty()) {
+                // 如果章节内容不存在，则插入新的内容
+                isOK = (bookContentMapper.insert(bookContentEntity) > 0);
+            } else {
+                // 如果章节内容已存在，则更新内容
+                bookContentEntity.setId(bookContentList.get(0).getId());
+                isOK = (bookContentMapper.updateById(bookContentEntity) > 0);
+            }
+            DynamicTableHelper.removeRequestData();
+            cn.hutool.core.lang.Console.log("[D]保存章节【{}: {}】的内容到'book_content{}': {}.", chapter.getId(), chapter.getTitle(), chapter.getId() % 10, (isOK ? "成功" : "失败"));
         }
 
         return chapter.getId();
     }
 
     @Override
+    public int saveChapters(List<Chapter> chapters, int count) {
+        int saveCount = 0;
+
+        if (count < 1 || count > chapters.size()) count = chapters.size();
+        chapters.sort(Comparator.comparing(Chapter::getOrder));
+        for (int i = 0; i < count; i++) {
+            if (saveChapter(chapters.get(i)) > 0) {
+                saveCount++;
+            }
+        }
+
+        return saveCount;
+    }
+
+    @Override
     public Chapter getChapterById(Long id) {
-        ChapterEntity chapterEntity = chapterMapper.selectById(id);
-        if (chapterEntity == null) {
+        BookIndexEntity bookIndexEntity = bookIndexMapper.selectById(id);
+        if (bookIndexEntity == null) {
             return null;
         }
 
-        return getChapterFromEntity(chapterEntity);
+        // 获取章节内容
+        DynamicTableHelper.setRequestData(Map.of("index_id", id));
+        LambdaQueryWrapper<BookContentEntity> contentWrapper = new LambdaQueryWrapper<>();
+        contentWrapper.eq(BookContentEntity::getIndexId, id);
+        List<BookContentEntity> bookContentList = bookContentMapper.selectList(contentWrapper);
+        DynamicTableHelper.removeRequestData();
+        if (bookContentList.isEmpty()) {
+            return getChapterFromEntity(bookIndexEntity, null);
+        }
+
+        return getChapterFromEntity(bookIndexEntity, bookContentList);
     }
 
     @Override
     public Chapter getChapterByBookIdAndTitle(Long bookId, String title) {
-        Map<String, Object> keyMap = Map.of(
-            "book_id", bookId,
-            "title", title
-        );
-        List<ChapterEntity> list = chapterMapper.selectByMap(keyMap);
-        if (list.isEmpty()) {
+        LambdaQueryWrapper<BookIndexEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.allEq(Map.of(
+            BookIndexEntity::getBookId, bookId,
+            BookIndexEntity::getIndexName, title
+        ));
+        BookIndexEntity bookIndexEntity = bookIndexMapper.selectOne(queryWrapper);
+        if (bookIndexEntity == null) {
             return null;
         }
-        ChapterEntity chapterEntity = list.get(0);
 
-        return getChapterFromEntity(chapterEntity);
+        // 获取章节内容
+        DynamicTableHelper.setRequestData(Map.of("index_id", bookIndexEntity.getId()));
+        LambdaQueryWrapper<BookContentEntity> contentWrapper = new LambdaQueryWrapper<>();
+        contentWrapper.eq(BookContentEntity::getIndexId, bookIndexEntity.getId());
+        List<BookContentEntity> bookContentList = bookContentMapper.selectList(contentWrapper);
+        DynamicTableHelper.removeRequestData();
+        if (bookContentList.isEmpty()) {
+            return getChapterFromEntity(bookIndexEntity, null);
+        }
+
+        return getChapterFromEntity(bookIndexEntity, bookContentList);
     }
 
     @Override
-    public Long updateChapter(Chapter chapter) {
-        Long id = 0L;
-        ChapterEntity chapterEntity = getEntityFromChapter(chapter);
-        if (chapterMapper.updateById(chapterEntity) > 0) {
-            id = chapterEntity.getId();
-        }
-        return id;
-    }
-    
+    public List<Chapter> getChapters(Long bookId, int start, int count) {
+        List<Chapter> list = new ArrayList<Chapter>();
 
-    private Book getBookFromEntity(BookEntity novelEntity) {
+        // 创建条件构造器
+        LambdaQueryWrapper<BookIndexEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BookIndexEntity::getBookId, bookId);
+        queryWrapper.orderByAsc(BookIndexEntity::getIndexNum);
+        // 获取章节列表
+        List<BookIndexEntity> bookIndexList = bookIndexMapper.selectList(queryWrapper);
+        if (bookIndexList.isEmpty()) {
+            return list;
+        }
+
+        // 获取章节内容
+        LambdaQueryWrapper<BookContentEntity> contentWrapper = new LambdaQueryWrapper<>();
+        for(BookIndexEntity bookIndexEntity : bookIndexList) {
+            DynamicTableHelper.setRequestData(Map.of("index_id", bookIndexEntity.getId()));
+            contentWrapper.clear();
+            contentWrapper.eq(BookContentEntity::getIndexId, bookIndexEntity.getId());
+            List<BookContentEntity> bookContentList = bookContentMapper.selectList(contentWrapper);
+            if (bookContentList.isEmpty()) {
+                list.add(getChapterFromEntity(bookIndexEntity, null));
+            } else {
+                list.add(getChapterFromEntity(bookIndexEntity, bookContentList));
+            }
+            DynamicTableHelper.removeRequestData();
+        }
+
+        return list;
+    }
+
+    @Override
+    public int sumWordCount(Long bookId) {
+        // 创建条件构造器
+        QueryWrapper<BookIndexEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("sum(word_count) as book_word_count"); 
+        queryWrapper.eq("book_id", bookId);
+
+        // 获取章节列表
+        List<Map<String, Object>> mapList = bookIndexMapper.selectMaps(queryWrapper);
+        if (mapList.isEmpty()) {
+            return 0;
+        }
+
+        return ((BigDecimal)mapList.get(0).get("book_word_count")).intValue();
+    }
+
+    // Test
+    @Override
+    public boolean AdjustChapterContents(Long bookId) {
+        // 获取章节列表
+        LambdaQueryWrapper<BookIndexEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BookIndexEntity::getBookId, bookId);
+        queryWrapper.orderByAsc(BookIndexEntity::getIndexNum);
+        List<BookIndexEntity> bookIndexList = bookIndexMapper.selectList(queryWrapper);
+        if (bookIndexList.isEmpty()) {
+            return false;
+        }
+
+        // 获取章节内容
+        List<BookContentEntity> allContentList = new ArrayList<BookContentEntity>();
+        LambdaQueryWrapper<BookContentEntity> contentWrapper = new LambdaQueryWrapper<>();
+        for(BookIndexEntity bookIndexEntity : bookIndexList) {
+            DynamicTableHelper.removeRequestData();
+            contentWrapper.clear();
+            contentWrapper.eq(BookContentEntity::getIndexId, bookIndexEntity.getId());
+            List<BookContentEntity> bookContentList = bookContentMapper.selectList(contentWrapper);
+            if (!bookContentList.isEmpty()) {
+                String content = "";
+                for (BookContentEntity bookContent : bookContentList) {
+                    content += bookContent.getContent() + "\n"; // 合并所有内容
+                }
+                BookContentEntity bookContentEntity = bookContentList.get(0);
+                bookContentEntity.setContent(content.trim());
+                bookContentEntity.setId(null);
+                allContentList.add(bookContentEntity);
+            }
+        }
+
+        // 重新保存章节内容
+        for(BookContentEntity bookContent : allContentList) {
+            DynamicTableHelper.setRequestData(Map.of("index_id", bookContent.getIndexId()));
+            boolean isOK = (bookContentMapper.insert(bookContent) > 0);
+            DynamicTableHelper.removeRequestData();
+            cn.hutool.core.lang.Console.log("[D]保存章节【{}】的内容到'book_content{}': {}.", bookContent.getIndexId(), bookContent.getIndexId() % 10, (isOK ? "成功" : "失败"));
+        }
+
+        return true;
+    }
+
+
+    private Book getBookFromEntity(BookEntity bookEntity) {
         Book book = new Book();
 
-        book.setId(novelEntity.getId());
-        book.setBookName(novelEntity.getName());
-        book.setCoverUrl(novelEntity.getCover());
-        book.setAuthor(novelEntity.getAuthor());
-        book.setIntro(novelEntity.getIntro());
-        book.setCategory(String.valueOf(novelEntity.getCategoryId()));
-        book.setLatestChapter(novelEntity.getLatestChapter());
-        book.setLastUpdateTime(novelEntity.getLastUpdateTime() == null ? "" : novelEntity.getLastUpdateTime().toString());
-        book.setStatus(novelEntity.getStatus() == 0 ? "完结" : "连载");
-        book.setWordCount(novelEntity.getWordCount());
-        book.setSaveType(novelEntity.getSaveType());
-        book.setDownloadUrl(novelEntity.getDownloadUrl());
+        book.setId(bookEntity.getId());
+        book.setBookName(bookEntity.getBookName());
+        book.setPicUrl(bookEntity.getPicUrl());
+        book.setAuthorName(bookEntity.getAuthorName());
+        book.setBookDesc(bookEntity.getBookDesc());
+        book.setCatId(bookEntity.getCatId());
+        book.setCatName(bookEntity.getCatName());
+        book.setLastChapterName(bookEntity.getLastIndexName());
+        book.setLastUpdateTime(bookEntity.getLastIndexUpdateTime());
+        book.setBookStatus(bookEntity.getBookStatus());
+        book.setWordCount(bookEntity.getWordCount());
+        book.setSaveType(CommonConst.SAVE_TYPE_HTML);
+        book.setDownloadUrl(bookEntity.getDownloadUrl());
 
         return book;
     }
 
-    private BookEntity getEntityFromBook(Book book) {
-        BookEntity novelEntity = new BookEntity();
-
-        novelEntity = new BookEntity();
-        novelEntity.setName(book.getBookName());
-        novelEntity.setCover(book.getCoverUrl());
-        novelEntity.setAuthor(book.getAuthor());
-        novelEntity.setIntro(book.getIntro());
-        novelEntity.setCategoryId(book.getCategoryId());
-        novelEntity.setLatestChapter(book.getLatestChapter());
-        if (book.getLastUpdateTime() == null || book.getLastUpdateTime().isEmpty()) {
-            novelEntity.setLastUpdateTime(Date.valueOf(LocalDate.now()));
-        } else {
-            // 处理可能的日期格式问题
-            try {
-                novelEntity.setLastUpdateTime(Date.valueOf(book.getLastUpdateTime()));
-            } catch (IllegalArgumentException e) {
-                // 如果转换失败，使用当前日期
-                novelEntity.setLastUpdateTime(Date.valueOf(LocalDate.now()));
+    private BookEntity mergeBookToEntity(Book book, BookEntity bookEntity) {
+        if (bookEntity == null) {
+            bookEntity = new BookEntity();
+            bookEntity.setCreateTime(Calendar.getInstance().getTime());
+            // 取得分类信息
+            BookCategoryEntity bookCategoryEntity = bookCategoryMapper.selectById(bookEntity.getCatId());
+            if (bookCategoryEntity != null) {
+                bookEntity.setCatName(bookCategoryEntity.getName());
+                bookEntity.setWorkDirection(bookCategoryEntity.getWorkDirection());
+            } else {
+                bookEntity.setCatName(book.getCatName());
+                bookEntity.setWorkDirection((byte)0);
             }
         }
-        novelEntity.setStatus("完结".equalsIgnoreCase(book.getStatus()) ? 0 : 1);
-        novelEntity.setWordCount(book.getWordCount());
-        novelEntity.setSaveType(book.getSaveType());
-        novelEntity.setDownloadUrl(book.getDownloadUrl());
-        novelEntity.setId(book.getId());
+        bookEntity.setBookName(book.getBookName());
+        bookEntity.setPicUrl(book.getPicUrl());
+        bookEntity.setAuthorName(book.getAuthorName());
+        bookEntity.setBookDesc(book.getBookDesc());
+        bookEntity.setCatId(book.getCatId());
+        bookEntity.setLastIndexName(book.getLastChapterName());
+        bookEntity.setLastIndexId(book.getLastChapterId());
+        if (book.getLastUpdateTime() == null) {
+            bookEntity.setLastIndexUpdateTime(Calendar.getInstance().getTime());
+        } else {
+            bookEntity.setLastIndexUpdateTime(book.getLastUpdateTime());
+        }
+        bookEntity.setBookStatus(book.getBookStatus());
+        if (bookEntity.getWordCount() == null) bookEntity.setWordCount(0);
+        bookEntity.setWordCount(bookEntity.getWordCount() + book.getWordCount());
+        bookEntity.setUpdateTime(Calendar.getInstance().getTime());
 
-        return novelEntity;
+        // 额外字段
+        bookEntity.setSaveType(book.getSaveType());
+        bookEntity.setDownloadUrl(book.getDownloadUrl());
+
+        return bookEntity;
     }
 
-    private ChapterEntity getEntityFromChapter(Chapter chapter) {
-        ChapterEntity chapterEntity = new ChapterEntity();
+    private BookIndexEntity mergeChapterToEntity(Chapter chapter, BookIndexEntity bookIndexEntity) {
+        if (bookIndexEntity == null) {
+            bookIndexEntity = new BookIndexEntity();
+            //bookIndexEntity.setId(chapter.getId());
+        }
+        bookIndexEntity.setBookId(chapter.getBookId());
+        bookIndexEntity.setIndexName(chapter.getTitle());
+        bookIndexEntity.setIndexNum(chapter.getOrder());
+        bookIndexEntity.setWordCount(chapter.getCleanContent().length());
+
+        return bookIndexEntity;
+    }
+
+    private Chapter getChapterFromEntity(BookIndexEntity bookIndexEntity, List<BookContentEntity> bookContentList) {
+        Chapter chapter = Chapter.builder()
+            .id(bookIndexEntity.getId())
+            .bookId(bookIndexEntity.getBookId())
+            .title(bookIndexEntity.getIndexName())
+            .order(bookIndexEntity.getIndexNum())
+            .wordCount(bookIndexEntity.getWordCount())
+            .build();
+        
+        // 如果有内容，则设置内容
+        String content = "";
+        for (BookContentEntity bookContentEntity : bookContentList) {
+            content += bookContentEntity.getContent() + "\n"; // 合并所有内容
+        }
+        if (content.isBlank()) {
+            // 如果没有内容，则设置为空字符串
+            chapter.setContent("");
+            chapter.setCleanContent("");
+        } else {
+            chapter.setContent(content);
+            chapter.setCleanContent(content);
+        }
     
-        chapterEntity.setId(chapter.getId());
-        chapterEntity.setBookId(chapter.getBookId());
-        chapterEntity.setTitle(chapter.getTitle());
-        chapterEntity.setOrder1(chapter.getOrder());
-        chapterEntity.setContent(chapter.getCleanContent());
-        chapterEntity.setWordCount((long)chapter.getContent().length());
-
-        return chapterEntity;
-    }
-
-    private Chapter getChapterFromEntity(ChapterEntity chapterEntity) {
-        return Chapter.builder()
-                .id(chapterEntity.getId())
-                .bookId(chapterEntity.getBookId())
-                .title(chapterEntity.getTitle())
-                .order(chapterEntity.getOrder1())
-                .wordCount(chapterEntity.getWordCount())
-                .content(chapterEntity.getContent())
-                .build();
+        return chapter;
     }
 }

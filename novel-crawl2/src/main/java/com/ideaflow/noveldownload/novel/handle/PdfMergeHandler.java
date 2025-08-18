@@ -31,7 +31,7 @@ public class PdfMergeHandler implements PostProcessingHandler {
         String outputPath = StrUtil.format("{}{}({}).pdf",
                 config.getDownloadPath() + File.separator,
                 book.getBookName(),
-                book.getAuthor());
+                book.getAuthorName());
         OutputStream out = new FileOutputStream(outputPath);
 
         // 使用 openhtmltopdf 合并 HTML 文件并生成 PDF

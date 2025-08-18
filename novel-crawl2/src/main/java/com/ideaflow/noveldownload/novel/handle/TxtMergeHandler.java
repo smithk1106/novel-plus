@@ -22,7 +22,7 @@ public class TxtMergeHandler implements PostProcessingHandler {
     @Override
     public void handle(Book book, File saveDir) {
         String outputPath = StrUtil.format("{}{}({}).txt",
-                config.getDownloadPath() + File.separator, book.getBookName(), book.getAuthor());
+                config.getDownloadPath() + File.separator, book.getBookName(), book.getAuthorName());
         // 删除旧的同名 txt 文件
         FileUtil.del(outputPath);
 
@@ -32,8 +32,8 @@ public class TxtMergeHandler implements PostProcessingHandler {
         FileAppender appender = new FileAppender(outputFile, 16, true);
         List<String> info = List.of(
                 StrUtil.format("书名：{}", book.getBookName()),
-                StrUtil.format("作者：{}", book.getAuthor()),
-                StrUtil.format("简介：{}\n", StrUtil.isEmpty(book.getIntro()) ? "暂无" : HtmlUtil.cleanHtmlTag(book.getIntro()))
+                StrUtil.format("作者：{}", book.getAuthorName()),
+                StrUtil.format("简介：{}\n", StrUtil.isEmpty(book.getBookDesc()) ? "暂无" : HtmlUtil.cleanHtmlTag(book.getBookDesc()))
         );
         // 首页添加书籍信息
         info.forEach(appender::append);

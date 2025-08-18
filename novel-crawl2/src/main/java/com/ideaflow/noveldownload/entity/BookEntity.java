@@ -1,27 +1,48 @@
 package com.ideaflow.noveldownload.entity;
 
-import java.sql.Date;
+import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
 
+import lombok.Data;
 
 @Data
 @TableName("book")
-public class BookEntity {
+public class BookEntity implements Serializable{
     @TableId(type = IdType.AUTO)
-    private Long id; //主键id
-    private String name; // 小说名字
-    private String cover; // 小说封面
-    private String author; // 小说作者封面
-    private String intro; // 小说简介
-    private Integer categoryId; // 小说分类
-    private Integer status; // 小说状态
-    private Long wordCount; // 小说字数
-    private Date lastUpdateTime; // 最后更新时间
-    private String latestChapter; // 最新章节
-    private String saveType; // 小说保存类型
-    private String downloadUrl; // 下载地址
+    private Long id;
+    private Byte workDirection = 0;
+    private Integer catId;
+    private String catName;
+    private String picUrl;
+    private String bookName;
+    private Long authorId;
+    private String authorName;
+    private String bookDesc;
+    private Float score = 0F;
+    private Byte bookStatus;
+    private Long visitCount = 0L;
+    private Integer wordCount = 0;
+    private Integer commentCount = 0;
+    private Integer yesterdayBuy = 0;
+    private Long lastIndexId = 0L;
+    private String lastIndexName = "";
+    private Date lastIndexUpdateTime;
+    private Byte isVip;
+    private Byte status;
+    private Date updateTime = Calendar.getInstance().getTime();
+    private Date createTime;
+    private Integer crawlSourceId;
+    private String crawlBookId;
+    private Date crawlLastTime;
+    private Byte crawlIsStop;
+    @TableField(exist = false)
+    private String downloadUrl = "";
+    @TableField(exist = false)
+    private String saveType = "html";
 }

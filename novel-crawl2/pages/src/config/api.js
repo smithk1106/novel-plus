@@ -8,8 +8,8 @@ export const API_BASE_URL = `${baselUrl}`;
 // WebSocket 配置
 //const websocketUrl = window.location.protocol === 'https:' ? 'wss://novel.x.com/ws' : 'ws://127.0.0.1:30000/ws';
 const websocketUrl = 'localhost,127.0.0.1'.indexOf(window.location.hostname) >= 0
-    ? `wss://${window.location.hostname}:8584/api`
-    : `wss://${window.location.host}/api`;
+    ? `ws://${window.location.hostname}:8584/ws`
+    : `wss://${window.location.host}/ws`;
 
 // console.log('websocketUrl:', websocketUrl);
 export const WS_URL = `${websocketUrl}`;

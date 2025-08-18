@@ -1,5 +1,7 @@
 package com.ideaflow.noveldownload.novel.parse;
 
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,11 +14,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import com.ideaflow.noveldownload.config.WebSocketContext;
-import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
 import com.ideaflow.noveldownload.novel.context.BookContext;
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
 import com.ideaflow.noveldownload.novel.convert.ChapterConverter;
 import com.ideaflow.noveldownload.novel.convert.ChineseConverter;
+import com.ideaflow.noveldownload.novel.core.ChapterFilter;
 import com.ideaflow.noveldownload.novel.core.Source;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.Book;
@@ -61,6 +63,10 @@ public class ChapterParser extends Source {
         chapter.setTitle(JsoupUtils.selectAndInvokeJs(document, r.getTitle()));
         String content = fetchContent(chapter.getUrl(), RandomUtil.randomInt(100, 200));
         chapter.setContent(content);
+        String filteredContent = new ChapterFilter(config).filter(chapter);
+        filteredContent = filteredContent.replaceAll("</(?:p|div)>", "\n").replaceAll("<[^>]*?>", "");
+        chapter.setCleanContent(filteredContent);  // 设置过滤后的内容
+        chapter.setWordCount(chapter.getCleanContent().length());
 
         return chapter;
     }
@@ -75,6 +81,10 @@ public class ChapterParser extends Source {
             String content = fetchContent(chapter.getUrl(), interval);
             Assert.notEmpty(content, "正文内容为空");
             chapter.setContent(content);
+            String filteredContent = new ChapterFilter(config).filter(chapter);
+            filteredContent = filteredContent.replaceAll("</(?:p|div)>", "\n").replaceAll("<[^>]*?>", "");
+            chapter.setCleanContent(filteredContent);  // 设置过滤后的内容
+            chapter.setWordCount(chapter.getCleanContent().length());
 
             // 确保简繁互转最后调用
             return ChineseConverter.convert(chapterConverter.convert(chapter), this.rule.getLanguage(), config.getLanguage());
@@ -98,6 +108,10 @@ public class ChapterParser extends Source {
                 String content = fetchContent(chapter.getUrl(), interval);
                 Assert.notEmpty(content, "正文内容为空");
                 chapter.setContent(content);
+                String filteredContent = new ChapterFilter(config).filter(chapter);
+                filteredContent = filteredContent.replaceAll("</(?:p|div)>", "\n").replaceAll("<[^>]*?>", "");
+                chapter.setCleanContent(filteredContent);  // 设置过滤后的内容
+                chapter.setWordCount(chapter.getCleanContent().length());
 
                 webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]重试成功: 【%s】", chapter.getTitle())));
                 return chapterConverter.convert(chapter);
@@ -118,7 +132,7 @@ public class ChapterParser extends Source {
         Book book = BookContext.get();
         String line = StrUtil.format("[E]下载失败章节: 【{}】({})\t原因: {}", chapter.getTitle(), chapter.getUrl(), errMsg);
         String path = StrUtil.format("[E]{}{}《{}》({}) 下载失败章节.log",
-                config.getDownloadPath(), File.separator, book.getBookName(), book.getAuthor());
+                config.getDownloadPath(), File.separator, book.getBookName(), book.getAuthorName());
 
         try (PrintWriter pw = new PrintWriter(new FileWriter(path, StandardCharsets.UTF_8, true))) {
             pw.println(line);

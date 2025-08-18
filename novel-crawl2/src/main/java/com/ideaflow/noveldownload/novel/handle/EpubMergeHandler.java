@@ -36,8 +36,8 @@ public class EpubMergeHandler implements PostProcessingHandler {
         String sessionId = WebSocketContext.getSessionId();
 
         if (FileUtil.isDirEmpty(saveDir)) {
-            Console.error(render("[i]《{}》（{}）下载章节数为 0，取消生成 EPUB", "red"), b.getBookName(), b.getAuthor());
-            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]《%s》（%s）下载章节数为 0，取消生成 EPUB",b.getBookName(), b.getAuthor())));
+            Console.error(render("[i]《{}》（{}）下载章节数为 0，取消生成 EPUB", "red"), b.getBookName(), b.getAuthorName());
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]《%s》（%s）下载章节数为 0，取消生成 EPUB",b.getBookName(), b.getAuthorName())));
             return;
         }
 
@@ -47,12 +47,12 @@ public class EpubMergeHandler implements PostProcessingHandler {
         // content.opf > metadata
         Metadata meta = book.getMetadata();
         meta.addTitle(b.getBookName());
-        meta.setAuthors(List.of(new Author(b.getAuthor())));
-        meta.addDescription(b.getIntro());
+        meta.setAuthors(List.of(new Author(b.getAuthorName())));
+        meta.addDescription(b.getBookDesc());
         // 下载封面失败会导致生成 epub 中断
         try {
-            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]正在下载封面： %s...",b.getCoverUrl())));
-            byte[] bytes = HttpUtil.downloadBytes(b.getCoverUrl());
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]正在下载封面： %s...",b.getPicUrl())));
+            byte[] bytes = HttpUtil.downloadBytes(b.getPicUrl());
             book.setCoverImage(new Resource(bytes, "cover.jpg"));
             // 添加封面页
             book.addSection("封面", new Resource(ResourceUtil.readBytes("templates/chapter_cover.html"), COVER_NAME));
@@ -80,7 +80,7 @@ public class EpubMergeHandler implements PostProcessingHandler {
         // 设置 guide，用于指定封面
         book.getGuide().addReference(new GuideReference(new Resource(ResourceUtil.readBytes("templates/chapter_cover.html"), COVER_NAME), "封面", COVER_NAME));
         EpubWriter epubWriter = new EpubWriter();
-        epubWriter.write(book, new FileOutputStream(StrUtil.format("{}/{}({}).epub", saveDir.getParent(), b.getBookName(), b.getAuthor())));
+        epubWriter.write(book, new FileOutputStream(StrUtil.format("{}/{}({}).epub", saveDir.getParent(), b.getBookName(), b.getAuthorName())));
     }
 
 }

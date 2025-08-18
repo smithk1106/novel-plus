@@ -1,17 +1,15 @@
 package com.ideaflow.noveldownload.novel.util;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.setting.Setting;
-import cn.hutool.setting.dialect.Props;
-import com.ideaflow.noveldownload.novel.model.AppConfig;
-import lombok.experimental.UtilityClass;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.setting.Setting;
+import cn.hutool.setting.dialect.Props;
+import lombok.experimental.UtilityClass;
 
 /**
  * 配置工具类
@@ -55,7 +53,7 @@ public class ConfigUtils {
 
 
     // 修复 hutool 的 bug：空串不能触发默认值
-    private String getStrOrDefault(Setting setting, String key, String group, String defaultValue) {
+    public String getStrOrDefault(Setting setting, String key, String group, String defaultValue) {
         String value = setting.getByGroup(key, group);
         return StrUtil.isEmpty(value) ? defaultValue : value;
     }

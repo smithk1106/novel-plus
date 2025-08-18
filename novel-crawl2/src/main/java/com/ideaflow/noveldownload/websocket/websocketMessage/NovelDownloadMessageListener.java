@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.ideaflow.noveldownload.config.AppProperties;
 import com.ideaflow.noveldownload.config.WebSocketContext;
-import com.ideaflow.noveldownload.constans.CommonConst;
-
 import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
 import com.ideaflow.noveldownload.entity.AppConfigEntity;
 import com.ideaflow.noveldownload.entity.SearchResultEntity;
@@ -54,13 +54,21 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
     private SearchResultMapper searchResultMapper;
 
     @Resource
-    private BookService novelService;
+    private BookService bookService;
+
+    @Autowired
+    private AppProperties appProperties;
 
     @Override
     public void onMessage(WebSocketSession session, DownloadSendMessage message) {
         try {
+            // 载入配置
             AppConfigEntity appConfigEntity = appConfigMapper.selectById(1);
             AppConfig config = JSONUtil.toBean(appConfigEntity.getConfigValue(), AppConfig.class);
+            config.setContentBase(appProperties.getContentBase());
+            config.setCoverPath(appProperties.getCoverPath());
+            config.setCoverUrlPrefix(appProperties.getCoverUrlPrefix());
+
             SearchResultEntity searchResultEntity = searchResultMapper.selectById(message.getSearchResultId());
             WebSocketThreadLocal.setThreadLocalValue(session.getId());
             if (Objects.isNull(searchResultEntity)) {
@@ -114,19 +122,11 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
             WebSocketContext.setSender(webSocketMessageSender);
             WebSocketContext.set(session.getId());
 
-            Book book = new Crawler(config, novelService).crawl(searchResult.getUrl(), downloadCatalogs, String.valueOf(catalogs.size()).length());
-
-            Long bookId = 0L;
-            if (CommonConst.SAVE_TYPE_HTML.equalsIgnoreCase(config.getExtName())) {
-                bookId = novelService.updateBook(book);
-            } else {
-                // 保存小说信息
-                bookId = novelService.saveBook(book);
-            }
+            Book book = new Crawler(config, bookService).crawl(searchResult.getUrl(), downloadCatalogs, String.valueOf(catalogs.size()).length());
 
             stopWatch.stop();
             double totalTimeSeconds = stopWatch.getTotalTimeSeconds();
-            webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]完成！总耗时 %s s,请取我的书库查看",NumberUtil.round(totalTimeSeconds, 2),bookId)));
+            webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]完成！总耗时 %s s,请取我的书库查看",NumberUtil.round(totalTimeSeconds, 2),book.getId())));
         } finally {
             WebSocketContext.clearSessionId();
             WebSocketContext.clearSerder();

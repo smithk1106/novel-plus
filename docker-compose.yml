@@ -1,0 +1,128 @@
+services:
+  novel-db:
+    container_name: novel-db
+    image: mysql:8.0
+    restart: always
+    hostname: novel-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${password}
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./doc/sql/novel_plus.sql:/docker-entrypoint-initdb.d/init.sql
+    command: mysqld --max_allowed_packet=100M
+    ports:
+      - "3306:33060"
+    networks:
+      - novelnet
+
+  novel-redis:
+    container_name: novel-redis
+    image: redis:7.0
+    restart: always
+    hostname: novel-redis
+    command: redis-server --save 60 1 --loglevel warning --requirepass "${redispwd}"
+    ports:
+      - "6379:6379"
+    networks:
+      - novelnet
+
+  front:
+    container_name: novel-front
+    image: openjdk:21
+    restart: always
+    environment:
+      - dburl=${dburl}
+      - username=${username}
+      - password=${password}
+      - redishost=${redishost}
+      - redispwd=${redispwd}
+      - redisport=${redisport}
+    volumes:
+      - ./novel-front/target/build:/app/front
+      - ./novel-front/target/build/config:/config
+      - ./docker/download/books:/app/books
+      - ./docker/download/pic:/app/pic
+    command: sh -c "java -jar -Dspring.profiles.active=dev /app/front/novel-front.jar"
+    # entrypoint: >
+    #   sh -c "java -Dspring.datasource.url=${dburl} -Dspring.datasource.username=${username} -Dspring.datasource.password=${password} -Dspring.redis.host=${redishost} -Dspring.redis.port=${redisport} -Dspring.redis.password=${redispwd} -jar /root/novel-front.jar"
+    ports:
+      - 8581:8085
+    depends_on:
+      - novel-db
+      - novel-redis
+    networks:
+      - novelnet
+
+  admin:
+    container_name: novel-admin
+    image: openjdk:21
+    restart: always
+    environment:
+      - dburl=${dburl}
+      - username=${username}
+      - password=${password}
+      - redishost=${redishost}
+      - redispwd=${redispwd}
+      - redisport=${redisport}
+    volumes:
+      - ./novel-admin/target/build:/app/admin
+      - ./novel-admin/target/build/config:/config
+      - ./docker/download/books:/app/books
+      - ./docker/download/pic:/app/pic
+    command: sh -c "java -jar -Dspring.profiles.active=dev /app/admin/novel-admin.jar"
+    ports:
+      - 8582:8088
+    depends_on:
+      - novel-db
+      - novel-redis
+    networks:
+      - novelnet
+
+  # crawler1:
+  #   container_name: novel-crawl1
+  #   image: openjdk:21
+  #   restart: always
+  #   environment:
+  #     - dburl=${dburl}
+  #     - username=${username}
+  #     - password=${password}
+  #   volumes:
+  #     - ./novel-crawl/target/build:/app/crawl
+  #     - ./novel-crawl/target/build/config:/config
+  #     - ./docker/download/books:/app/books
+  #     - ./docker/download/pic:/app/pic
+  #   command: sh -c "java -jar -Dspring.profiles.active=dev /app/crawl/novel-crawl.jar"
+  #   ports:
+  #     - 8583:8083
+  #   depends_on:
+  #     - novel-db
+  #     - novel-redis
+  #   networks:
+  #     - novelnet
+
+  crawler2:
+    container_name: novel-crawl2
+    image: openjdk:21
+    restart: always
+    environment:
+      - dburl=${dburl}
+      - username=${username}
+      - password=${password}
+    volumes:
+      - ./novel-crawl2/target:/app
+      - ./docker/h2db:/app/db
+      - ./docker/download:/app/download
+    working_dir: /app
+    command: java -jar -Dspring.profiles.active=dev /app/novel-crawl2.jar
+    ports:
+      - 8584:30000
+    depends_on:
+      - novel-db
+    networks:
+      - novelnet
+
+networks:
+  novelnet:
+    driver: bridge
+    # driver_opts:
+    #   com.docker.network.bridge.host_binding_ipv4: "127.0.0.1"

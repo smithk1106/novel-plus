@@ -136,8 +136,12 @@ public class CrawlParser {
                     desc = desc.replaceAll("<a[^<]+</a>", "")
                         .replaceAll("<font[^<]+</font>", "")
                         .replaceAll("<p>\\s*</p>", "")
-                        .replaceAll("<p>", "")
-                        .replaceAll("</p>", "<br/>");
+                        .replaceAll("(?:</p>|</div>)", "\n")
+                        .replaceAll("<dt>[^<]+</dt>", "")
+                        .replaceAll("&nbsp;", " ")
+                        .replaceAll("<[^>]+?>", "")
+                        .replaceAll("&[a-z]+?;", "")
+                        .trim();
                     // 小说简介过滤
                     String filterDesc = ruleBean.getFilterDesc();
                     if (StringUtils.isNotBlank(filterDesc)) {
@@ -388,7 +392,11 @@ public class CrawlParser {
      * 删除字符串末尾的所有 <br> 类似标签（允许各种空格）
      */
     public static String removeTrailingBrTags(String str) {
-        return str.replaceAll("(?i)(?:\\s*<\\s*br\\s*/?\\s*>)++(?:\\s|\\u3000)*$", "");
+        return str.replaceAll("(?i)(?:\\s*<\\s*br\\s*/?\\s*>)++(?:\\s|\\u3000)*$", "\n")
+            .replaceAll("&nbsp;", " ")
+            .replaceAll("<[^>]+?>", "")
+            .replaceAll("&[a-z]+?;", "")
+            .trim();
     }
 
 }

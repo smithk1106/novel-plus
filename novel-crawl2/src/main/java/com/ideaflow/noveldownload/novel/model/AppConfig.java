@@ -33,8 +33,9 @@ public class AppConfig {
     private String proxyHost;
     private Integer proxyPort;
 
-    // [application.yaml]
+    // [application_xxx.yaml]
     private String contentBase;
     private String coverPath;
     private String coverUrlPrefix;
+    private String bookUrlPrefix;
 }

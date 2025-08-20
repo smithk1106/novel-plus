@@ -5,9 +5,9 @@
   "comment": "搜索无限流",
   "language": "zh_CN",
   "search": {
-    "url": "https://www.dxmwx.org/list/topall_%s.html",
+    "url": "https://www.dxmwx.org/list/%s.html",
     "method": "get",
-    "result": "#ListContents > div",
+    "result": "#ListContents",
     "bookName": ".margin0h5 > a.fonttext",
     "author": ".margin0h5 > a:nth-child(2)",
     "latestChapter": ".right_wid > div:nth-child(4) > a@js:r=r.replaceAll('最新章节','');",

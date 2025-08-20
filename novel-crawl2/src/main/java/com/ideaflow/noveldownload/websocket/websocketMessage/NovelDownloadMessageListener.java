@@ -1,20 +1,17 @@
 package com.ideaflow.noveldownload.websocket.websocketMessage;
 
 
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-import com.ideaflow.noveldownload.config.AppProperties;
 import com.ideaflow.noveldownload.config.WebSocketContext;
-import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
-import com.ideaflow.noveldownload.entity.AppConfigEntity;
 import com.ideaflow.noveldownload.entity.SearchResultEntity;
-import com.ideaflow.noveldownload.mapper.AppConfigMapper;
 import com.ideaflow.noveldownload.mapper.SearchResultMapper;
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
 import com.ideaflow.noveldownload.novel.core.Crawler;
@@ -24,6 +21,7 @@ import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.novel.model.SearchResult;
 import com.ideaflow.noveldownload.novel.parse.TocParser;
+import com.ideaflow.noveldownload.service.AppConfigService;
 import com.ideaflow.noveldownload.service.BookService;
 import com.ideaflow.noveldownload.websocket.config.WebSocketThreadLocal;
 import com.ideaflow.noveldownload.websocket.websocketMessage.message.DownloadSendMessage;
@@ -48,7 +46,7 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
     private WebSocketMessageSender webSocketMessageSender;
 
     @Resource
-    private AppConfigMapper appConfigMapper;
+    private AppConfigService appConfigService;
 
     @Resource
     private SearchResultMapper searchResultMapper;
@@ -56,19 +54,11 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
     @Resource
     private BookService bookService;
 
-    @Autowired
-    private AppProperties appProperties;
-
     @Override
     public void onMessage(WebSocketSession session, DownloadSendMessage message) {
         try {
             // 载入配置
-            AppConfigEntity appConfigEntity = appConfigMapper.selectById(1);
-            AppConfig config = JSONUtil.toBean(appConfigEntity.getConfigValue(), AppConfig.class);
-            config.setContentBase(appProperties.getContentBase());
-            config.setCoverPath(appProperties.getCoverPath());
-            config.setCoverUrlPrefix(appProperties.getCoverUrlPrefix());
-
+            AppConfig config = appConfigService.load();
             SearchResultEntity searchResultEntity = searchResultMapper.selectById(message.getSearchResultId());
             WebSocketThreadLocal.setThreadLocalValue(session.getId());
             if (Objects.isNull(searchResultEntity)) {

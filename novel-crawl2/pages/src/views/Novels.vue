@@ -79,7 +79,7 @@
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                   </svg>
-                  <span>{{ novel.saveType === 'html' ? '查看' : '下载' }}</span>
+                  <span>{{ (novel.saveType === 'html' || novel.saveType === 'db') ? '查看' : '下载' }}</span>
                 </a>
                 <button 
                   @click="confirmDelete(novel)"
@@ -311,7 +311,7 @@ const confirmDelete = (novel) => {
 }
 
 const handleDownload = (novel) => {
-  if (novel.saveType === 'html') {
+  if (novel.saveType === 'html' || novel.saveType === 'db') {
     // HTML格式直接打开
     window.open(novel.downloadUrl, novel.bookName)
   } else {

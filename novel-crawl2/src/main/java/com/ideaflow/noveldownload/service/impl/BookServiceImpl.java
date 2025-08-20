@@ -12,6 +12,8 @@ import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ideaflow.noveldownload.config.DynamicTableHelper;
 import com.ideaflow.noveldownload.constans.CommonConst;
 import com.ideaflow.noveldownload.entity.BookCategoryEntity;
@@ -22,6 +24,7 @@ import com.ideaflow.noveldownload.mapper.BookCategoryMapper;
 import com.ideaflow.noveldownload.mapper.BookContentMapper;
 import com.ideaflow.noveldownload.mapper.BookIndexMapper;
 import com.ideaflow.noveldownload.mapper.BookMapper;
+import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.service.BookService;
@@ -61,6 +64,7 @@ public class BookServiceImpl implements BookService {
         }
         List<BookEntity> bookEntityList = novelMapper.selectList(queryWrapper);
         if (bookEntityList.isEmpty()) {
+            // 追加数据
             BookEntity bookEntity = mergeBookToEntity(book, null);
             if (novelMapper.insert(bookEntity) > 0){
                 book.setId(bookEntity.getId());
@@ -68,6 +72,17 @@ public class BookServiceImpl implements BookService {
                 book.setId(0L);
             }
         } else {
+            // 更新最后章节
+            LambdaQueryWrapper<BookIndexEntity> chapterQueryWrapper = new LambdaQueryWrapper<>();
+            chapterQueryWrapper.eq(BookIndexEntity::getBookId, book.getId());
+            chapterQueryWrapper.orderByDesc(BookIndexEntity::getIndexNum);
+            chapterQueryWrapper.last("limit 1");
+            BookIndexEntity bookIndexEntity = bookIndexMapper.selectOne(chapterQueryWrapper);
+            if (bookIndexEntity != null) {
+                book.setLastChapterName(bookIndexEntity.getIndexName());
+                book.setLastChapterId(bookIndexEntity.getId());
+            }
+            // 合并并更新数据
             BookEntity bookEntity = mergeBookToEntity(book, bookEntityList.get(0));
             book.setId(bookEntity.getId());
             novelMapper.updateById(bookEntity);
@@ -77,7 +92,23 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    public boolean deleteBookById(Long id) {
+        LambdaQueryWrapper<BookIndexEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(BookIndexEntity::getBookId, id);
+        if (bookIndexMapper.delete(queryWrapper) > 0) {
+            // 删除小说信息
+            if (novelMapper.deleteById(id) == 0) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public Book getBookById(Long id) {
+        if (id < 1) return null;
         BookEntity bookEntity = novelMapper.selectById(id);
         if (bookEntity == null) {
             return null;
@@ -86,12 +117,60 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Book getBookByName(String bookName) {
-        List<BookEntity> list = novelMapper.selectByMap(Map.of("name", bookName));
-        if (list.isEmpty()) {
-            return null;
+    public List<Book> getBookByName(String bookName, String authorName) {
+        LambdaQueryWrapper<BookEntity> queryWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(authorName)) {
+            queryWrapper.allEq(Map.of(
+                BookEntity::getBookName, bookName,
+                BookEntity::getAuthorName, authorName
+            ));
+        } else {
+            queryWrapper.eq(BookEntity::getBookName, bookName);
         }
-        return getBookFromEntity(list.get(0));
+        List<BookEntity> bookEntityList = novelMapper.selectList(queryWrapper);
+        List<Book> bookList = new ArrayList<Book>();
+        for (BookEntity bookEntity : bookEntityList) {
+            bookList.add(getBookFromEntity(bookEntity));
+        }
+
+        return bookList;
+    }
+
+    @Override
+    public List<Book> getBookList(AppConfig config, String keyword, Integer pageNo, Integer pageSize) {
+        // 创建分页对象，传入当前页和每页显示的条数
+        Page<BookEntity> page = new Page<>(pageNo, pageSize);
+        
+        // 创建条件构造器
+        LambdaQueryWrapper<BookEntity> queryWrapper = new LambdaQueryWrapper<>();
+        
+        // 如果name不为空，添加name的模糊查询条件
+        if (StringUtils.hasText(keyword)) {
+            queryWrapper.like(BookEntity::getBookName, keyword);
+        }
+        queryWrapper.orderByDesc(BookEntity::getId);
+        // 执行分页查询
+        IPage<BookEntity> bookPageResult = novelMapper.selectPage(page, queryWrapper);
+        List<Book> pageResult = new ArrayList<Book>();
+        bookPageResult.getRecords().forEach(bookEntity -> {
+            Book book = getBookFromEntity(bookEntity);
+            // 调整下载地址
+            if (CommonConst.SAVE_TYPE_HTML.equalsIgnoreCase(bookEntity.getSaveType())) {
+                bookEntity.setDownloadUrl(String.format("%s/%s/%s/", config.getContentBase(), CommonConst.BOOK_DIR_PREFIX, book.getId()));
+            } else if (CommonConst.SAVE_TYPE_DB.equalsIgnoreCase(bookEntity.getSaveType())) {
+                bookEntity.setDownloadUrl(String.format("%s%s/%s.html", config.getContentBase(), config.getBookUrlPrefix(), book.getId()));
+            } else {
+                bookEntity.setDownloadUrl(String.format("/%s/%s/%s(%s).%s", config.getDownloadPath(), CommonConst.BOOK_DIR_PREFIX, book.getBookName(), book.getAuthorName(), config.getExtName()));
+            }
+
+            // 调整封面地址
+            if (StringUtils.hasText(bookEntity.getPicUrl()) && !bookEntity.getPicUrl().startsWith("http")) {
+                bookEntity.setPicUrl(config.getContentBase() + bookEntity.getPicUrl());
+            }
+            pageResult.add(book);
+        });
+
+        return pageResult;
     }
 
     @Override
@@ -235,7 +314,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public int sumWordCount(Long bookId) {
+    public int sumBookWordCount(Long bookId) {
         // 创建条件构造器
         QueryWrapper<BookIndexEntity> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("sum(word_count) as book_word_count"); 
@@ -308,7 +387,7 @@ public class BookServiceImpl implements BookService {
         book.setLastUpdateTime(bookEntity.getLastIndexUpdateTime());
         book.setBookStatus(bookEntity.getBookStatus());
         book.setWordCount(bookEntity.getWordCount());
-        book.setSaveType(CommonConst.SAVE_TYPE_HTML);
+        book.setSaveType(bookEntity.getSaveType());
         book.setDownloadUrl(bookEntity.getDownloadUrl());
 
         return book;
@@ -318,8 +397,10 @@ public class BookServiceImpl implements BookService {
         if (bookEntity == null) {
             bookEntity = new BookEntity();
             bookEntity.setCreateTime(Calendar.getInstance().getTime());
+            bookEntity.setLastIndexName(book.getLastChapterName());
+            bookEntity.setLastIndexId(book.getLastChapterId());
             // 取得分类信息
-            BookCategoryEntity bookCategoryEntity = bookCategoryMapper.selectById(bookEntity.getCatId());
+            BookCategoryEntity bookCategoryEntity = bookCategoryMapper.selectById(book.getCatId());
             if (bookCategoryEntity != null) {
                 bookEntity.setCatName(bookCategoryEntity.getName());
                 bookEntity.setWorkDirection(bookCategoryEntity.getWorkDirection());

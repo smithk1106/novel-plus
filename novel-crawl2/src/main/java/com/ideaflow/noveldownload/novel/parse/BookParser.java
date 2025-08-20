@@ -64,7 +64,7 @@ public class BookParser extends Source {
         book.setLastUpdateTime(FormatUtils.parseDate(lastUpdateTime, null));
         book.setBookStatus(status != null && status.contains("完结") ? (byte)1 : (byte)0);
         book.setWordCount(FormatUtils.parseInt(wordCount, 0));
-        book.setSaveType(CommonConst.SAVE_TYPE_HTML);
+        book.setSaveType(config.getExtName());
 
         return ChineseConverter.convert(book, this.rule.getLanguage(), config.getLanguage());
     }

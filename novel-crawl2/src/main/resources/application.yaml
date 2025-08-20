@@ -7,6 +7,7 @@ spring:
     #图片保存路径
     coverPath: pic/localPic
     coverUrlPrefix: /localPic
+    bookUrlPrefix: /book
 
 server:
   port: 30000

@@ -13,4 +13,5 @@ public class AppProperties {
     private String contentBase;
     private String coverPath;
     private String coverUrlPrefix;
+    private String bookUrlPrefix;
 }

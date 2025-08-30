@@ -265,6 +265,9 @@ public class PageController extends BaseController {
                 //查询内容
                 BookContent bookContent = bookContentServiceMap.get(bookIndex.getStorageType())
                     .queryBookContent(bookId, bookIndexId);
+                if (bookContent != null) {
+                    bookContent.setContent(bookContent.getContent().replace("\n", "<br>"));
+                }
                 log.debug("加载小说内容信息线程结束");
                 return bookContent;
             }, threadPoolExecutor);

@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class PageParam implements Serializable {
 
     private static final Integer PAGE_NO = 1;
-    private static final Integer PAGE_SIZE = 10;
+    private static final Integer PAGE_SIZE = 100;
 
     /**
      * 每页条数 - 不分页

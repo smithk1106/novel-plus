@@ -7,44 +7,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.Book;
-import com.ideaflow.noveldownload.novel.util.FileUtils;
+import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.novel.util.FormatUtils;
 import com.ideaflow.noveldownload.service.BookService;
 
-import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.template.Template;
 import cn.hutool.extra.template.TemplateConfig;
 import cn.hutool.extra.template.TemplateEngine;
 import cn.hutool.extra.template.TemplateUtil;
-import jakarta.annotation.Resource;
-
 
 public class HtmlTocHandler implements PostProcessingHandler {
 
     private final TemplateEngine engine = TemplateUtil.createEngine(new TemplateConfig("templates", TemplateConfig.ResourceMode.CLASSPATH));
 
-    @Resource
+    private AppConfig config;
+
     private BookService bookService;
+
+    HtmlTocHandler(AppConfig config, BookService bookService) {
+        this.config = config;
+        this.bookService = bookService;
+    }
 
     @Override
     public void handle(Book book, File saveDir) {
-        String regex = "<title>(.*?)</title>";
-        List<String> chapterList = new ArrayList<String>();
-        List<File> files = FileUtils.sortFilesByName(saveDir);
-        for (File file : files) {
-            if (file.getName().endsWith(".html") && !file.getName().endsWith("index.html")) {
-                FileReader reader = FileReader.create(file, StandardCharsets.UTF_8);
-                // 获取 <title> 内容
-                String title = ReUtil.getGroup1(regex, reader.readString());
-                String chapterLink = StrUtil.format("<a href=\"{}\">{}</a>", file.getName(), title);
-                chapterList.add(chapterLink);
-            }
-        }
-
+        List<Chapter> chapters = bookService.getChapters(book.getId(), 0, 0);
         Template template = engine.getTemplate("book_html.flt");
         Map<String, String> map = new HashMap<>();
         map.put("bookName", book.getBookName());
@@ -54,6 +44,11 @@ public class HtmlTocHandler implements PostProcessingHandler {
         map.put("status", book.getBookStatus() == 1 ? "已完结" : "连载中");
         map.put("coverUrl", book.getPicUrl().startsWith("http") ? book.getPicUrl() : (book.getPicUrl().startsWith("/") ? book.getPicUrl() : "/" + book.getPicUrl()));
         map.put("lastUpdate", FormatUtils.formatDate(book.getLastUpdateTime(), null));
+
+        List<String> chapterList = new ArrayList<String>();
+        for (Chapter chapter : chapters) {
+            chapterList.add(String.format("<a href=\"%05d\">%s</a>", chapter.getOrder(), chapter.getTitle()));
+        }
         map.put("chapters", String.join("\n", chapterList));
 
         String bookDetail = template.render(map);

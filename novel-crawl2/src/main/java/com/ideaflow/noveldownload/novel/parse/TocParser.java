@@ -1,10 +1,16 @@
 package com.ideaflow.noveldownload.novel.parse;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Opt;
-import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
+import static com.ideaflow.noveldownload.novel.model.ContentType.ATTR_HREF;
+import static com.ideaflow.noveldownload.novel.model.ContentType.ATTR_VALUE;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
 import com.ideaflow.noveldownload.novel.core.Source;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
@@ -12,22 +18,18 @@ import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.novel.model.ContentType;
 import com.ideaflow.noveldownload.novel.model.Rule;
 import com.ideaflow.noveldownload.novel.util.CrawlUtils;
+import com.ideaflow.noveldownload.novel.util.FormatUtils;
 import com.ideaflow.noveldownload.novel.util.JsoupUtils;
 import com.ideaflow.noveldownload.novel.util.TocList;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Opt;
+import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import static com.ideaflow.noveldownload.novel.model.ContentType.ATTR_HREF;
-import static com.ideaflow.noveldownload.novel.model.ContentType.ATTR_VALUE;
 
 
 public class TocParser extends Source {
@@ -57,16 +59,16 @@ public class TocParser extends Source {
 
         // 目录和详情不在同一页面
         if (StrUtil.isNotEmpty(ruleToc.getUrl())) {
-            String id = ReUtil.getGroup1(StrUtil.subBefore(ruleBook.getUrl(), "@js:", false), url);
+            String id = ReUtil.getGroup1(StrUtil.subBefore(ruleBook.getUrl(), JsoupUtils.JS_SEPARATOR, false), url);
             url = ruleToc.getUrl().formatted(id);
         }
         // 非 / 开头的 path 需设置 baseUri
         if (StrUtil.isNotEmpty(ruleToc.getBaseUri())) {
-            String id = ReUtil.getGroup1(StrUtil.subBefore(ruleBook.getUrl(), "@js:", false), url);
+            String id = ReUtil.getGroup1(StrUtil.subBefore(ruleBook.getUrl(), JsoupUtils.JS_SEPARATOR, false), url);
             ruleToc.setBaseUri(ruleToc.getBaseUri().formatted(id));
         }
         // 目录分页 url
-        Set<String> urls = new LinkedHashSet<>();
+        List<String> urls = new ArrayList<>();
         urls.add(url);
 
         Document document;
@@ -82,26 +84,57 @@ public class TocParser extends Source {
     }
 
     @SneakyThrows
-    private void extractPaginationUrls(Set<String> urls, Document document, Rule.Toc r) {
-        Elements elements = JsoupUtils.select(document, r.getNextPage());
-        // 一次性获取分页 URL（下拉菜单）
-        if (CollUtil.isNotEmpty(elements) && elements.hasAttr(ATTR_VALUE.getValue())) {
-            String attrKey = elements.eachAttr(ATTR_HREF.getValue()).isEmpty()
-                    ? ATTR_VALUE.getValue()
-                    : ATTR_HREF.getValue();
+    private void extractPaginationUrls(List<String> urls, Document document, Rule.Toc r) {
+        if (StrUtil.isNotEmpty(r.getListUrl()) && StrUtil.isNotEmpty(r.getBookUrl())) {
+            // 一次性获取分页URL（顺序URL）
+            int pageCount = 0;
+            String id = ReUtil.getGroup1(r.getBookUrl(), urls.get(0));
 
-            List<String> list = elements.stream()
-                    .map(el -> el.absUrl(attrKey))
-                    .toList();
+            if (StrUtil.isNotBlank(r.getPageCount())) {
+                if (r.getPageCount().matches("[0-9]+")) {
+                    pageCount = FormatUtils.parseInt(r.getPageCount(), 0);
+                } else {
+                    String countStr = JsoupUtils.selectAndInvokeJs(document, r.getPageCount(), ContentType.TEXT);
+                    //cn.hutool.core.lang.Console.log("[D]pageCount:{}", countStr);
+                    if (StrUtil.isNotEmpty(countStr)) {
+                        pageCount = FormatUtils.parseInt(countStr, 0);
+                    }
+                }
+            } else {
+                // 页数未知时，使用一个固定值
+                pageCount = 1000;
+            }
 
-            // 不能用 addAll，这里要保证后加入元素覆盖前面已存在的元素并保持顺序，因为 toc.url 不一定是 select 的首个 option (见书源20)
-            for (String s : list) {
-                urls.remove(s);
-                urls.add(s);
+            cn.hutool.core.lang.Console.log("[D]Converted pageCount:{}", pageCount);
+            for (int i = 2; i <= pageCount; i++) {
+                String listUrl = r.getListUrl().formatted(id, i);
+                urls.removeIf(s -> s.equalsIgnoreCase(listUrl));
+                urls.add(listUrl);
+                cn.hutool.core.lang.Console.log("[D]Added listUrl:{}", listUrl);
             }
 
             return;
+        } else {
+            // 一次性获取分页 URL（下拉菜单）
+            Elements elements = JsoupUtils.select(document, r.getNextPage());
+            if (CollUtil.isNotEmpty(elements) && elements.hasAttr(ATTR_VALUE.getValue())) {
+                String attrKey = elements.eachAttr(ATTR_HREF.getValue()).isEmpty()
+                        ? ATTR_VALUE.getValue()
+                        : ATTR_HREF.getValue();
+                List<String> list = elements.stream()
+                        .map(el -> el.absUrl(attrKey))
+                        .toList();
+
+                // 不能用 addAll，这里要保证后加入元素覆盖前面已存在的元素并保持顺序，因为 toc.url 不一定是 select 的首个 option (见书源20)
+                for (String listUrl : list) {
+                    urls.removeIf(s -> s.equalsIgnoreCase(listUrl));
+                    urls.add(listUrl);
+                }
+
+                return;
+            }
         }
+
         // 以下代码覆盖率可能为 0，因为分页的目录基本全都是通过下拉菜单一次性获取的
         // 递归获取分页 URL（模拟点击下一页）
         while (true) {
@@ -123,7 +156,7 @@ public class TocParser extends Source {
      * @param urls 分页目录的 url
      */
     @SneakyThrows
-    private List<Chapter> parseToc(Set<String> urls, int start, int end, Rule.Toc r) {
+    private List<Chapter> parseToc(List<String> urls, int start, int end, Rule.Toc r) {
         List<Chapter> toc = new TocList();
         boolean isDesc = r.isDesc();
         int orderNumber = 1;
@@ -133,7 +166,11 @@ public class TocParser extends Source {
         for (String url : urls) {
             Document document;
             try (Response resp = CrawlUtils.request(client, url, r.getTimeout())) {
-                document = Jsoup.parse(resp.body().string(), this.rule.getToc().getBaseUri());
+                if (resp.isSuccessful()) {
+                    document = Jsoup.parse(resp.body().string(), this.rule.getToc().getBaseUri());
+                } else {
+                    break;
+                }
             }
 
             // TODO rule.toc.item 实现 JS 语法，在此调用比 addChapter 性能更好
@@ -182,8 +219,9 @@ public class TocParser extends Source {
 
     private void addChapter(Element el, List<Chapter> toc, int order, Rule.Toc r) {
         String url = JsoupUtils.getStrAndInvokeJs(el, r.getNextPage(), ATTR_HREF);
+        String title = r.getFilterTxt() != null ? el.text().replaceAll(r.getFilterTxt(), "").trim() : el.text();
         toc.add(Chapter.builder()
-                .title(el.text())
+                .title(title)
                 .url(url)
                 .order(order)
                 .build());

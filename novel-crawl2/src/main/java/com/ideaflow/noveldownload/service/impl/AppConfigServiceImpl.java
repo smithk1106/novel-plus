@@ -35,5 +35,22 @@ public class AppConfigServiceImpl implements AppConfigService {
         config.setBookUrlPrefix(appProperties.getBookUrlPrefix());
         return config;
     }
+
+    @Override
+    public boolean save(AppConfig appConfig) {
+        // 检查配置是否存在
+        AppConfigEntity existConfig = appConfigMapper.selectById(1);
+
+        // 创建实体对象并复制属性
+        if (existConfig == null) {
+            existConfig = new AppConfigEntity();
+            existConfig.setConfigKey("appConfig");
+        }
+        existConfig.setConfigValue(JSONUtil.toJsonStr(appConfig));
+        
+        // 更新配置
+        return appConfigMapper.insertOrUpdate(existConfig);
+    }
+    
     
 }

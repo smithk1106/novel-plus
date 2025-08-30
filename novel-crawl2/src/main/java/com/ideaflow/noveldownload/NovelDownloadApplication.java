@@ -30,13 +30,17 @@ public class NovelDownloadApplication {
         String websocketPath = env.getProperty("ideaflow.websocket.path");
         String h2 = "/h2-console";
 
-        System.out.println("\n----------------------------------------------------------\n\t" +
-                "application is running! Access URLs:\n\t" +
-                "Local: \t\thttp://localhost:" + port + path + "/\n\t" +
-                "前端页面: \thttp://" + ip + ":" + port + path + "/\n\t" +
-                "websocketPath: \tws://" + ip + ":" + port + websocketPath + "/\n\t" +
-                "/h2-console: \thttp://" + ip + ":" + port + h2 + "/\n\t" +
-                "----------------------------------------------------------");
+        System.out.println(
+            "\n----------------------------------------------------------" +
+            "\n  Application is running! Access URLs:" +
+            "\n  Local:             http://localhost:" + port + path + "/" +
+            "\n  前端页面:           http://" + ip + ":" + port + path + "/" +
+            "\n  Websocket Path:    ws://" + ip + ":" + port + websocketPath + "/" +
+            "\n  /h2-console:       http://" + ip + ":" + port + h2 + "/" +
+            "\n  Project path:      " + System.getProperty("user.dir") +
+            "\n  Resource path:     " + NovelDownloadApplication.class.getResource("/").getPath() +
+            "\n----------------------------------------------------------"
+        );
     }
 
 }

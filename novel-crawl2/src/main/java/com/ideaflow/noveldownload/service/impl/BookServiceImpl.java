@@ -53,19 +53,28 @@ public class BookServiceImpl implements BookService {
             return 0L;
         }
 
-        LambdaQueryWrapper<BookEntity> queryWrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.hasText(book.getAuthorName())) {
-            queryWrapper.allEq(Map.of(
-                BookEntity::getBookName, book.getBookName(),
-                BookEntity::getAuthorName, book.getAuthorName()
-            ));
-        } else {
-            queryWrapper.eq(BookEntity::getBookName, book.getBookName());
+        BookEntity bookEntity = null;
+        if (book.getId() != null && book.getId() > 0) {
+            bookEntity = novelMapper.selectById(book.getId());
         }
-        List<BookEntity> bookEntityList = novelMapper.selectList(queryWrapper);
-        if (bookEntityList.isEmpty()) {
+        if (bookEntity == null) {
+            LambdaQueryWrapper<BookEntity> queryWrapper = new LambdaQueryWrapper<>();
+            if (StringUtils.hasText(book.getAuthorName())) {
+                queryWrapper.eq(BookEntity::getAuthorName, book.getAuthorName());
+                queryWrapper.and(wrapper -> {
+                    wrapper.eq(BookEntity::getBookName, book.getBookName()).or().like(BookEntity::getBookNameAlias, "|" + book.getBookName() + "|");
+                });
+            } else {
+                queryWrapper.eq(BookEntity::getBookName, book.getBookName()).or().like(BookEntity::getBookNameAlias, "|" + book.getBookName() + "|");
+            }
+            List<BookEntity> bookEntityList = novelMapper.selectList(queryWrapper);
+            if (bookEntityList.size() > 0) {
+                bookEntity = bookEntityList.get(0);
+            }
+        }
+        if (bookEntity == null) {
             // 追加数据
-            BookEntity bookEntity = mergeBookToEntity(book, null);
+            bookEntity = mergeBookToEntity(book, null);
             if (novelMapper.insert(bookEntity) > 0){
                 book.setId(bookEntity.getId());
             } else {
@@ -83,7 +92,7 @@ public class BookServiceImpl implements BookService {
                 book.setLastChapterId(bookIndexEntity.getId());
             }
             // 合并并更新数据
-            BookEntity bookEntity = mergeBookToEntity(book, bookEntityList.get(0));
+            bookEntity = mergeBookToEntity(book, bookEntity);
             book.setId(bookEntity.getId());
             novelMapper.updateById(bookEntity);
         }
@@ -95,6 +104,15 @@ public class BookServiceImpl implements BookService {
     public boolean deleteBookById(Long id) {
         LambdaQueryWrapper<BookIndexEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(BookIndexEntity::getBookId, id);
+        List<BookIndexEntity> bookIndexList = bookIndexMapper.selectList(queryWrapper);
+        LambdaQueryWrapper<BookContentEntity> queryWrapperContent = new LambdaQueryWrapper<>();
+        for (BookIndexEntity bookIndexEntity: bookIndexList) {
+            DynamicTableHelper.setRequestData(Map.of("index_id", bookIndexEntity.getId()));
+            queryWrapperContent.clear();
+            queryWrapperContent.eq(BookContentEntity::getIndexId, bookIndexEntity.getId());
+            bookContentMapper.delete(queryWrapperContent);
+            DynamicTableHelper.removeRequestData();
+        }
         if (bookIndexMapper.delete(queryWrapper) > 0) {
             // 删除小说信息
             if (novelMapper.deleteById(id) == 0) {
@@ -137,7 +155,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<Book> getBookList(AppConfig config, String keyword, Integer pageNo, Integer pageSize) {
+    public Page<Book> getBookList(AppConfig config, String keyword, Integer pageNo, Integer pageSize) {
         // 创建分页对象，传入当前页和每页显示的条数
         Page<BookEntity> page = new Page<>(pageNo, pageSize);
         
@@ -151,24 +169,28 @@ public class BookServiceImpl implements BookService {
         queryWrapper.orderByDesc(BookEntity::getId);
         // 执行分页查询
         IPage<BookEntity> bookPageResult = novelMapper.selectPage(page, queryWrapper);
-        List<Book> pageResult = new ArrayList<Book>();
+        List<Book> bookList = new ArrayList<Book>();
         bookPageResult.getRecords().forEach(bookEntity -> {
             Book book = getBookFromEntity(bookEntity);
             // 调整下载地址
-            if (CommonConst.SAVE_TYPE_HTML.equalsIgnoreCase(bookEntity.getSaveType())) {
-                bookEntity.setDownloadUrl(String.format("%s/%s/%s/", config.getContentBase(), CommonConst.BOOK_DIR_PREFIX, book.getId()));
-            } else if (CommonConst.SAVE_TYPE_DB.equalsIgnoreCase(bookEntity.getSaveType())) {
-                bookEntity.setDownloadUrl(String.format("%s%s/%s.html", config.getContentBase(), config.getBookUrlPrefix(), book.getId()));
+            if (CommonConst.SAVE_TYPE_HTML.equalsIgnoreCase(book.getSaveType())) {
+                book.setDownloadUrl(String.format("%s/%s/%s/", config.getContentBase(), CommonConst.BOOK_DIR_PREFIX, book.getId()));
+            } else if (CommonConst.SAVE_TYPE_DB.equalsIgnoreCase(book.getSaveType())) {
+                book.setDownloadUrl(String.format("%s%s/%s.html", config.getContentBase(), config.getBookUrlPrefix(), book.getId()));
             } else {
-                bookEntity.setDownloadUrl(String.format("/%s/%s/%s(%s).%s", config.getDownloadPath(), CommonConst.BOOK_DIR_PREFIX, book.getBookName(), book.getAuthorName(), config.getExtName()));
+                book.setDownloadUrl(String.format("/%s/%s/%s(%s).%s", config.getDownloadPath(), CommonConst.BOOK_DIR_PREFIX, book.getBookName(), book.getAuthorName(), config.getExtName()));
             }
 
             // 调整封面地址
-            if (StringUtils.hasText(bookEntity.getPicUrl()) && !bookEntity.getPicUrl().startsWith("http")) {
-                bookEntity.setPicUrl(config.getContentBase() + bookEntity.getPicUrl());
+            if (StringUtils.hasText(book.getPicUrl()) && !book.getPicUrl().startsWith("http")) {
+                book.setPicUrl(config.getContentBase() + book.getPicUrl());
             }
-            pageResult.add(book);
+            bookList.add(book);
         });
+
+        Page<Book> pageResult = new Page<Book>(bookPageResult.getCurrent(), bookPageResult.getSize());
+        pageResult.setRecords(bookList);
+        pageResult.setTotal(bookPageResult.getTotal());
 
         return pageResult;
     }
@@ -178,7 +200,7 @@ public class BookServiceImpl implements BookService {
         LambdaQueryWrapper<BookIndexEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.allEq(Map.of(
             BookIndexEntity::getBookId, chapter.getBookId(),
-            BookIndexEntity::getIndexName, chapter.getTitle()
+            BookIndexEntity::getIndexNum, chapter.getOrder()
         ));
         Boolean isOK = true;
         BookIndexEntity entity = bookIndexMapper.selectOne(queryWrapper);
@@ -215,7 +237,7 @@ public class BookServiceImpl implements BookService {
                 isOK = (bookContentMapper.updateById(bookContentEntity) > 0);
             }
             DynamicTableHelper.removeRequestData();
-            cn.hutool.core.lang.Console.log("[D]保存章节【{}: {}】的内容到'book_content{}': {}.", chapter.getId(), chapter.getTitle(), chapter.getId() % 10, (isOK ? "成功" : "失败"));
+            cn.hutool.core.lang.Console.log("[D]保存章节【{}: {}】的内容到'book_content{}': {}.", chapter.getOrder(), chapter.getTitle(), chapter.getId() % 10, (isOK ? "成功" : "失败"));
         }
 
         return chapter.getId();
@@ -378,6 +400,7 @@ public class BookServiceImpl implements BookService {
 
         book.setId(bookEntity.getId());
         book.setBookName(bookEntity.getBookName());
+        book.setBookNameAlias(bookEntity.getBookNameAlias());
         book.setPicUrl(bookEntity.getPicUrl());
         book.setAuthorName(bookEntity.getAuthorName());
         book.setBookDesc(bookEntity.getBookDesc());
@@ -399,21 +422,12 @@ public class BookServiceImpl implements BookService {
             bookEntity.setCreateTime(Calendar.getInstance().getTime());
             bookEntity.setLastIndexName(book.getLastChapterName());
             bookEntity.setLastIndexId(book.getLastChapterId());
-            // 取得分类信息
-            BookCategoryEntity bookCategoryEntity = bookCategoryMapper.selectById(book.getCatId());
-            if (bookCategoryEntity != null) {
-                bookEntity.setCatName(bookCategoryEntity.getName());
-                bookEntity.setWorkDirection(bookCategoryEntity.getWorkDirection());
-            } else {
-                bookEntity.setCatName(book.getCatName());
-                bookEntity.setWorkDirection((byte)0);
-            }
         }
         bookEntity.setBookName(book.getBookName());
+        bookEntity.setBookNameAlias(book.getBookNameAlias());
         bookEntity.setPicUrl(book.getPicUrl());
         bookEntity.setAuthorName(book.getAuthorName());
         bookEntity.setBookDesc(book.getBookDesc());
-        bookEntity.setCatId(book.getCatId());
         bookEntity.setLastIndexName(book.getLastChapterName());
         bookEntity.setLastIndexId(book.getLastChapterId());
         if (book.getLastUpdateTime() == null) {
@@ -425,6 +439,19 @@ public class BookServiceImpl implements BookService {
         if (bookEntity.getWordCount() == null) bookEntity.setWordCount(0);
         bookEntity.setWordCount(bookEntity.getWordCount() + book.getWordCount());
         bookEntity.setUpdateTime(Calendar.getInstance().getTime());
+        if (bookEntity.getCatId() == null || bookEntity.getCatId() != book.getCatId()) {
+            // 取得分类名
+            BookCategoryEntity bookCategoryEntity = bookCategoryMapper.selectById(book.getCatId());
+            if (bookCategoryEntity != null) {
+                bookEntity.setCatName(bookCategoryEntity.getName());
+                bookEntity.setWorkDirection(bookCategoryEntity.getWorkDirection());
+                book.setCatName(bookEntity.getCatName());
+            } else {
+                bookEntity.setCatName(book.getCatName());
+                bookEntity.setWorkDirection((byte)0);
+            }
+            bookEntity.setCatId(book.getCatId());
+        }
 
         // 额外字段
         bookEntity.setSaveType(book.getSaveType());

@@ -89,7 +89,7 @@ public class SearchParser extends Source {
 
             resp = CrawlUtils.request(client, builder, r.getTimeout());
             document = Jsoup.parse(resp.peekBody(Long.MAX_VALUE).string(), r.getBaseUri());
-
+            cn.hutool.core.lang.Console.log("[D]Request Url: {}", resp.request().url().url().toString());
         } catch (Exception e) {
             String errorMsg = e.getMessage();
             if (errorMsg != null && (errorMsg.toLowerCase().contains("timeout") || errorMsg.toLowerCase().contains("timed out"))) {
@@ -151,6 +151,7 @@ public class SearchParser extends Source {
                 String bookUrl = resp.request().url().toString();
                 BookParser bookParser = new BookParser(config);
                 Book book = bookParser.parse(bookUrl);
+                cn.hutool.core.lang.Console.log("[D][{}]Found book {}({})", this.rule.getName(), book.getBookName(), book.getAuthorName());
 
                 if (StrUtil.isBlank(book.getBookName())) {
                     return Collections.emptyList();
@@ -187,6 +188,7 @@ public class SearchParser extends Source {
                 String lastUpdateTime = JsoupUtils.selectAndInvokeJs(el, r.getLastUpdateTime());
                 String status = JsoupUtils.selectAndInvokeJs(el, r.getStatus());
                 String wordCount = JsoupUtils.selectAndInvokeJs(el, r.getWordCount());
+                cn.hutool.core.lang.Console.log("[D][{}]Found {}({})", this.rule.getName(), bookName, author);
 
                 if (bookName.isEmpty()) continue;
 
@@ -207,7 +209,6 @@ public class SearchParser extends Source {
         } catch (Exception e) {
             Console.error(e);
             return Collections.emptyList();
-
         } finally {
             if (resp != null) {
                 resp.close();

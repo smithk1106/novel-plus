@@ -1,7 +1,6 @@
 package com.ideaflow.noveldownload.controller;
 
 import java.io.File;
-import java.util.List;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.pojo.CommonResult;
@@ -33,12 +33,12 @@ public class NovelController {
     private AppConfig config;
 
     @PostMapping("/list")
-    public CommonResult<List<Book>> list(@Valid @RequestBody NovelWebSearch novelWebSearch) {
+    public CommonResult<Page<Book>> list(@Valid @RequestBody NovelWebSearch novelWebSearch) {
         if (config == null) {
             config = appConfigService.load();
         }
 
-        List<Book> pageResult = bookService.getBookList(config, novelWebSearch.getName(), novelWebSearch.getPageNo(), novelWebSearch.getPageSize());
+        Page<Book> pageResult = bookService.getBookList(config, novelWebSearch.getName(), novelWebSearch.getPageNo(), novelWebSearch.getPageSize());
 
         return CommonResult.success(pageResult);
     }

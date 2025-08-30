@@ -4,4 +4,5 @@ import com.ideaflow.noveldownload.novel.model.AppConfig;
 
 public interface AppConfigService {
     AppConfig load();
+    boolean save(AppConfig appConfig);
 }

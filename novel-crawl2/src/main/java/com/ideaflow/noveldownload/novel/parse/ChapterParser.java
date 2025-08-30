@@ -2,11 +2,6 @@ package com.ideaflow.noveldownload.novel.parse;
 
 import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
 import org.jsoup.Jsoup;
@@ -35,11 +30,11 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
-
-
+@Slf4j
 public class ChapterParser extends Source {
 
     private final ChapterConverter chapterConverter;
@@ -51,7 +46,7 @@ public class ChapterParser extends Source {
 
     // 用于测试
     @SneakyThrows
-    public Chapter parse(Chapter chapter) {
+    public Chapter testParse(Chapter chapter) {
         Rule.Chapter r = this.rule.getChapter();
         Document document;
         OkHttpClient client = HttpClientContext.get();
@@ -75,21 +70,21 @@ public class ChapterParser extends Source {
         try {
             long interval = CrawlUtils.randomInterval(config);
             if (config.getShowDownloadLog() == 1) {
-               Console.log("[D]正在下载:【{}】{}. 间隔: {}ms", chapter.getTitle(), chapter.getUrl(), interval);
+               Console.log("[D]正在下载:{}【{}】{}. 间隔: {}ms", chapter.getOrder(), chapter.getTitle(), chapter.getUrl(), interval);
             }
 
             String content = fetchContent(chapter.getUrl(), interval);
             Assert.notEmpty(content, "正文内容为空");
             chapter.setContent(content);
-            String filteredContent = new ChapterFilter(config).filter(chapter);
-            filteredContent = filteredContent.replaceAll("</(?:p|div)>", "\n").replaceAll("<[^>]*?>", "");
-            chapter.setCleanContent(filteredContent);  // 设置过滤后的内容
-            chapter.setWordCount(chapter.getCleanContent().length());
 
-            // 确保简繁互转最后调用
-            return ChineseConverter.convert(chapterConverter.convert(chapter), this.rule.getLanguage(), config.getLanguage());
-
+            if (StrUtil.isNotBlank(this.rule.getLanguage()) && this.rule.getLanguage().toLowerCase().contains("zh")) {
+                // 确保简繁互转最后调用
+                return ChineseConverter.convert(chapterConverter.convert(chapter), this.rule.getLanguage(), config.getLanguage());
+            } else {
+                return chapterConverter.convert(chapter);
+            }
         } catch (Exception e) {
+            e.printStackTrace();
             Chapter retryChapter = retry(chapter, e.getMessage());
             return retryChapter == null ? null : ChineseConverter.convert(retryChapter, this.rule.getLanguage(), config.getLanguage());
         } finally {
@@ -108,10 +103,6 @@ public class ChapterParser extends Source {
                 String content = fetchContent(chapter.getUrl(), interval);
                 Assert.notEmpty(content, "正文内容为空");
                 chapter.setContent(content);
-                String filteredContent = new ChapterFilter(config).filter(chapter);
-                filteredContent = filteredContent.replaceAll("</(?:p|div)>", "\n").replaceAll("<[^>]*?>", "");
-                chapter.setCleanContent(filteredContent);  // 设置过滤后的内容
-                chapter.setWordCount(chapter.getCleanContent().length());
 
                 webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]重试成功: 【%s】", chapter.getTitle())));
                 return chapterConverter.convert(chapter);
@@ -130,16 +121,8 @@ public class ChapterParser extends Source {
 
     private void saveDownloadErrorLog(Chapter chapter, String errMsg) {
         Book book = BookContext.get();
-        String line = StrUtil.format("[E]下载失败章节: 【{}】({})\t原因: {}", chapter.getTitle(), chapter.getUrl(), errMsg);
-        String path = StrUtil.format("[E]{}{}《{}》({}) 下载失败章节.log",
-                config.getDownloadPath(), File.separator, book.getBookName(), book.getAuthorName());
-
-        try (PrintWriter pw = new PrintWriter(new FileWriter(path, StandardCharsets.UTF_8, true))) {
-            pw.println(line);
-
-        } catch (IOException e) {
-            Console.error(e);
-        }
+        String line = StrUtil.format("[E]《{}》({})下载失败章节: {}【{}】({}). 原因: {}", book.getBookName(), book.getAuthorName(), chapter.getOrder(), chapter.getTitle(), chapter.getUrl(), errMsg);
+        log.error(line);
     }
 
     /**

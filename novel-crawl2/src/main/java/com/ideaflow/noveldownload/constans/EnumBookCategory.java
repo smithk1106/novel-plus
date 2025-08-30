@@ -3,8 +3,8 @@ package com.ideaflow.noveldownload.constans;
  * 小说分类枚举
  */
 public enum EnumBookCategory {
-    UNKNOWN(0, "未知"),
-    FANTASY(1, "玄幻,奇幻"),
+    UNKNOWN(0, "其它"),
+    FANTASY(1, "玄幻,奇幻,修真"),
     XIANXIA(2, "武侠,仙侠"),
     ROMANCE(3, "言情,古言,现言,幻言,都市"),
     HISTORY(4, "历史,军事"),

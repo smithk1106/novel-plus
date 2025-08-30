@@ -2,6 +2,7 @@ package com.ideaflow.noveldownload.service;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.Chapter;
@@ -11,7 +12,7 @@ public interface BookService {
     boolean deleteBookById(Long id);
     Book getBookById(Long id);
     List<Book> getBookByName(String bookName, String authorName);
-    List<Book> getBookList(AppConfig config, String keyword, Integer pageNo, Integer pageSize);
+    Page<Book> getBookList(AppConfig config, String keyword, Integer pageNo, Integer pageSize);
 
     int saveChapters(List<Chapter> chapters, int count);
     Long saveChapter(Chapter chapter);

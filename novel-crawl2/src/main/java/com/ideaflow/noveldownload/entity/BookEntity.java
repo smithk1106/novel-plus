@@ -22,6 +22,7 @@ public class BookEntity implements Serializable{
     private String catName;
     private String picUrl;
     private String bookName;
+    private String bookNameAlias = "";
     private Long authorId;
     private String authorName;
     private String bookDesc;

@@ -114,9 +114,10 @@ public class AuthorController extends BaseController {
         HttpServletRequest request) {
         Author author = checkAuthor(request);
 
-        content = content.replaceAll("(\\n|</p>|</div>)", "<br>")
-            .replaceAll("\\s", "&nbsp;")
+        content = content.replaceAll("(\\\\n|</p>|</div>)", "\n")
+            .replaceAll("&nbsp;", " ")
             .replaceAll("<(p|div)[^>]*?>", "");
+            //.replaceAll("\\s", "&nbsp;")
         //发布章节内容
         bookService.addBookContent(bookId, indexName, content, isVip, author.getId());
 

@@ -32,7 +32,8 @@
   },
   "toc": {
     "item": "#list > dl > dd > a",
-    "offset": 12
+    "offset": 12,
+    "filterTxt": "（.+?更）"
   },
   "chapter": {
     "title": ".bookname > h1",

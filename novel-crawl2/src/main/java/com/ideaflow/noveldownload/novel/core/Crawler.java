@@ -217,7 +217,7 @@ public class Crawler {
 
         // 保存到文件时的处理
         if (CommonConst.SAVE_TYPE_DB.equalsIgnoreCase(config.getExtName()) == false) {
-            new CrawlerPostHandler(config).handle(saveDir);
+            new CrawlerPostHandler(config, novelService).handle(saveDir);
         }
 
         stopWatch.stop();

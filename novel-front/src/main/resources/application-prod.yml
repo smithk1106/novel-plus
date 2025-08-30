@@ -15,7 +15,6 @@ spring:
 templates:
   name: green
 
-
 pic:
   save:
     type: 2 #图片保存方式, 1不保存，使用爬取的网络图片 ，2保存在自己的存储介质

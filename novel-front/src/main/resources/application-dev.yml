@@ -2,13 +2,24 @@ spring:
   config:
     import: classpath:application-common-dev.yml
 
+  #静态文件路径配置
+  #thymeleaf模版路径配置
+  thymeleaf:
+    prefix: file:${user.dir}/templates/${templates.name}/html/
+    suffix: .html
+  web:
+    resources:
+      static-locations: file:${user.dir}/templates/${templates.name}/static/
+
+#模版配置
+templates:
+  name: green
 
 pic:
   save:
-    type: 1 #图片保存方式, 1不保存，使用爬取的网络图片 ，2保存在自己的存储介质
+    type: 2 #图片保存方式, 1不保存，使用爬取的网络图片 ，2保存在自己的存储介质
     storage: local #存储介质，local：本地，OSS：阿里云对象存储
-    path: /app/pic/  #图片保存路径
-
+    path: /app/pic  #图片保存路径
 
 
 #线程池配置

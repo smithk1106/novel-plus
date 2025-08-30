@@ -27,7 +27,8 @@
   "toc": {
     "item": "div:nth-child(4) > ul > li > a",
     "pagination": true,
-    "nextPage": "#indexselect > option"
+    "nextPage": "#indexselect > option",
+    "filterTxt": "（.+?更）"
   },
   "chapter": {
     "title": ".title",

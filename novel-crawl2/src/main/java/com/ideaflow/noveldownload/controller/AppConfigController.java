@@ -1,31 +1,35 @@
 package com.ideaflow.noveldownload.controller;
 
-import cn.hutool.json.JSONUtil;
-import com.ideaflow.noveldownload.entity.AppConfigEntity;
-import com.ideaflow.noveldownload.mapper.AppConfigMapper;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.pojo.CommonResult;
+import com.ideaflow.noveldownload.service.AppConfigService;
 import com.ideaflow.noveldownload.vo.SourceInfoVO;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/config")
 public class AppConfigController {
 
-    @jakarta.annotation.Resource
-    private AppConfigMapper appConfigMapper;
+    @Resource
+    private AppConfigService appConfigService;
 
     @GetMapping("/getConfig")
     public CommonResult<AppConfig> getConfig() {
-        // 检查配置是否存在
-        AppConfigEntity existConfig = appConfigMapper.selectById(1);
-        AppConfig appConfig = JSONUtil.toBean(existConfig.getConfigValue(), AppConfig.class, true);
+        // 载入配置
+        AppConfig appConfig = appConfigService.load();
         return CommonResult.success(appConfig);
     }
+
     @GetMapping("/getSourceInfo")
     public CommonResult<List<SourceInfoVO>> getSourceInfo() {
         // 这里直接硬编码返回，实际可从配置或数据库读取
@@ -48,26 +52,15 @@ public class AppConfigController {
             new SourceInfoVO(17, "八一中文网", true, true, true, ""),
             new SourceInfoVO(18, "悠久小说网", true, false, true, ""),
             new SourceInfoVO(19, "阅读库", true, true, true, ""),
-            new SourceInfoVO(20, "顶点小说", true, true, true, "搜索、详情、章节限流")
+            new SourceInfoVO(20, "顶点小说", true, true, true, "搜索、详情、章节限流"),
+            new SourceInfoVO(21, "笔趣阁", true, true, true, "搜索、详情、章节限流")
         );
         return CommonResult.success(sourceInfoVOS);
     }
 
     @PostMapping("/updateConfig")
     public CommonResult<Void> updateConfig(@Valid @RequestBody AppConfig appConfig) {
-
-        
-        // 检查配置是否存在
-        AppConfigEntity existConfig = appConfigMapper.selectById(1);
-
-        
-        // 创建实体对象并复制属性
-        existConfig.setConfigValue(JSONUtil.toJsonStr(appConfig));
-        
-        // 更新配置
-        int rows = appConfigMapper.updateById(existConfig);
-        
-        if (rows > 0) {
+        if (appConfigService.save(appConfig)) {
             return CommonResult.success();
         } else {
             return CommonResult.error("更新配置失败");

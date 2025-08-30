@@ -8,6 +8,7 @@ import com.ideaflow.noveldownload.constans.CommonConst;
 import com.ideaflow.noveldownload.novel.context.BookContext;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.Book;
+import com.ideaflow.noveldownload.service.BookService;
 import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -20,6 +21,7 @@ import java.util.Set;
 public class CrawlerPostHandler {
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(CommonConst.SAVE_TYPE_TEXT, CommonConst.SAVE_TYPE_EPUB, CommonConst.SAVE_TYPE_PDF);
     private final AppConfig config;
+    private final BookService bookService;
 
     @SneakyThrows
     public void handle(File saveDir) {
@@ -46,7 +48,7 @@ public class CrawlerPostHandler {
             attempts--;
         }
 
-        PostHandlerFactory.getHandler(extName, config).handle(book, saveDir);
+        PostHandlerFactory.getHandler(extName, config, bookService).handle(book, saveDir);
 
         if (ALLOWED_EXTENSIONS.contains(extName.toLowerCase()) && config.getPreserveChapterCache() == 0) {
             FileUtil.del(saveDir);

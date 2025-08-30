@@ -161,6 +161,28 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <!-- <fixcrlf srcdir="${basedir}/src/main/resources/rule" eol="unix"/> -->
+                                <copy todir="${project.build.directory}/rule" overwrite="true">
+                                    <fileset dir="${basedir}/src/main/resources/rule">
+                                        <include name="*.json"/>
+                                    </fileset>
+                                </copy>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

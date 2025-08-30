@@ -1,20 +1,19 @@
 package com.ideaflow.noveldownload.novel.convert;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.ideaflow.noveldownload.novel.core.ChapterFilter;
+import com.ideaflow.noveldownload.novel.core.ChapterFormatter;
+import com.ideaflow.noveldownload.novel.model.AppConfig;
+import com.ideaflow.noveldownload.novel.model.Chapter;
+
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.template.Template;
 import cn.hutool.extra.template.TemplateConfig;
 import cn.hutool.extra.template.TemplateEngine;
 import cn.hutool.extra.template.TemplateUtil;
-
-import com.ideaflow.noveldownload.novel.core.ChapterFormatter;
-import com.ideaflow.noveldownload.novel.model.AppConfig;
-import com.ideaflow.noveldownload.novel.model.Chapter;
 import lombok.AllArgsConstructor;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @AllArgsConstructor
 public class ChapterConverter {
@@ -24,29 +23,34 @@ public class ChapterConverter {
 
     public Chapter convert(Chapter chapter) {
         String extName = config.getExtName();
-        String content = new ChapterFormatter(config).format(chapter.getContent());
+        String filteredContent = new ChapterFilter(config).filter(chapter);
+        chapter.setCleanContent(filteredContent);  // 设置过滤后的内容
+        chapter.setWordCount(chapter.getCleanContent().length());
 
-        if ("txt".equals(extName)) {
-            // 全角空格，用于首行缩进
-            String ident = "\u3000".repeat(2);
-            Matcher matcher = Pattern.compile("<p>(.*?)</p>").matcher(content);
-            StringBuilder result = new StringBuilder();
+        if (extName.matches("(?i)^(txt|epub|html|pdf)$")) {
+            String content = filteredContent;
 
-            while (matcher.find()) {
-                result.append(ident)
-                        .append(matcher.group(1))
-                        .append("\n");
+            if ("txt".equals(extName)) {
+                // 全角空格，用于首行缩进
+                String ident = "\u3000".repeat(2);
+                StringBuilder result = new StringBuilder();
+
+                for (String line : filteredContent.split("\n")) {
+                    if (!line.isBlank()) {
+                        result.append(ident).append(line).append("\n");
+                    }
+                }
+                content = chapter.getTitle() + "\n".repeat(2) + result;
+            } else if (extName.matches("(?i)^(epub|html|pdf)$")) {
+                content = new ChapterFormatter(config).format(filteredContent);
+                chapter.setContent(content);
+                content = templateRender(chapter, extName);
             }
-
-            content = chapter.getTitle() + "\n".repeat(2) + result;
-        }
-
-        if (extName.matches("(?i)^(epub|html|pdf)$")) {
             chapter.setContent(content);
-            content = templateRender(chapter, extName);
+        } else {
+            chapter.setContent(filteredContent);
         }
 
-        chapter.setContent(content);
         return chapter;
     }
 

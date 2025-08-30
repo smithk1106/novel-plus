@@ -10,6 +10,7 @@ public class Book {
     private Long id;
     private String url;
     private String bookName;
+    private String bookNameAlias = "";
     private String authorName;
     private String bookDesc;
     private int catId = 0;

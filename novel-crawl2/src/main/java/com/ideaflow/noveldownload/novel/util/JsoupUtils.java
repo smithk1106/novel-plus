@@ -8,6 +8,9 @@ import org.jsoup.select.Elements;
 
 import static com.ideaflow.noveldownload.novel.model.ContentType.*;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Jsoup 工具类
  * <p>
@@ -17,7 +20,8 @@ import static com.ideaflow.noveldownload.novel.model.ContentType.*;
 @UtilityClass
 public class JsoupUtils {
 
-    private static final String JS_SEPARATOR = "@js:";
+    public static final String JS_SEPARATOR = "@js:";
+    public static final String REGEXP_SEPARATOR = "@re:";
 
     /**
      * 使用查询条件选择元素
@@ -61,10 +65,10 @@ public class JsoupUtils {
      */
     public String selectAndInvokeJs(Element el, String query, ContentType contentType) {
         if (StrUtil.isEmpty(query) || contentType == null) {
-            return null;
+            return "";
         }
 
-        String[] split = query.split(JS_SEPARATOR);
+        String[] split = query.contains(JS_SEPARATOR) ? query.split(JS_SEPARATOR) : query.split(REGEXP_SEPARATOR);
         String actualQuery = split[0];
 
         // 根据查询条件选择元素
@@ -76,8 +80,28 @@ public class JsoupUtils {
                 ? getContentByType(els.first(), contentType)
                 : getContentByType(els, contentType);
 
-        // 如果查询条件包含 JS，调用它
-        return split.length == 2 ? invokeJs(query, result) : result;
+        // 追加处理
+        if (split.length == 2) {
+            if (query.contains(JS_SEPARATOR)) {
+                // 如果查询条件包含 JS，调用它
+                result = invokeJs(query, result);
+            } else if (query.contains(REGEXP_SEPARATOR)) {
+                // 如果查询条件包含正则表达式，应用它
+                Pattern p = Pattern.compile(split[1]);
+                Matcher m = p.matcher(result);
+                String needText = "";
+                while (m.find()) {
+                    for (int i = 1; i <= m.groupCount(); i++) {
+                        needText += m.group(i).trim();
+                    }
+                }
+                if (!needText.isBlank()) {
+                    result = needText;
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

@@ -65,9 +65,14 @@ public class Rule {
         private String item;
         private Integer offset;
         private boolean isDesc;
+        private String filterTxt;
         // 目录是否分页
         private boolean pagination;
         private String nextPage;
+        // 针对顺序分页的情况
+        private String bookUrl;
+        private String listUrl;
+        private String pageCount;
     }
 
     @Data

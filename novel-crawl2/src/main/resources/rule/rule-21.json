@@ -1,0 +1,49 @@
+{
+  "id": 21,
+  "url": "https://www.fsshu.com/",
+  "name": "笔趣阁",
+  "comment": "搜索、详情、章节限流",
+  "language": "zh_CN",
+  "search": {
+    "url": "https://www.fsshu.com/search.php?q=%s",
+    "method": "get",
+    "data": "{q: %s, Submit: 搜索}",
+    "result": "section > div.container > div > div.row > div",
+    "bookName": "dl > dd > h3 > a@re:\\[[^\\]]+\\](.+)",
+    "author": "dl > dd > span",
+    "status": "dl > dd:nth-child(4)@re:状态：(.+)",
+    "latestChapter": "dl > dd > a",
+    "lastUpdateTime": "dl > dd:nth-child(5)@re:更新时间：([0-9\\-: ]+)",
+    "pagination": false
+  },
+  "book": {
+    "bookName": "meta[property=\"og:novel:book_name\"]",
+    "author": "meta[property=\"og:novel:author\"]",
+    "intro": "meta[property=\"og:description\"]",
+    "category": "meta[property=\"og:novel:category\"]",
+    "coverUrl": "meta[property=\"og:image\"]",
+    "latestChapter": "meta[property=\"og:novel:lastest_chapter_name\"]",
+    "lastUpdateTime": "meta[property=\"og:novel:update_time\"]",
+    "status": "meta[property=\"og:novel:status\"]"
+  },
+  "toc": {
+    "item": "div.book_list2 > ul > li > a",
+    "pagination": true,
+    "nextPage": "",
+    "bookUrl": "/biquge/(.*?)/",
+    "listUrl": "https://www.fsshu.com/biquge/%s/index_%d.html",
+    "pageCount": "ul.pagination > li:nth-child(1) > a.page-link@re:[0-9]+/([0-9]+)",
+    "filterTxt": "（.+?更）",
+    "timeout": 10
+  },
+  "chapter": {
+    "title": "#outer > div > p",
+    "content": "article",
+    "paragraphTagClosed": false,
+    "paragraphTag": "p",
+    "filterTxt": "\\(本章完\\)|第\\([^\\)]+\\)页",
+    "filterTag": "head title",
+    "pagination": true,
+    "nextPage": "#next"
+  }
+}

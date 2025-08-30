@@ -96,6 +96,8 @@ public class CrawlController {
         resultMap.put("是否匹配",isFind);
         if(isFind){
             resultMap.put("匹配结果",matcher.group(1));
+        } else {
+            resultMap.put("匹配失败HTML",html);
         }
        // resultMap.put("url",url);
         return RestResult.ok(resultMap);

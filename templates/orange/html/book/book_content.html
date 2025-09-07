@@ -33,9 +33,7 @@
 
 
 </script>
-<body class="read_style_1" oncontextmenu="return false" onselectstart="return false"
-      ondragstart="return false" onbeforecopy="return false" oncopy="document.selection.empty()"
-      onselect="document.selection.empty()">
+<body class="read_style_1">
 
 <input type="hidden" id="bookId" th:value="${book.id}"/>
 <input type="hidden" id="bookName" th:value="${book.bookName}"/>
@@ -101,7 +99,7 @@
                                 作者：<a th:href="'javascript:searchByK(\''+${book.authorName}+'\')'"
                                       th:utext="${book.authorName}"></a><span
                                     th:text="'字数：'+${bookIndex.wordCount}"></span><span
-                                    th:text="'更新时间：'+${#dates.format(bookIndex.updateTime, 'yy/MM/dd HH:mm:ss')}"></span>
+                                    th:text="'更新时间：'+${#dates.format(bookIndex.updateTime, 'yyyy/MM/dd HH:mm:ss')}"></span>
                             </div>
                         </div>
                         <div class="txtwrap" th:if="${needBuy}">

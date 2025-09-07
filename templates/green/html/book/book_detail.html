@@ -76,7 +76,7 @@
                                         th:href="'/book/'+${book.id}+'/'+${book.lastIndexId}+'.html'"
                                         th:utext="${book.lastIndexName}"><!--<i class="vip">VIP</i>--></a></span>
                                 <span class="black9 fr"
-                                      th:text="'更新时间：'+${#dates.format(book.lastIndexUpdateTime, 'yy/MM/dd HH:mm:ss')}"></span>
+                                      th:text="'更新时间：'+${#dates.format(book.lastIndexUpdateTime, 'yyyy/MM/dd HH:mm:ss')}"></span>
                             </li>
                             <li class="zj_yl" id="lastBookContent"> 　</li>
                             <!--此处是该章节预览，截取最前面的42个字-->

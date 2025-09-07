@@ -169,6 +169,7 @@ public class PageController extends BaseController {
         CompletableFuture<Book> bookCompletableFuture = CompletableFuture.supplyAsync(() -> {
             //查询书籍
             Book book = bookService.queryBookDetail(bookId);
+            book.setBookDesc(book.getBookDesc().replace("\n", "<br>"));
             log.debug("加载小说基本信息线程结束");
             return book;
         }, threadPoolExecutor);

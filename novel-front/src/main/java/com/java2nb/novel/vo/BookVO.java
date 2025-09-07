@@ -15,7 +15,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper=false)
 public class BookVO extends Book implements Serializable {
 
-    @JsonFormat(timezone = "GMT+8", pattern = "MM/dd HH:mm")
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy/MM/dd HH:mm")
     private Date lastIndexUpdateTime;
 
 

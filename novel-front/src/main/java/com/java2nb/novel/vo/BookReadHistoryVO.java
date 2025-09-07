@@ -29,7 +29,7 @@ public class BookReadHistoryVO extends UserReadHistory {
 
     private String bookDesc;
 
-    @JsonFormat(timezone = "GMT+8", pattern = "MM/dd HH:mm")
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy/MM/dd HH:mm")
     private Date lastIndexUpdateTime;
 
     private Byte bookStatus;

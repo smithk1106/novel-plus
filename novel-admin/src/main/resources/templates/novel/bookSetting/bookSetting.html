@@ -8,10 +8,14 @@
         <div class="ibox">
             <div class="ibox-body">
                 <div class="fixed-table-toolbar">
+                    <div class="columns pull-left">
+                        <button shiro:hasPermission="novel:bookSetting:add" type="button" class="btn btn-primary" onclick="add()">
+                            <i class="fa fa-plus" aria-hidden="true"></i>添加
+                        </button>
+                    </div>
                     <div class="columns pull-right">
                         <button class="btn btn-success" onclick="reLoad()">查询</button>
                     </div>
-
                     <form id="searchForm">
                         <div class="columns pull-right col-md-2">
                             <select data-placeholder="--推荐类型--" id="type"
@@ -37,7 +41,7 @@
         var s_remove_h = 'hidden';
     </script>
 </div>
-<div shiro:hasPermission="test:order:detail">
+<div shiro:hasPermission="novel:bookSetting:detail">
     <script type="text/javascript">
         s_detail_h = '';
     </script>

@@ -7,9 +7,9 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${password}
     volumes:
-      - ./docker/mysql/data:/var/lib/mysql
-      - ./doc/sql/novel_plus.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./docker/share:/share
+      - ./mysql/data:/var/lib/mysql
+      - ./share/novel_plus.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./share:/share
     command: mysqld --max_allowed_packet=100M
     ports:
       - "3306:33060"
@@ -39,9 +39,9 @@ services:
       - redispwd=${redispwd}
       - redisport=${redisport}
     volumes:
-      - ./novel-front/target/build:/app/front
-      - ./docker/download/books:/app/books
-      - ./docker/download/pic:/app/pic
+      - ./front:/app/front
+      - ./download/books:/app/books
+      - ./download/pic:/app/pic
     working_dir: /app/front
     command: sh -c "java -jar -Dspring.profiles.active=dev /app/front/novel-front.jar"
     ports:
@@ -64,9 +64,9 @@ services:
       - redispwd=${redispwd}
       - redisport=${redisport}
     volumes:
-      - ./novel-admin/target/build:/app/admin
-      - ./docker/download/books:/app/books
-      - ./docker/download/pic:/app/pic
+      - ./admin:/app/admin
+      - ./download/books:/app/books
+      - ./download/pic:/app/pic
     working_dir: /app/admin
     command: sh -c "java -jar -Dspring.profiles.active=dev /app/admin/novel-admin.jar"
     ports:
@@ -108,9 +108,9 @@ services:
       - username=${username}
       - password=${password}
     volumes:
-      - ./novel-crawl2/target:/app
-      - ./docker/h2db:/app/db
-      - ./docker/download:/app/download
+      - ./crawl2:/app
+      - ./h2db:/app/db
+      - ./download:/app/download
     working_dir: /app
     command: java -jar -Dspring.profiles.active=dev /app/novel-crawl2.jar
     ports:

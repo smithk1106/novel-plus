@@ -2,7 +2,7 @@ spring:
   application:
    name: novelDownloadServer
   profiles:
-    active: dev
+    active: prod
   app:
     #图片保存路径
     coverPath: pic/localPic

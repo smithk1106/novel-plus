@@ -21,6 +21,8 @@ public class Book {
     private Date lastUpdateTime;
     private Byte bookStatus = 0;
     private Integer wordCount = 0;
+    private Integer crawlSourceId;
+
     private String saveType;
     private String downloadUrl;
 }

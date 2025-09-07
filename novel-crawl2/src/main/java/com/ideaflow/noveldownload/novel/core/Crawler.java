@@ -102,12 +102,27 @@ public class Crawler {
 
         this.digitCount = digitCount;
         book.setSaveType(config.getExtName().toLowerCase());
+        book.setCrawlSourceId(config.getSourceId());
+
+        // 检查同名的书是否存在
+        List<Book> repeatBooks = novelService.getBookByName(book.getBookName(), book.getAuthorName());
+        if (repeatBooks.size() > 0) {
+            Book repeatBook = repeatBooks.get(0);
+            book.setId(repeatBook.getId());
+            if (StrUtil.isNotBlank(repeatBook.getPicUrl()) && repeatBook.getPicUrl().startsWith("//") == false) {
+                book.setPicUrl(repeatBook.getPicUrl());
+            }
+            book.setBookName(repeatBook.getBookName());
+            book.setBookNameAlias(repeatBook.getBookNameAlias());
+        }
 
         // 下载封面(优先下载封面是为了防止自动下载重复图片)
-        String coverUrl = downloadCover(book, config.getDownloadPath());
-        if (!coverUrl.isEmpty()) {
-            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]已下载封面：%s -> %s", book.getPicUrl(), coverUrl)));
-            book.setPicUrl(coverUrl);
+        if (book.getPicUrl().startsWith("http")) {
+            String coverUrl = downloadCover(book, config.getDownloadPath());
+            if (!coverUrl.isEmpty()) {
+                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]已下载封面：%s -> %s", book.getPicUrl(), coverUrl)));
+                book.setPicUrl(coverUrl);
+            }
         }
 
         // 保存小说信息

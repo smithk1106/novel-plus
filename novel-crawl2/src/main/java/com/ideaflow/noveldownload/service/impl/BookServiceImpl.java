@@ -29,6 +29,7 @@ import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.service.BookService;
 
+import cn.hutool.core.util.StrUtil;
 import jakarta.annotation.Resource;
 
 @Service
@@ -54,9 +55,11 @@ public class BookServiceImpl implements BookService {
         }
 
         BookEntity bookEntity = null;
+        // 从ID取得书的信息
         if (book.getId() != null && book.getId() > 0) {
             bookEntity = novelMapper.selectById(book.getId());
         }
+        // 从书名和作者取得书的信息
         if (bookEntity == null) {
             LambdaQueryWrapper<BookEntity> queryWrapper = new LambdaQueryWrapper<>();
             if (StringUtils.hasText(book.getAuthorName())) {
@@ -72,6 +75,7 @@ public class BookServiceImpl implements BookService {
                 bookEntity = bookEntityList.get(0);
             }
         }
+        // 追加或更新数据
         if (bookEntity == null) {
             // 追加数据
             bookEntity = mergeBookToEntity(book, null);
@@ -94,6 +98,7 @@ public class BookServiceImpl implements BookService {
             // 合并并更新数据
             bookEntity = mergeBookToEntity(book, bookEntity);
             book.setId(bookEntity.getId());
+            book.setPicUrl(bookEntity.getPicUrl());
             novelMapper.updateById(bookEntity);
         }
 
@@ -138,12 +143,12 @@ public class BookServiceImpl implements BookService {
     public List<Book> getBookByName(String bookName, String authorName) {
         LambdaQueryWrapper<BookEntity> queryWrapper = new LambdaQueryWrapper<>();
         if (StringUtils.hasText(authorName)) {
-            queryWrapper.allEq(Map.of(
-                BookEntity::getBookName, bookName,
-                BookEntity::getAuthorName, authorName
-            ));
+            queryWrapper.eq(BookEntity::getAuthorName, authorName);
+            queryWrapper.and(wrapper -> {
+                wrapper.eq(BookEntity::getBookName, bookName).or().like(BookEntity::getBookNameAlias, "|" + bookName + "|");
+            });
         } else {
-            queryWrapper.eq(BookEntity::getBookName, bookName);
+            queryWrapper.eq(BookEntity::getBookName, bookName).or().like(BookEntity::getBookNameAlias, "|" + bookName + "|");
         }
         List<BookEntity> bookEntityList = novelMapper.selectList(queryWrapper);
         List<Book> bookList = new ArrayList<Book>();
@@ -410,6 +415,9 @@ public class BookServiceImpl implements BookService {
         book.setLastUpdateTime(bookEntity.getLastIndexUpdateTime());
         book.setBookStatus(bookEntity.getBookStatus());
         book.setWordCount(bookEntity.getWordCount());
+        book.setCrawlSourceId(bookEntity.getCrawlSourceId());
+        book.setUrl(bookEntity.getCrawlBookUrl());
+
         book.setSaveType(bookEntity.getSaveType());
         book.setDownloadUrl(bookEntity.getDownloadUrl());
 
@@ -423,21 +431,34 @@ public class BookServiceImpl implements BookService {
             bookEntity.setLastIndexName(book.getLastChapterName());
             bookEntity.setLastIndexId(book.getLastChapterId());
         }
-        bookEntity.setBookName(book.getBookName());
-        bookEntity.setBookNameAlias(book.getBookNameAlias());
-        bookEntity.setPicUrl(book.getPicUrl());
-        bookEntity.setAuthorName(book.getAuthorName());
-        bookEntity.setBookDesc(book.getBookDesc());
-        bookEntity.setLastIndexName(book.getLastChapterName());
-        bookEntity.setLastIndexId(book.getLastChapterId());
+        if (StrUtil.isNotBlank(book.getBookName())) {
+            bookEntity.setBookName(book.getBookName());
+        }
+        if (StrUtil.isNotBlank(book.getBookNameAlias())) {
+            bookEntity.setBookNameAlias(book.getBookNameAlias());
+        }
+        if (StrUtil.isNotBlank(book.getPicUrl()) && book.getPicUrl().startsWith("http") == false) {
+            bookEntity.setPicUrl(book.getPicUrl());
+        }
+        if (StrUtil.isNotBlank(book.getAuthorName())) {
+            bookEntity.setAuthorName(book.getAuthorName());
+        }
+        if (StrUtil.isNotBlank(book.getBookDesc())) {
+            bookEntity.setBookDesc(book.getBookDesc());
+        }
+        if (StrUtil.isNotBlank(book.getLastChapterName())) {
+            bookEntity.setLastIndexName(book.getLastChapterName());
+        }
+        if (book.getLastChapterId() > 0) {
+            bookEntity.setLastIndexId(book.getLastChapterId());
+        }
         if (book.getLastUpdateTime() == null) {
             bookEntity.setLastIndexUpdateTime(Calendar.getInstance().getTime());
         } else {
             bookEntity.setLastIndexUpdateTime(book.getLastUpdateTime());
         }
         bookEntity.setBookStatus(book.getBookStatus());
-        if (bookEntity.getWordCount() == null) bookEntity.setWordCount(0);
-        bookEntity.setWordCount(bookEntity.getWordCount() + book.getWordCount());
+        bookEntity.setWordCount(book.getWordCount());
         bookEntity.setUpdateTime(Calendar.getInstance().getTime());
         if (bookEntity.getCatId() == null || bookEntity.getCatId() != book.getCatId()) {
             // 取得分类名
@@ -452,6 +473,8 @@ public class BookServiceImpl implements BookService {
             }
             bookEntity.setCatId(book.getCatId());
         }
+        bookEntity.setCrawlSourceId(book.getCrawlSourceId());
+        bookEntity.setCrawlBookUrl(book.getUrl());
 
         // 额外字段
         bookEntity.setSaveType(book.getSaveType());
@@ -464,11 +487,16 @@ public class BookServiceImpl implements BookService {
         if (bookIndexEntity == null) {
             bookIndexEntity = new BookIndexEntity();
             //bookIndexEntity.setId(chapter.getId());
+            bookIndexEntity.setCreateTime(Calendar.getInstance().getTime());
+            bookIndexEntity.setBookPrice(0);
+            bookIndexEntity.setStorageType("db");
+            bookIndexEntity.setIsVip((byte)0);
         }
         bookIndexEntity.setBookId(chapter.getBookId());
         bookIndexEntity.setIndexName(chapter.getTitle());
         bookIndexEntity.setIndexNum(chapter.getOrder());
         bookIndexEntity.setWordCount(chapter.getCleanContent().length());
+        bookIndexEntity.setUpdateTime(Calendar.getInstance().getTime());
 
         return bookIndexEntity;
     }

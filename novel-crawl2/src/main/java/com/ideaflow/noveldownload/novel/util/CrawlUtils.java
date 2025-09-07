@@ -54,6 +54,16 @@ public class CrawlUtils {
         return StrUtil.isEmpty(text) ? "" : text.replaceAll("[\\p{C}\\p{Cf}\\p{Co}\\p{Zl}\\p{Zp}\\u200B\\uFEFF]", "");
     }
 
+    public String replaceIntroTags(String text) {
+        return text.replaceAll("</(?:p|div)>|<p */>|<br[^>]*?>", "\n")
+                    .replaceAll("<[^>]*?>", "")
+                    .replaceAll("&amp;", "&")
+                    .replaceAll("&lt;", "<")
+                    .replaceAll("&gt;", ">")
+                    .replaceAll("&[^;]+;", "")
+                    .replaceAll("[\\r\\n]+", "\n");
+    }
+
     @SneakyThrows
     public Response request(OkHttpClient client, String url, int timeout) {
         Call call = client.newCall(new Request.Builder()

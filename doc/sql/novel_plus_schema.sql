@@ -15,6 +15,10 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+CREATE database if NOT EXISTS `novel_plus` default character set utf8mb4 collate utf8mb4_unicode_ci;
+use `novel_plus`;
+SET NAMES utf8mb4;
+
 --
 -- Table structure for table `author`
 --
@@ -133,6 +137,7 @@ CREATE TABLE IF NOT EXISTS `book` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `crawl_source_id` int DEFAULT NULL COMMENT '爬虫源站ID',
   `crawl_book_id` varchar(32) DEFAULT NULL COMMENT '抓取的源站小说ID',
+  `crawl_book_url` varchar(250) DEFAULT NULL COMMENT '抓取的源站小说URL',
   `crawl_last_time` datetime DEFAULT NULL COMMENT '最后一次的抓取时间',
   `crawl_is_stop` tinyint(1) DEFAULT '0' COMMENT '是否已停止更新，0：未停止，1：已停止',
   PRIMARY KEY (`id`),

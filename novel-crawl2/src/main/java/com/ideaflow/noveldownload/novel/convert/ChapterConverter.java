@@ -29,7 +29,6 @@ public class ChapterConverter {
 
         if (extName.matches("(?i)^(txt|epub|html|pdf)$")) {
             String content = filteredContent;
-
             if ("txt".equals(extName)) {
                 // 全角空格，用于首行缩进
                 String ident = "\u3000".repeat(2);
@@ -41,7 +40,7 @@ public class ChapterConverter {
                     }
                 }
                 content = chapter.getTitle() + "\n".repeat(2) + result;
-            } else if (extName.matches("(?i)^(epub|html|pdf)$")) {
+            } else {
                 content = new ChapterFormatter(config).format(filteredContent);
                 chapter.setContent(content);
                 content = templateRender(chapter, extName);

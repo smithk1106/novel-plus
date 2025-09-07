@@ -38,7 +38,8 @@ public class NovelController {
             config = appConfigService.load();
         }
 
-        Page<Book> pageResult = bookService.getBookList(config, novelWebSearch.getName(), novelWebSearch.getPageNo(), novelWebSearch.getPageSize());
+        //Page<Book> pageResult = bookService.getBookList(config, novelWebSearch.getName(), novelWebSearch.getPageNo(), novelWebSearch.getPageSize());
+        Page<Book> pageResult = bookService.getBookList(config, novelWebSearch.getName(), novelWebSearch.getPageNo(), 100);
 
         return CommonResult.success(pageResult);
     }
@@ -51,7 +52,7 @@ public class NovelController {
             return CommonResult.error("小说不存在");
         }
         // 设置文件路径
-        String filePath =  System.getProperty("user.dir") + File.separator + book.getDownloadUrl();
+        String filePath =  System.getProperty("user.dir") + File.separator + book.getDownloadUrl() + File.separator + book_id;
         File file = new File(filePath);
 
         // 如果文件存在则删除

@@ -94,8 +94,8 @@ public class ChapterFilter extends Source {
             }
 
             // 确保在 EscapeFilter、AdsFilter 之后
-            this.content = this.content.replaceAll("</(?:p|div)>|<br[^>]*?>", "\n").replaceAll("<[^>]*?>", "");
             this.content = StrUtil.cleanBlank(this.content);
+            this.content = this.content.replaceAll("</(?:p|div)>|(?:<br[^>]*?>)+", "\n").replaceAll("<[^>]*?>", "").replaceAll("[\\r\\n]+", "\n");
 
             if (applyDuplicateTitleFilter) {
                 this.content = content.replaceFirst(Pattern.quote(this.title) + "|" + Pattern.quote(StrUtil.cleanBlank(this.title)), "");

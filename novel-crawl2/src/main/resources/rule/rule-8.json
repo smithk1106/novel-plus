@@ -7,11 +7,11 @@
   "search": {
     "url": "https://www.dxmwx.org/list/%s.html",
     "method": "get",
-    "result": "#ListContents",
-    "bookName": ".margin0h5 > a.fonttext",
-    "author": ".margin0h5 > a:nth-child(2)",
-    "latestChapter": ".right_wid > div:nth-child(4) > a@js:r=r.replaceAll('最新章节','');",
-    "lastUpdateTime": ".right_wid > div:nth-child(4) > span",
+    "result": "#ListContents > div",
+    "bookName": "div.right_wid > .margin0h5 > a.fonttext",
+    "author": "div.right_wid > .margin0h5 > a:nth-child(2)",
+    "latestChapter": "div.right_wid > div:nth-child(4) > a@re:最新章节(?:</span>)*(.+)",
+    "lastUpdateTime": "div.right_wid > div:nth-child(4) > span",
     "pagination": true,
     "nextPage": "//div[@class='onlypc']//div//a[not(text()='首页') and not(text()='上一页') and not(text()='下一页') and not(text()='尾页')]"
   },
@@ -19,7 +19,7 @@
     "url": "https://www.dxmwx.org/book/(.*?).html",
     "bookName": "meta[property=\"og:novel:book_name\"]",
     "author": "meta[property=\"og:novel:author\"]",
-    "intro": "meta[property=\"og:description\"]",
+    "intro": "div[style=\"line-height: 20px; font-size: 14px; color: #66666b; min-height: 100px; margin: 10px 0px; padding-left: 30px; padding-right: 30px;\"]",
     "category": "meta[property=\"og:novel:category\"]",
     "coverUrl": "meta[property=\"og:image\"]",
     "latestChapter": "meta[property=\"og:novel:latest_chapter_name\"]",
@@ -34,7 +34,7 @@
     "title": "#ChapterTitle",
     "content": "#Lab_Contents",
     "paragraphTagClosed": true,
-    "filterTxt": "\\(本章完\\)",
+    "filterTxt": "\\(本章完\\)|\\(.*?未完.*?\\)|[\\(（][。！]*[\\)）]|\\[本文字由.*?\\]|[\\(（].*?\\[本文字由.*|[\\(（].*?如果您喜欢.*[\\)）]",
     "filterTag": ""
   }
 }

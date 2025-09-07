@@ -41,6 +41,7 @@ public class BookEntity implements Serializable{
     private Date createTime;
     private Integer crawlSourceId;
     private String crawlBookId;
+    private String crawlBookUrl;
     private Date crawlLastTime;
     private Byte crawlIsStop;
     @TableField(exist = false)

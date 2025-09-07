@@ -15,6 +15,7 @@ public class CorsConfig implements WebMvcConfigurer {
                     "http://localhost:[*]",
                     "http://127.0.0.1:[*]", 
                     "http://192.168.11.50:[*]",
+                    "http://book.wdllstudio.com:[*]",
                     "https://book.wdllstudio.com:[*]"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")

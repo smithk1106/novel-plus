@@ -3,7 +3,6 @@ package com.ideaflow.noveldownload.novel.parse;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import com.ideaflow.noveldownload.constans.CommonConst;
 import com.ideaflow.noveldownload.constans.EnumBookCategory;
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
 import com.ideaflow.noveldownload.novel.convert.ChineseConverter;
@@ -42,9 +41,11 @@ public class BookParser extends Source {
 
         String bookName = JsoupUtils.selectAndInvokeJs(document, r.getBookName(), getContentType(r.getBookName()));
         String author = JsoupUtils.selectAndInvokeJs(document, r.getAuthor(), getContentType(r.getAuthor()));
-        String intro = StrUtil.cleanBlank(JsoupUtils.selectAndInvokeJs(document, r.getIntro(), getContentType(r.getIntro())));
-        String coverUrl = JsoupUtils.selectAndInvokeJs(document, r.getCoverUrl(),
-                StrUtil.startWith(r.getCoverUrl(), "meta[") ? ContentType.ATTR_CONTENT : ContentType.ATTR_SRC);
+        String intro = CrawlUtils.replaceIntroTags(JsoupUtils.selectAndInvokeJs(document, r.getIntro(), getContentType(r.getIntro(), ContentType.HTML)));
+        String coverUrl = JsoupUtils.selectAndInvokeJs(document, r.getCoverUrl(), getContentType(r.getCoverUrl(), ContentType.ATTR_SRC));
+        if (StrUtil.isNotBlank(coverUrl) && coverUrl.startsWith("//")) {
+            coverUrl = url.substring(0, url.indexOf(':') + 1) + coverUrl;
+        }
         // 以下为非必须属性
         String category = JsoupUtils.selectAndInvokeJs(document, r.getCategory(), getContentType(r.getCategory()));
         String latestChapter = JsoupUtils.selectAndInvokeJs(document, r.getLatestChapter(), getContentType(r.getLatestChapter()));
@@ -66,7 +67,8 @@ public class BookParser extends Source {
         book.setWordCount(FormatUtils.parseInt(wordCount, 0));
         book.setSaveType(config.getExtName());
 
-        return ChineseConverter.convert(book, this.rule.getLanguage(), config.getLanguage());
+        return book;
+        //return ChineseConverter.convert(book, this.rule.getLanguage(), config.getLanguage());
     }
 
     /**
@@ -99,11 +101,22 @@ public class BookParser extends Source {
     }
     
 
-    private ContentType getContentType(String query) {
+    private ContentType getContentType(String query, ContentType defContentType) {
         if (StrUtil.isEmpty(query)) {
-            return null;
+            return defContentType;
         }
-        return query.startsWith("meta[") ? ContentType.ATTR_CONTENT : ContentType.TEXT;
+        ContentType contentType = defContentType;
+        if (query.startsWith("meta[")) {
+            contentType = ContentType.ATTR_CONTENT;
+        } else if (query.endsWith("img") || query.lastIndexOf("img@") >= 0) {
+            contentType = ContentType.ATTR_SRC;
+        }
+
+        return contentType;
+    }
+
+    private ContentType getContentType(String query) {
+        return getContentType(query, ContentType.TEXT);
     }
 
 }

@@ -44,11 +44,14 @@
                 <h3 th:text="'正文('+${bookIndexCount}+')'"></h3>
                 <div class="dirList">
                     <ul th:each="bookIndex : ${bookIndexList}">
-                        <li><a th:if="${bookIndex.isVip} != '1'" th:href="'/book/'+${book.id}+'/'+${bookIndex.id}+'.html'" >
-                            <span th:utext="${bookIndex.indexName}"></span><i class="red" > [免费]</i>
-                        </a>
-                            <a th:if="${bookIndex.isVip} == '1'" th:href="'/book/'+${book.id}+'/'+${bookIndex.id}+'.html'" th:utext="${bookIndex.indexName}">
-                            </a></li>
+                        <li>
+                            <a th:if="${bookIndex.isVip} != '1'" th:href="'/book/'+${book.id}+'/'+${bookIndex.id}+'.html'">
+                                <span th:utext="${bookIndex.indexName}"></span>
+                            </a>
+                            <a th:if="${bookIndex.isVip} == '1'" th:href="'/book/'+${book.id}+'/'+${bookIndex.id}+'.html'">
+                                <span th:utext="${bookIndex.indexName}"></span><i class="red" > [VIP]</i>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>

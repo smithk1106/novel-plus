@@ -12,7 +12,7 @@
     <artifactId>novel-crawl</artifactId>
 
     <name>novel-crawl</name>
-    <description>小说精品屋 爬虫管理程序</description>
+    <description>WDLL文学 爬虫管理程序</description>
 
     <dependencies>
 

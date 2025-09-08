@@ -83,12 +83,12 @@ hr {
 }
 
 a {
-    color: #333;
+    color: var(--ws-dark);
     text-decoration: none
 }
 
 a:hover {
-    color: #777
+    color: var(--ws-dark-active)
 }
 
 a cite {
@@ -134,23 +134,23 @@ a cite {
 
 .layui-edge-top {
     top: -4px;
-    border-bottom-color: #999;
+    border-bottom-color: var(--ws-dark-active);
     border-bottom-style: solid
 }
 
 .layui-edge-right {
-    border-left-color: #999;
+    border-left-color: var(--ws-dark-active);
     border-left-style: solid
 }
 
 .layui-edge-bottom {
     top: 2px;
-    border-top-color: #999;
+    border-top-color: var(--ws-dark-active);
     border-top-style: solid
 }
 
 .layui-edge-left {
-    border-right-color: #999;
+    border-right-color: var(--ws-dark-active);
     border-right-style: solid
 }
 
@@ -862,7 +862,7 @@ a cite {
     height: 44px;
     line-height: 44px;
     padding: 0 15px;
-    background-color: #eee
+    background-color: var(--ws-gray-300)
 }
 
 .layui-layout-admin .layui-logo {
@@ -873,7 +873,7 @@ a cite {
     height: 100%;
     line-height: 60px;
     text-align: center;
-    color: #009688;
+    color: var(--ws-secondary);
     font-size: 16px
 }
 
@@ -1508,9 +1508,9 @@ a cite {
 
 .layui-elem-quote {
     margin-bottom: 10px;
-    padding: 15px;
+    padding: 8px;
     line-height: 22px;
-    border-left: 5px solid #009688;
+    border-left: 5px solid var(--ws-secondary);
     border-radius: 0 2px 2px 0;
     background-color: #f2f2f2
 }
@@ -1552,7 +1552,7 @@ a cite {
     position: relative;
     height: 6px;
     border-radius: 20px;
-    background-color: #e2e2e2
+    background-color: var(--ws-gray-300)
 }
 
 .layui-progress-bar {
@@ -1564,7 +1564,7 @@ a cite {
     height: 6px;
     border-radius: 20px;
     text-align: right;
-    background-color: #5FB878;
+    background-color: var(--ws-secondary);
     transition: all .3s;
     -webkit-transition: all .3s
 }
@@ -1585,7 +1585,7 @@ a cite {
 .layui-progress-big .layui-progress-text {
     position: static;
     padding: 0 10px;
-    color: #fff
+    color: var(--ws-primary)
 }
 
 .layui-collapse {
@@ -1596,7 +1596,6 @@ a cite {
 
 .layui-colla-content, .layui-colla-item {
     border-top-width: 1px;
-    border-top-style: solid
 }
 
 .layui-colla-item:first-child {
@@ -1608,7 +1607,7 @@ a cite {
     height: 42px;
     line-height: 42px;
     padding: 0 15px 0 35px;
-    color: #333;
+    color: var(--ws-dark);
     background-color: #f2f2f2;
     cursor: pointer;
     font-size: 14px;
@@ -1632,7 +1631,7 @@ a cite {
 .layui-card {
     margin-bottom: 15px;
     border-radius: 2px;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05)
 }
 
@@ -1646,13 +1645,13 @@ a cite {
     line-height: 42px;
     padding: 0 15px;
     border-bottom: 1px solid #f6f6f6;
-    color: #333;
+    color: var(--ws-dark);
     border-radius: 2px 2px 0 0;
     font-size: 14px
 }
 
 .layui-bg-black, .layui-bg-blue, .layui-bg-cyan, .layui-bg-green, .layui-bg-orange, .layui-bg-red {
-    color: #fff !important
+    color: var(--ws-primary) !important
 }
 
 .layui-card-body {
@@ -1682,7 +1681,7 @@ a cite {
     padding: 15px;
     border-radius: 0;
     border-top: 5px solid #E6E6E6;
-    background-color: #fff
+    background-color: var(--ws-gray-100)
 }
 
 .layui-auxiliar-moving {
@@ -1702,7 +1701,7 @@ a cite {
 }
 
 .layui-bg-red {
-    background-color: #FF5722 !important
+    background-color: var(--ws-red) !important
 }
 
 .layui-bg-orange {
@@ -1710,23 +1709,23 @@ a cite {
 }
 
 .layui-bg-green {
-    background-color: #009688 !important
+    background-color: var(--ws-green) !important
 }
 
 .layui-bg-cyan {
-    background-color: #2F4056 !important
+    background-color: var(--ws-cyan) !important
 }
 
 .layui-bg-blue {
-    background-color: #1E9FFF !important
+    background-color: var(--ws-blue) !important
 }
 
 .layui-bg-black {
-    background-color: #393D49 !important
+    background-color: var(--ws-dark) !important
 }
 
 .layui-bg-gray {
-    background-color: #eee !important;
+    background-color: var(--ws-gray-300) !important;
     color: #666 !important
 }
 
@@ -1746,7 +1745,7 @@ a cite {
 
 .layui-text h1, .layui-text h2, .layui-text h3 {
     font-weight: 500;
-    color: #333
+    color: var(--ws-dark)
 }
 
 .layui-text h1 {
@@ -1779,7 +1778,7 @@ a cite {
 }
 
 .layui-text em, .layui-word-aux {
-    color: #999 !important;
+    color: var(--ws-dark-active) !important;
     padding: 0 5px !important
 }
 
@@ -1788,8 +1787,8 @@ a cite {
     height: 38px;
     line-height: 38px;
     padding: 0 18px;
-    background-color: #009688;
-    color: #fff;
+    background-color: var(--ws-secondary);
+    color: var(--ws-primary);
     white-space: nowrap;
     text-align: center;
     font-size: 14px;
@@ -1801,7 +1800,7 @@ a cite {
 .layui-btn:hover {
     opacity: .8;
     filter: alpha(opacity=80);
-    color: #fff
+    color: var(--ws-primary)
 }
 
 .layui-btn:active {
@@ -1843,17 +1842,17 @@ a cite {
 
 .layui-btn-primary {
     border: 1px solid #C9C9C9;
-    background-color: #fff;
+    background-color: var(--ws-primary);
     color: #555
 }
 
 .layui-btn-primary:hover {
-    border-color: #009688;
-    color: #333
+    border-color: var(--ws-secondary);
+    color: var(--ws-dark)
 }
 
 .layui-btn-normal {
-    background-color: #1E9FFF
+    background-color: var(--ws-secondary)
 }
 
 .layui-btn-warm {
@@ -1861,7 +1860,7 @@ a cite {
 }
 
 .layui-btn-danger {
-    background-color: #FF5722
+    background-color: var(--ws-red)
 }
 
 .layui-btn-disabled, .layui-btn-disabled:active, .layui-btn-disabled:hover {
@@ -1920,7 +1919,7 @@ a cite {
 
 .layui-btn-group .layui-btn-primary:hover {
     border-color: #C9C9C9;
-    color: #009688
+    color: var(--ws-dark-active)
 }
 
 .layui-btn-group .layui-btn:first-child {
@@ -1954,7 +1953,7 @@ a cite {
     line-height: 38px \9;
     border-width: 1px;
     border-style: solid;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     border-radius: 2px
 }
 
@@ -1969,7 +1968,7 @@ a cite {
 }
 
 .layui-input:hover, .layui-textarea:hover {
-    border-color: #D2D2D2 !important
+    border-color: var(--ws-gray-300) !important
 }
 
 .layui-input:focus, .layui-textarea:focus {
@@ -2062,7 +2061,7 @@ a cite {
 }
 
 .layui-form-danger + .layui-form-select .layui-input, .layui-form-danger:focus {
-    border-color: #FF5722 !important
+    border-color: var(--ws-red) !important
 }
 
 .layui-form-select .layui-input {
@@ -2077,7 +2076,7 @@ a cite {
     margin-top: -3px;
     cursor: pointer;
     border-width: 6px;
-    border-top-color: #c2c2c2;
+    border-top-color: var(--ws-gray-300);
     border-top-style: solid;
     transition: all .3s;
     -webkit-transition: all .3s
@@ -2091,10 +2090,10 @@ a cite {
     padding: 5px 0;
     z-index: 899;
     min-width: 100%;
-    border: 1px solid #d2d2d2;
+    border: 1px solid var(--ws-gray-300);
     max-height: 300px;
     overflow-y: auto;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     border-radius: 2px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12);
     box-sizing: border-box
@@ -2110,7 +2109,7 @@ a cite {
 
 .layui-form-select dl dt {
     font-size: 12px;
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-form-select dl dd {
@@ -2129,16 +2128,16 @@ a cite {
 
 .layui-form-select dl dd.layui-select-tips {
     padding-left: 10px !important;
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-form-select dl dd.layui-this {
-    background-color: #5FB878;
-    color: #fff
+    background-color: var(--ws-secondary);
+    color: var(--ws-primary)
 }
 
 .layui-form-checkbox, .layui-form-select dl dd.layui-disabled {
-    background-color: #fff
+    background-color: var(--ws-gray-100)
 }
 
 .layui-form-selected dl {
@@ -2169,15 +2168,15 @@ a cite {
 .layui-select-none {
     margin: 5px 0;
     text-align: center;
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-select-disabled .layui-disabled {
-    border-color: #eee !important
+    border-color: var(--ws-gray-300) !important
 }
 
 .layui-select-disabled .layui-edge {
-    border-top-color: #d2d2d2
+    border-top-color: var(--ws-gray-300)
 }
 
 .layui-form-checkbox {
@@ -2198,13 +2197,13 @@ a cite {
     height: 100%;
     font-size: 14px;
     border-radius: 2px 0 0 2px;
-    background-color: #d2d2d2;
-    color: #fff;
+    background-color: var(--ws-gray-300);
+    color: var(--ws-primary);
     overflow: hidden
 }
 
 .layui-form-checkbox:hover span {
-    background-color: #c2c2c2
+    background-color: var(--ws-gray-300)
 }
 
 .layui-form-checkbox i {
@@ -2213,29 +2212,29 @@ a cite {
     top: 0;
     width: 30px;
     height: 28px;
-    border: 1px solid #d2d2d2;
+    border: 1px solid var(--ws-gray-300);
     border-left: none;
     border-radius: 0 2px 2px 0;
-    color: #fff;
+    color: var(--ws-primary);
     font-size: 20px;
     text-align: center
 }
 
 .layui-form-checkbox:hover i {
-    border-color: #c2c2c2;
-    color: #c2c2c2
+    border-color: var(--ws-gray-300);
+    color: var(--ws-primary)
 }
 
 .layui-form-checked, .layui-form-checked:hover {
-    border-color: #5FB878
+    border-color: var(--ws-secondary)
 }
 
 .layui-form-checked span, .layui-form-checked:hover span {
-    background-color: #5FB878
+    background-color: var(--ws-secondary)
 }
 
 .layui-form-checked i, .layui-form-checked:hover i {
-    color: #5FB878
+    color: var(--ws-secondary)
 }
 
 .layui-form-item .layui-form-checkbox {
@@ -2268,32 +2267,32 @@ a cite {
     width: 16px;
     height: 16px;
     line-height: 16px;
-    border: 1px solid #d2d2d2;
+    border: 1px solid var(--ws-gray-300);
     font-size: 12px;
     border-radius: 2px;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     -webkit-transition: .1s linear;
     transition: .1s linear
 }
 
 .layui-form-checkbox[lay-skin=primary]:hover i {
-    border-color: #5FB878;
-    color: #fff
+    border-color: var(--ws-secondary);
+    color: var(--ws-primary)
 }
 
 .layui-form-checked[lay-skin=primary] i {
-    border-color: #5FB878;
-    background-color: #5FB878;
-    color: #fff
+    border-color: var(--ws-secondary);
+    background-color: var(--ws-secondary);
+    color: var(--ws-primary)
 }
 
 .layui-checkbox-disbaled[lay-skin=primary] span {
     background: 0 0 !important;
-    color: #c2c2c2
+    color: var(--ws-primary)
 }
 
 .layui-checkbox-disbaled[lay-skin=primary]:hover i {
-    border-color: #d2d2d2
+    border-color: var(--ws-gray-300)
 }
 
 .layui-form-item .layui-form-checkbox[lay-skin=primary] {
@@ -2307,10 +2306,10 @@ a cite {
     min-width: 35px;
     padding: 0 5px;
     margin-top: 8px;
-    border: 1px solid #d2d2d2;
+    border: 1px solid var(--ws-gray-300);
     border-radius: 20px;
     cursor: pointer;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     -webkit-transition: .1s linear;
     transition: .1s linear
 }
@@ -2322,7 +2321,7 @@ a cite {
     width: 16px;
     height: 16px;
     border-radius: 20px;
-    background-color: #d2d2d2;
+    background-color: var(--ws-gray-300);
     -webkit-transition: .1s linear;
     transition: .1s linear
 }
@@ -2334,38 +2333,38 @@ a cite {
     margin-left: 21px;
     padding: 0 !important;
     text-align: center !important;
-    color: #999 !important;
+    color: var(--ws-dark-active) !important;
     font-style: normal !important;
     font-size: 12px
 }
 
 .layui-form-onswitch {
-    border-color: #5FB878;
-    background-color: #5FB878
+    border-color: var(--ws-secondary);
+    background-color: var(--ws-secondary)
 }
 
 .layui-checkbox-disbaled, .layui-checkbox-disbaled i {
-    border-color: #e2e2e2 !important
+    border-color: var(--ws-gray-300) !important
 }
 
 .layui-form-onswitch i {
     left: 100%;
     margin-left: -21px;
-    background-color: #fff
+    background-color: var(--ws-gray-100)
 }
 
 .layui-form-onswitch em {
     margin-left: 5px;
     margin-right: 21px;
-    color: #fff !important
+    color: var(--ws-primary) !important
 }
 
 .layui-checkbox-disbaled span {
-    background-color: #e2e2e2 !important
+    background-color: var(--ws-gray-300) !important
 }
 
 .layui-checkbox-disbaled:hover i {
-    color: #fff !important
+    color: var(--ws-primary) !important
 }
 
 [lay-radio] {
@@ -2392,15 +2391,15 @@ a cite {
 .layui-form-radio > i {
     margin-right: 8px;
     font-size: 22px;
-    color: #c2c2c2
+    color: var(--ws-primary)
 }
 
 .layui-form-radio > i:hover, .layui-form-radioed > i {
-    color: #5FB878
+    color: var(--ws-dark-active)
 }
 
 .layui-radio-disbaled > i {
-    color: #e2e2e2 !important
+    color: var(--ws-gray-300) !important
 }
 
 .layui-form-pane .layui-form-label {
@@ -2540,7 +2539,7 @@ a cite {
 .layedit-tool-fixed {
     position: fixed;
     top: 0;
-    border-top: 1px solid #e2e2e2
+    border-top: 1px solid var(--ws-gray-300)
 }
 
 .layui-layedit-tool .layedit-tool-mid, .layui-layedit-tool .layui-icon {
@@ -2556,22 +2555,22 @@ a cite {
     height: 30px;
     line-height: 30px;
     margin: 3px 5px;
-    color: #777;
+    color: var(--ws-dark-active);
     cursor: pointer;
     border-radius: 2px
 }
 
 .layui-layedit-tool .layui-icon:hover {
-    color: #393D49
+    color: var(--ws-dark)
 }
 
 .layui-layedit-tool .layui-icon:active {
-    color: #000
+    color: var(--ws-dark)
 }
 
 .layui-layedit-tool .layedit-tool-active {
-    background-color: #e2e2e2;
-    color: #000
+    background-color: var(--ws-gray-300);
+    color: var(--ws-dark)
 }
 
 .layui-layedit-tool .layui-disabled, .layui-layedit-tool .layui-disabled:hover {
@@ -2583,7 +2582,7 @@ a cite {
     width: 1px;
     height: 18px;
     margin: 0 10px;
-    background-color: #d2d2d2
+    background-color: var(--ws-gray-300)
 }
 
 .layedit-tool-html {
@@ -2646,7 +2645,7 @@ a cite {
 }
 
 .layui-laypage a, .layui-laypage button, .layui-laypage input, .layui-laypage select, .layui-laypage span {
-    border: 1px solid #e2e2e2
+    border: 1px solid var(--ws-gray-300)
 }
 
 .layui-laypage a, .layui-laypage span {
@@ -2658,8 +2657,8 @@ a cite {
     height: 28px;
     line-height: 28px;
     margin: 0 -1px 5px 0;
-    background-color: #fff;
-    color: #333;
+    background-color: var(--ws-gray-100);
+    color: var(--ws-dark);
     font-size: 12px
 }
 
@@ -2668,7 +2667,7 @@ a cite {
 }
 
 .layui-laypage a:hover {
-    color: #009688
+    color: var(--ws-dark-active)
 }
 
 .layui-laypage em {
@@ -2676,7 +2675,7 @@ a cite {
 }
 
 .layui-laypage .layui-laypage-spr {
-    color: #999;
+    color: var(--ws-dark-active);
     font-weight: 700
 }
 
@@ -2690,7 +2689,7 @@ a cite {
 
 .layui-laypage .layui-laypage-curr em {
     position: relative;
-    color: #fff
+    color: var(--ws-primary)
 }
 
 .layui-laypage .layui-laypage-curr .layui-laypage-em {
@@ -2700,7 +2699,7 @@ a cite {
     padding: 1px;
     width: 100%;
     height: 100%;
-    background-color: #009688
+    background-color: var(--ws-secondary)
 }
 
 .layui-laypage-em {
@@ -2738,7 +2737,7 @@ a cite {
 .layui-laypage .layui-laypage-skip {
     height: 30px;
     line-height: 30px;
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-laypage button, .layui-laypage input {
@@ -2746,7 +2745,7 @@ a cite {
     line-height: 30px;
     border-radius: 2px;
     vertical-align: top;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     box-sizing: border-box
 }
 
@@ -2758,7 +2757,7 @@ a cite {
 }
 
 .layui-laypage input:focus, .layui-laypage select:focus {
-    border-color: #009688 !important
+    border-color: var(--ws-dark-active) !important
 }
 
 .layui-laypage button {
@@ -2774,7 +2773,7 @@ a cite {
 .layui-flow-more {
     margin: 10px 0;
     text-align: center;
-    color: #999;
+    color: var(--ws-dark-active);
     font-size: 14px
 }
 
@@ -2790,8 +2789,8 @@ a cite {
 .layui-flow-more a cite {
     padding: 0 20px;
     border-radius: 3px;
-    background-color: #eee;
-    color: #333;
+    background-color: var(--ws-gray-300);
+    color: var(--ws-dark);
     font-style: normal
 }
 
@@ -2806,7 +2805,7 @@ a cite {
 
 .layui-table {
     width: 100%;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     color: #666
 }
 
@@ -2941,7 +2940,7 @@ a cite {
     top: 50%;
     margin: -15px 0 0 -15px;
     font-size: 30px;
-    color: #c2c2c2
+    color: var(--ws-primary)
 }
 
 .layui-table-header {
@@ -2961,7 +2960,7 @@ a cite {
     line-height: 16px;
     margin-right: 10px;
     text-align: center;
-    color: #333;
+    color: var(--ws-dark);
     border: 1px solid #ccc;
     cursor: pointer;
     -webkit-transition: .5s all;
@@ -2969,7 +2968,7 @@ a cite {
 }
 
 .layui-table-tool .layui-inline[lay-event]:hover {
-    border: 1px solid #999
+    border: 1px solid var(--ws-dark-active)
 }
 
 .layui-table-tool-temp {
@@ -2993,10 +2992,10 @@ a cite {
     padding: 5px 0;
     min-width: 150px;
     min-height: 40px;
-    border: 1px solid #d2d2d2;
+    border: 1px solid var(--ws-gray-300);
     text-align: left;
     overflow-y: auto;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12)
 }
 
@@ -3044,7 +3043,7 @@ a cite {
     width: 20px;
     height: 100%;
     border-width: 0 0 0 1px;
-    background-color: #fff
+    background-color: var(--ws-gray-100)
 }
 
 .layui-table-sort {
@@ -3083,11 +3082,11 @@ a cite {
 }
 
 .layui-table-sort[lay-sort=asc] .layui-table-sort-asc {
-    border-bottom-color: #000
+    border-bottom-color: var(--ws-dark)
 }
 
 .layui-table-sort[lay-sort=desc] .layui-table-sort-desc {
-    border-top-color: #000
+    border-top-color: var(--ws-dark)
 }
 
 .layui-table-cell {
@@ -3123,7 +3122,7 @@ a cite {
     line-height: 26px;
     padding: 15px;
     text-align: center;
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-table-fixed {
@@ -3259,7 +3258,7 @@ a cite {
 }
 
 .layui-table-edit:focus {
-    border-color: #5FB878 !important
+    border-color: var(--ws-secondary) !important
 }
 
 select.layui-table-edit {
@@ -3296,8 +3295,8 @@ select.layui-table-edit {
     padding: 5px 0;
     border-width: 0 0 0 1px;
     text-align: center;
-    background-color: #fff;
-    color: #999;
+    background-color: var(--ws-gray-100);
+    color: var(--ws-dark-active);
     cursor: pointer
 }
 
@@ -3324,7 +3323,7 @@ body .layui-table-tips .layui-layer-content {
     padding: 8px 15px;
     font-size: 14px;
     overflow-y: scroll;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     color: #666
 }
 
@@ -3338,11 +3337,11 @@ body .layui-table-tips .layui-layer-content {
     cursor: pointer;
     background-color: #666;
     border-radius: 50%;
-    color: #fff
+    color: var(--ws-primary)
 }
 
 .layui-table-tips-c:hover {
-    background-color: #777
+    background-color: var(--ws-dark-active)
 }
 
 .layui-table-tips-c:before {
@@ -3366,26 +3365,26 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-upload-choose {
     padding: 0 10px;
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-upload-drag {
     position: relative;
     padding: 30px;
-    border: 1px dashed #e2e2e2;
-    background-color: #fff;
+    border: 1px dashed var(--ws-gray-300);
+    background-color: var(--ws-gray-100);
     text-align: center;
     cursor: pointer;
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-upload-drag .layui-icon {
     font-size: 50px;
-    color: #009688
+    color: var(--ws-dark-active)
 }
 
 .layui-upload-drag[lay-over] {
-    border-color: #009688
+    border-color: var(--ws-dark-active)
 }
 
 .layui-upload-iframe {
@@ -3450,7 +3449,7 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-tree li i {
     padding-left: 6px;
-    color: #333;
+    color: var(--ws-dark);
     -moz-user-select: none
 }
 
@@ -3469,7 +3468,7 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-tree li .layui-tree-enter {
     line-height: 24px;
-    border: 1px dotted #000
+    border: 1px dotted var(--ws-dark)
 }
 
 .layui-tree-drag {
@@ -3479,7 +3478,7 @@ body .layui-table-tips .layui-layer-content {
     top: -666px;
     background-color: #f2f2f2;
     padding: 5px 10px;
-    border: 1px dotted #000;
+    border: 1px dotted var(--ws-dark);
     white-space: nowrap
 }
 
@@ -3490,8 +3489,8 @@ body .layui-table-tips .layui-layer-content {
 .layui-nav {
     position: relative;
     padding: 0 20px;
-    background-color: #393D49;
-    color: #fff;
+    background-color: var(--ws-secondary);
+    color: var(--ws-primary);
     border-radius: 2px;
     font-size: 0;
     box-sizing: border-box
@@ -3513,8 +3512,7 @@ body .layui-table-tips .layui-layer-content {
 .layui-nav .layui-nav-item a {
     display: block;
     padding: 0 20px;
-    color: #fff;
-    color: rgba(255, 255, 255, .7);
+    color: var(--ws-primary);
     transition: all .3s;
     -webkit-transition: all .3s
 }
@@ -3525,7 +3523,7 @@ body .layui-table-tips .layui-layer-content {
     top: 0;
     width: 0;
     height: 5px;
-    background-color: #5FB878;
+    background-color: rgba(255, 255, 255, 0.8);;
     transition: all .2s;
     -webkit-transition: all .2s
 }
@@ -3535,7 +3533,7 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-nav .layui-nav-item a:hover, .layui-nav .layui-this a {
-    color: #fff
+    color: var(--ws-primary)
 }
 
 .layui-nav .layui-this:after {
@@ -3557,7 +3555,7 @@ body .layui-table-tips .layui-layer-content {
     width: 0;
     height: 0;
     border-style: solid dashed dashed;
-    border-color: #fff transparent transparent;
+    border-color: var(--ws-gray-100) transparent transparent;
     overflow: hidden;
     cursor: pointer;
     transition: all .2s;
@@ -3573,7 +3571,7 @@ body .layui-table-tips .layui-layer-content {
 .layui-nav .layui-nav-mored, .layui-nav-itemed > a .layui-nav-more {
     margin-top: -9px;
     border-style: dashed dashed solid;
-    border-color: transparent transparent #fff
+    border-color: transparent transparent var(--ws-gray-100)
 }
 
 .layui-nav-child {
@@ -3585,20 +3583,20 @@ body .layui-table-tips .layui-layer-content {
     line-height: 36px;
     padding: 5px 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12);
-    border: 1px solid #d2d2d2;
-    background-color: #fff;
+    border: 1px solid var(--ws-gray-300);
+    background-color: var(--ws-gray-100);
     z-index: 100;
     border-radius: 2px;
     white-space: nowrap
 }
 
 .layui-nav .layui-nav-child a {
-    color: #333
+    color: var(--ws-dark)
 }
 
 .layui-nav .layui-nav-child a:hover {
     background-color: #f2f2f2;
-    color: #000
+    color: var(--ws-dark)
 }
 
 .layui-nav-child dd {
@@ -3606,8 +3604,7 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-nav .layui-nav-child dd.layui-this a, .layui-nav-child dd.layui-this {
-    background-color: #5FB878;
-    color: #fff
+    background-color: var(--ws-secondary);
 }
 
 .layui-nav-child dd.layui-this:after {
@@ -3641,12 +3638,12 @@ body .layui-table-tips .layui-layer-content {
 .layui-nav-tree .layui-nav-bar {
     width: 5px;
     height: 0;
-    background-color: #009688
+    background-color: var(--ws-secondary)
 }
 
 .layui-nav-tree .layui-nav-child dd.layui-this, .layui-nav-tree .layui-nav-child dd.layui-this a, .layui-nav-tree .layui-this, .layui-nav-tree .layui-this > a, .layui-nav-tree .layui-this > a:hover {
-    background-color: #009688;
-    color: #fff
+    background-color: var(--ws-secondary);
+    color: var(--ws-primary)
 }
 
 .layui-nav-tree .layui-this:after {
@@ -3654,7 +3651,7 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-nav-itemed > a, .layui-nav-tree .layui-nav-title a, .layui-nav-tree .layui-nav-title a:hover {
-    color: #fff !important
+    color: var(--ws-primary) !important
 }
 
 .layui-nav-tree .layui-nav-child {
@@ -3668,13 +3665,13 @@ body .layui-table-tips .layui-layer-content {
 .layui-nav-tree .layui-nav-child a {
     height: 40px;
     line-height: 40px;
-    color: #fff;
+    color: var(--ws-primary);
     color: rgba(255, 255, 255, .7)
 }
 
 .layui-nav-tree .layui-nav-child, .layui-nav-tree .layui-nav-child a:hover {
     background: 0 0;
-    color: #fff
+    color: var(--ws-primary)
 }
 
 .layui-nav-tree .layui-nav-more {
@@ -3722,11 +3719,11 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-breadcrumb a {
-    color: #999 !important
+    color: var(--ws-dark-active) !important
 }
 
 .layui-breadcrumb a:hover {
-    color: #5FB878 !important
+    color: var(--ws-dark-active) !important
 }
 
 .layui-breadcrumb a cite {
@@ -3736,7 +3733,7 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-breadcrumb span[lay-separator] {
     margin: 0 10px;
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-tab {
@@ -3781,7 +3778,7 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-tab-title .layui-this {
-    color: #000
+    color: var(--ws-dark)
 }
 
 .layui-tab-title .layui-this:after {
@@ -3793,7 +3790,7 @@ body .layui-table-tips .layui-layer-content {
     height: 41px;
     border-width: 1px;
     border-style: solid;
-    border-bottom-color: #fff;
+    border-bottom-color: var(--ws-gray-100);
     border-radius: 2px 2px 0 0;
     box-sizing: border-box;
     pointer-events: none
@@ -3811,7 +3808,7 @@ body .layui-table-tips .layui-layer-content {
     border-style: solid;
     border-radius: 2px;
     text-align: center;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     cursor: pointer
 }
 
@@ -3834,7 +3831,7 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-tab-more li.layui-this:after {
-    border-bottom-color: #e2e2e2;
+    border-bottom-color: var(--ws-gray-300);
     border-radius: 2px
 }
 
@@ -3863,25 +3860,25 @@ body .layui-table-tips .layui-layer-content {
     top: 1px;
     text-align: center;
     font-size: 14px;
-    color: #c2c2c2;
+    color: var(--ws-primary);
     transition: all .2s;
     -webkit-transition: all .2s
 }
 
 .layui-tab-title li .layui-tab-close:hover {
     border-radius: 2px;
-    background-color: #FF5722;
-    color: #fff
+    background-color: var(--ws-red);
+    color: var(--ws-primary)
 }
 
 .layui-tab-brief > .layui-tab-title .layui-this {
-    color: #009688
+    color: var(--ws-secondary)
 }
 
 .layui-tab-brief > .layui-tab-more li.layui-this:after, .layui-tab-brief > .layui-tab-title .layui-this:after {
     border: none;
     border-radius: 0;
-    border-bottom: 2px solid #5FB878
+    border-bottom: 2px solid var(--ws-secondary)
 }
 
 .layui-tab-brief[overflow] > .layui-tab-title .layui-this:after {
@@ -3905,13 +3902,13 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-tab-card > .layui-tab-title .layui-this {
-    background-color: #fff
+    background-color: var(--ws-gray-100)
 }
 
 .layui-tab-card > .layui-tab-title .layui-this:after {
     border-top: none;
     border-width: 1px;
-    border-bottom-color: #fff
+    border-bottom-color: var(--ws-gray-100)
 }
 
 .layui-tab-card > .layui-tab-title .layui-tab-bar {
@@ -3924,7 +3921,7 @@ body .layui-table-tips .layui-layer-content {
 
 .layui-tab-card > .layui-tab-more .layui-this {
     background: 0 0;
-    color: #5FB878
+    color: var(--ws-dark-active)
 }
 
 .layui-tab-card > .layui-tab-more .layui-this:after {
@@ -3948,15 +3945,15 @@ body .layui-table-tips .layui-layer-content {
     width: 20px;
     height: 20px;
     line-height: 20px;
-    background-color: #fff;
-    color: #5FB878;
+    background-color: var(--ws-gray-100);
+    color: var(--ws-dark);
     border-radius: 50%;
     text-align: center;
     cursor: pointer
 }
 
 .layui-timeline-axis:hover {
-    color: #FF5722
+    color: var(--ws-red)
 }
 
 .layui-timeline-item:before {
@@ -3992,8 +3989,8 @@ body .layui-table-tips .layui-layer-content {
     padding: 0 6px;
     font-size: 12px;
     text-align: center;
-    background-color: #FF5722;
-    color: #fff;
+    background-color: var(--ws-red);
+    color: var(--ws-primary);
     border-radius: 2px
 }
 
@@ -4014,7 +4011,7 @@ body .layui-table-tips .layui-layer-content {
     line-height: 18px;
     border-width: 1px;
     border-style: solid;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     color: #666
 }
 
@@ -4037,7 +4034,7 @@ body .layui-table-tips .layui-layer-content {
     position: relative;
     left: 0;
     top: 0;
-    background-color: #f8f8f8
+    background-color: var(--ws-gray-100)
 }
 
 .layui-carousel > [carousel-item] {
@@ -4056,7 +4053,7 @@ body .layui-table-tips .layui-layer-content {
     line-height: 20px;
     margin: -10px 0 0 -50px;
     text-align: center;
-    color: #c2c2c2;
+    color: var(--ws-primary);
     font-family: layui-icon !important;
     font-size: 30px;
     font-style: normal;
@@ -4071,7 +4068,7 @@ body .layui-table-tips .layui-layer-content {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: #f8f8f8;
+    background-color: var(--ws-gray-100);
     transition-duration: .3s;
     -webkit-transition-duration: .3s
 }
@@ -4096,7 +4093,7 @@ body .layui-table-tips .layui-layer-content {
     border: 0;
     border-radius: 50%;
     background-color: rgba(0, 0, 0, .2);
-    color: #fff;
+    color: var(--ws-primary);
     -webkit-transition-duration: .3s;
     transition-duration: .3s;
     cursor: pointer
@@ -4170,7 +4167,7 @@ body .layui-table-tips .layui-layer-content {
     height: 10px;
     margin: 0 3px;
     font-size: 14px;
-    background-color: #e2e2e2;
+    background-color: var(--ws-gray-300);
     background-color: rgba(255, 255, 255, .5);
     border-radius: 50%;
     cursor: pointer;
@@ -4183,7 +4180,7 @@ body .layui-table-tips .layui-layer-content {
 }
 
 .layui-carousel-ind li.layui-this {
-    background-color: #fff
+    background-color: var(--ws-gray-100)
 }
 
 .layui-carousel > [carousel-item] > .layui-carousel-next, .layui-carousel > [carousel-item] > .layui-carousel-prev, .layui-carousel > [carousel-item] > .layui-this {
@@ -4298,7 +4295,7 @@ body .layui-table-tips .layui-layer-content {
     cursor: pointer;
     font-size: 30px;
     background-color: #9F9F9F;
-    color: #fff;
+    color: var(--ws-primary);
     border-radius: 2px;
     opacity: .95
 }
@@ -4323,7 +4320,7 @@ body .layui-util-face {
 
 body .layui-util-face .layui-layer-content {
     padding: 0;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     color: #666;
     box-shadow: none
 }
@@ -4337,7 +4334,7 @@ body .layui-util-face .layui-layer-content {
     width: 372px;
     padding: 10px;
     border: 1px solid #D9D9D9;
-    background-color: #fff;
+    background-color: var(--ws-gray-100);
     box-shadow: 0 0 20px rgba(0, 0, 0, .2)
 }
 
@@ -4357,7 +4354,7 @@ body .layui-util-face .layui-layer-content {
     position: relative;
     z-index: 2;
     border: 1px solid #eb7350;
-    background: #fff9ec
+    background: var(--ws-gray-100)9ec
 }
 
 .layui-code {
@@ -4368,7 +4365,7 @@ body .layui-util-face .layui-layer-content {
     border: 1px solid #ddd;
     border-left-width: 6px;
     background-color: #F2F2F2;
-    color: #333;
+    color: var(--ws-dark);
     font-family: Courier New;
     font-size: 12px
 }
@@ -4416,7 +4413,7 @@ body .layui-util-face .layui-layer-content {
 }
 
 .layui-colorpicker:hover {
-    border-color: #d2d2d2
+    border-color: var(--ws-gray-300)
 }
 
 .layui-colorpicker.layui-colorpicker-lg {
@@ -4454,12 +4451,12 @@ body .layui-util-face .layui-layer-content {
 
 .layui-colorpicker-trigger-i {
     display: inline-block;
-    color: #FFF;
+    color: var(--ws-primary);
     font-size: 12px
 }
 
 .layui-colorpicker-trigger-i.layui-icon-close {
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-colorpicker-main {
@@ -4467,8 +4464,8 @@ body .layui-util-face .layui-layer-content {
     z-index: 66666666;
     width: 280px;
     padding: 7px;
-    background: #FFF;
-    border: 1px solid #d2d2d2;
+    background: var(--ws-gray-100);
+    border: 1px solid var(--ws-gray-300);
     border-radius: 2px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12)
 }
@@ -4490,7 +4487,7 @@ body .layui-util-face .layui-layer-content {
     position: absolute;
     top: 0;
     left: 0;
-    background: linear-gradient(90deg, #FFF, hsla(0, 0%, 100%, 0))
+    background: linear-gradient(90deg, var(--ws-gray-100), hsla(0, 0%, 100%, 0))
 }
 
 .layui-colorpicker-basis-black {
@@ -4499,13 +4496,13 @@ body .layui-util-face .layui-layer-content {
     position: absolute;
     top: 0;
     left: 0;
-    background: linear-gradient(0deg, #000, transparent)
+    background: linear-gradient(0deg, var(--ws-dark), transparent)
 }
 
 .layui-colorpicker-basis-cursor {
     width: 10px;
     height: 10px;
-    border: 1px solid #FFF;
+    border: 1px solid var(--ws-gray-100);
     border-radius: 50%;
     position: absolute;
     top: -3px;
@@ -4527,7 +4524,7 @@ body .layui-util-face .layui-layer-content {
     height: 5px;
     box-shadow: 0 0 1px #888;
     box-sizing: border-box;
-    background: #FFF;
+    background: var(--ws-gray-100);
     border-radius: 1px;
     border: 1px solid #f0f0f0;
     cursor: pointer;
@@ -4552,7 +4549,7 @@ body .layui-util-face .layui-layer-content {
     height: 100%;
     box-shadow: 0 0 1px #888;
     box-sizing: border-box;
-    background: #FFF;
+    background: var(--ws-gray-100);
     border-radius: 1px;
     border: 1px solid #f0f0f0;
     cursor: pointer;
@@ -4615,7 +4612,7 @@ body .layui-util-face .layui-layer-content {
 
 .layui-slider {
     height: 4px;
-    background: #e2e2e2;
+    background: var(--ws-gray-300);
     border-radius: 3px;
     position: relative;
     cursor: pointer
@@ -4633,7 +4630,7 @@ body .layui-util-face .layui-layer-content {
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: #FFF;
+    background: var(--ws-gray-100);
     -webkit-transform: translateX(-50%);
     transform: translateX(-50%)
 }
@@ -4653,7 +4650,7 @@ body .layui-util-face .layui-layer-content {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #FFF;
+    background: var(--ws-gray-100);
     display: inline-block;
     vertical-align: middle;
     cursor: pointer;
@@ -4683,8 +4680,8 @@ body .layui-util-face .layui-layer-content {
     display: none;
     -webkit-transform: translateX(-50%);
     transform: translateX(-50%);
-    color: #FFF;
-    background: #000;
+    color: var(--ws-primary);
+    background: var(--ws-dark);
     border-radius: 3px;
     height: 25px;
     line-height: 25px;
@@ -4701,7 +4698,7 @@ body .layui-util-face .layui-layer-content {
     height: 0;
     border-width: 6px;
     border-style: solid;
-    border-color: #000 transparent transparent
+    border-color: var(--ws-dark) transparent transparent
 }
 
 .layui-slider-input {
@@ -4723,7 +4720,7 @@ body .layui-util-face .layui-layer-content {
     right: 0;
     width: 20px;
     height: 100%;
-    border-left: 1px solid #d2d2d2
+    border-left: 1px solid var(--ws-gray-300)
 }
 
 .layui-slider-input-btn i {
@@ -4736,12 +4733,12 @@ body .layui-util-face .layui-layer-content {
     font-size: 12px;
     line-height: 16px;
     text-align: center;
-    color: #999
+    color: var(--ws-dark-active)
 }
 
 .layui-slider-input-btn i:first-child {
     top: 0;
-    border-bottom: 1px solid #d2d2d2
+    border-bottom: 1px solid var(--ws-gray-300)
 }
 
 .layui-slider-input-txt {
@@ -4755,7 +4752,7 @@ body .layui-util-face .layui-layer-content {
 }
 
 .layui-slider-input-btn i:hover {
-    color: #009688
+    color: var(--ws-secondary)
 }
 
 .layui-slider-vertical {

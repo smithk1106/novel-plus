@@ -16,7 +16,7 @@
     <packaging>pom</packaging>
 
     <name>novel</name>
-    <description>小说精品屋父工程</description>
+    <description>WDLL文学父工程</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

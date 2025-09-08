@@ -46,7 +46,9 @@
 .scSmallImg {
     position: absolute;
     top: 0px;
-    right: 0px; /*height: 335px*/
+    right: 0px;
+    height: 300px;
+    overflow: hidden;
 }
 
 .scSmallImg li {

@@ -36,11 +36,11 @@
 {{# layui.each(d.data, function(index, item){
   if(item.from){ }}
     <li data-uid="{{ item.from }}" data-fromGroup="{{ item.from_group }}">
-      <a href="/u/{{ item.from }}/" target="_blank">
+      <a href="/u/{{ item.from }}/" >
         <img src="{{ item.user.avatar }}" class="layui-circle layim-msgbox-avatar">
       </a>
       <p class="layim-msgbox-user">
-        <a href="/u/{{ item.from }}/" target="_blank">{{ item.user.username||'' }}</a>
+        <a href="/u/{{ item.from }}/" >{{ item.user.username||'' }}</a>
         <span>{{ item.time }}</span>
       </p>
       <p class="layim-msgbox-content">

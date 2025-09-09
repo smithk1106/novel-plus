@@ -89,6 +89,16 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
+    public Author queryAuthorByPenName(String penName) {
+        return authorMapper.selectMany(
+            select(AuthorDynamicSqlSupport.id, AuthorDynamicSqlSupport.userId, AuthorDynamicSqlSupport.penName, AuthorDynamicSqlSupport.status)
+                .from(AuthorDynamicSqlSupport.author)
+                .where(AuthorDynamicSqlSupport.penName, isEqualTo(penName))
+                .build()
+                .render(RenderingStrategies.MYBATIS3)).get(0);
+    }
+
+    @Override
     public List<Author> queryAuthorList(int needAuthorNumber, Date maxAuthorCreateTime) {
         return authorMapper.selectMany(select(AuthorDynamicSqlSupport.id, AuthorDynamicSqlSupport.userId)
             .from(AuthorDynamicSqlSupport.author)

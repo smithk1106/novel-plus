@@ -48,6 +48,14 @@ public interface AuthorService {
     Author queryAuthor(Long userId);
 
     /**
+     * 根据笔名查询作家信息
+     *
+     * @param penName 笔名
+     * @return 作家对象
+     */
+    Author queryAuthorByPenName(String penName);
+
+    /**
      * 查询作家列表
      *
      * @param limit               查询条数

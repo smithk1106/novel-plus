@@ -50,6 +50,15 @@ public class AuthorController extends BaseController {
     }
 
     /**
+     * 根据笔名取得作者信息
+     */
+    @GetMapping("getByPenName")
+    public RestResult<Author> getByPenName(String penName) {
+
+        return RestResult.ok(authorService.queryAuthorByPenName(penName));
+    }
+
+    /**
      * 作家发布小说分页列表查询
      */
     @GetMapping("listBookByPage")

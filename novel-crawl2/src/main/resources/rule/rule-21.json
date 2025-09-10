@@ -10,7 +10,7 @@
     "data": "{q: %s, Submit: 搜索}",
     "result": "section > div.container > div > div.row > div",
     "bookName": "dl > dd > h3 > a@re:\\[[^\\]]+\\](.+)",
-    "author": "dl > dd > span",
+    "author": "dl > dd > span@re:(.+)<*",
     "status": "dl > dd:nth-child(4)@re:状态：(.+)",
     "latestChapter": "dl > dd > a",
     "lastUpdateTime": "dl > dd:nth-child(5)@re:更新时间：([0-9\\-: ]+)",

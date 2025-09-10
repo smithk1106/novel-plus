@@ -74,7 +74,7 @@
                       v-model="selectedSourceIds"
                       @click.stop
                     />
-                    <span>{{ source.id }}</span>
+                    <span>{{ source.id }}: {{ source.name }}</span>
                   </div>
                 </div>
               </div>

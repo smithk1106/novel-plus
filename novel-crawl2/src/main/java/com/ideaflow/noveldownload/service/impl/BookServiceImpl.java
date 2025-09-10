@@ -430,6 +430,18 @@ public class BookServiceImpl implements BookService {
             bookEntity.setCreateTime(Calendar.getInstance().getTime());
             bookEntity.setLastIndexName(book.getLastChapterName());
             bookEntity.setLastIndexId(book.getLastChapterId());
+            bookEntity.setBookStatus(book.getBookStatus());
+            // 取得分类名
+            BookCategoryEntity bookCategoryEntity = bookCategoryMapper.selectById(book.getCatId());
+            if (bookCategoryEntity != null) {
+                bookEntity.setCatName(bookCategoryEntity.getName());
+                bookEntity.setWorkDirection(bookCategoryEntity.getWorkDirection());
+                book.setCatName(bookEntity.getCatName());
+            } else {
+                bookEntity.setCatName(book.getCatName());
+                bookEntity.setWorkDirection((byte)0);
+            }
+            bookEntity.setCatId(book.getCatId());
         }
         if (StrUtil.isNotBlank(book.getBookName())) {
             bookEntity.setBookName(book.getBookName());
@@ -457,22 +469,8 @@ public class BookServiceImpl implements BookService {
         } else {
             bookEntity.setLastIndexUpdateTime(book.getLastUpdateTime());
         }
-        bookEntity.setBookStatus(book.getBookStatus());
         bookEntity.setWordCount(book.getWordCount());
         bookEntity.setUpdateTime(Calendar.getInstance().getTime());
-        if (bookEntity.getCatId() == null || bookEntity.getCatId() != book.getCatId()) {
-            // 取得分类名
-            BookCategoryEntity bookCategoryEntity = bookCategoryMapper.selectById(book.getCatId());
-            if (bookCategoryEntity != null) {
-                bookEntity.setCatName(bookCategoryEntity.getName());
-                bookEntity.setWorkDirection(bookCategoryEntity.getWorkDirection());
-                book.setCatName(bookEntity.getCatName());
-            } else {
-                bookEntity.setCatName(book.getCatName());
-                bookEntity.setWorkDirection((byte)0);
-            }
-            bookEntity.setCatId(book.getCatId());
-        }
         bookEntity.setCrawlSourceId(book.getCrawlSourceId());
         bookEntity.setCrawlBookUrl(book.getUrl());
 

@@ -76,6 +76,7 @@ const initWebSocket = () => {
             isNew: true 
           })
         }
+        scrollToBottom()
       }
     } else if (data.type === 'NovelNameSearchConsoleMessageListener') {
       // const consoleResult = JSON.parse(data.content)
@@ -90,6 +91,7 @@ const initWebSocket = () => {
           consoleMessage.includes('搜索完成')) {
         isLoading.value = false
       }
+      scrollToBottom()
     } else if (data.type === 'NovelDownloadConsoleMessageListener') {
       addMessage({ 
         type: 'download',
@@ -99,7 +101,6 @@ const initWebSocket = () => {
       // 下载消息自动滚动到底部
       scrollToBottomDownload()
     }
-    scrollToBottom()
   }
   
   ws.onclose = () => {

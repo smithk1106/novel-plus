@@ -38,6 +38,7 @@ public class Rule {
         // 搜索结果是否分页
         private boolean pagination;
         private String nextPage;
+        private String filterTxt;
     }
 
     @Data
@@ -54,6 +55,7 @@ public class Rule {
         private String lastUpdateTime;
         private String status;
         private String wordCount;
+        private String filterTxt;
     }
 
     @Data

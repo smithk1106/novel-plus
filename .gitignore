@@ -4,5 +4,10 @@
 **/target
 **/*.iml
 **/.DS_Store
-docker
+*.code-workspace
+download
+h2db
+mysql
+share
 bak
+templates

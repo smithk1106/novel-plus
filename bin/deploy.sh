@@ -5,11 +5,15 @@ remoteServer="webmanager@133.130.66.33"
 remoteDir="~/www/book"
 
 site="$1"
+isAll="$2"
 
 if [ -z "$site" ] || [ "$site" = "front" ]; then
     scp "$projectDir/novel-front/target/build/novel-front.jar" book_server:$remoteDir/front/
     scp -r "$projectDir/novel-front/target/build/config" book_server:$remoteDir/front/
-    #scp -r "$projectDir/novel-front/target/build/templates" book_server:$remoteDir/front/
+    ssh book_server "cd $remoteDir/front/templates; git pull"
+    if [ "$isAll" = "all" ]; then
+        scp -r "$projectDir/templates" book_server:$remoteDir/front/
+    fi
 fi
 
 if [ -z "$site" ] || [ "$site" = "admin" ]; then

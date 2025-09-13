@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,13 +46,11 @@ public class FileUtil {
             //本地图片保存
             HttpHeaders headers = new HttpHeaders();
             HttpEntity<String> requestEntity = new HttpEntity<>(null, headers);
-            ResponseEntity<Resource> resEntity = RestTemplates.newInstance(Charsets.ISO_8859_1.name())
+            ResponseEntity<Resource> resEntity = RestTemplates.newInstance(StandardCharsets.ISO_8859_1.name())
                 .exchange(picSrc, HttpMethod.GET, requestEntity, Resource.class);
             input = Objects.requireNonNull(resEntity.getBody()).getInputStream();
             Date currentDate = new Date();
-            picSrc =
-                visitPrefix + DateUtils.formatDate(currentDate, "yyyy") + "/" + DateUtils.formatDate(currentDate, "MM")
-                    + "/" + DateUtils.formatDate(currentDate, "dd") + "/"
+            picSrc = visitPrefix + DateUtil.formatDate(currentDate, "yyyyMMdd") + "/"
                     + UUIDUtil.getUUID32()
                     + picSrc.substring(picSrc.lastIndexOf("."));
             File picFile = new File(picSavePath + picSrc);

@@ -8,7 +8,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${password}
     volumes:
       - ./docker/mysql/data:/var/lib/mysql
-      - ./doc/sql/novel_plus.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/share:/docker-entrypoint-initdb.d
       - ./docker/share:/share
     command: mysqld --max_allowed_packet=100M
     ports:
@@ -52,30 +52,30 @@ services:
     networks:
       - novelnet
 
-  admin:
-    container_name: novel-admin
-    image: openjdk:21
-    restart: always
-    environment:
-      - dburl=${dburl}
-      - username=${username}
-      - password=${password}
-      - redishost=${redishost}
-      - redispwd=${redispwd}
-      - redisport=${redisport}
-    volumes:
-      - ./novel-admin/target/build:/app/admin
-      - ./docker/download/books:/app/books
-      - ./docker/download/pic:/app/pic
-    working_dir: /app/admin
-    command: sh -c "java -jar -Dspring.profiles.active=dev /app/admin/novel-admin.jar"
-    ports:
-      - 8582:8088
-    depends_on:
-      - novel-db
-      - novel-redis
-    networks:
-      - novelnet
+  # admin:
+  #   container_name: novel-admin
+  #   image: openjdk:21
+  #   restart: always
+  #   environment:
+  #     - dburl=${dburl}
+  #     - username=${username}
+  #     - password=${password}
+  #     - redishost=${redishost}
+  #     - redispwd=${redispwd}
+  #     - redisport=${redisport}
+  #   volumes:
+  #     - ./novel-admin/target/build:/app/admin
+  #     - ./docker/download/books:/app/books
+  #     - ./docker/download/pic:/app/pic
+  #   working_dir: /app/admin
+  #   command: sh -c "java -jar -Dspring.profiles.active=dev /app/admin/novel-admin.jar"
+  #   ports:
+  #     - 8582:8088
+  #   depends_on:
+  #     - novel-db
+  #     - novel-redis
+  #   networks:
+  #     - novelnet
 
   # crawler1:
   #   container_name: novel-crawl1

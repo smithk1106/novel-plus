@@ -112,7 +112,7 @@ services:
       - ./h2db:/app/db
       - ./download:/app/download
     working_dir: /app
-    command: java -jar -Dspring.profiles.active=dev /app/novel-crawl2.jar
+    command: java -jar -Dspring.profiles.active=prod /app/novel-crawl2.jar
     ports:
       - 8584:30000
     depends_on:

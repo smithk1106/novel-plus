@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.List;
 
 @Controller
@@ -84,8 +85,9 @@ public class LoginController extends BaseController {
             logger.error("验证码校验失败", e);
             return R.error("验证码校验失败");
         }
-        password = MD5Utils.encrypt(username, password);
-        UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+        String passwordHash = MD5Utils.encrypt(username, password);
+        UsernamePasswordToken token = new UsernamePasswordToken(username, passwordHash);
+        logger.debug("登录用户: " + username + ", 密码: " + password + " -> " + passwordHash);
         Subject subject = SecurityUtils.getSubject();
         try {
             subject.login(token);

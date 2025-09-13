@@ -98,6 +98,10 @@ const initWebSocket = () => {
         content: data.content,
         isNew: true 
       })
+      if (data.content.indexOf('总耗时') >= 0) {
+        // 下载完成
+        downloadingNovel.value = {}
+      }
       // 下载消息自动滚动到底部
       scrollToBottomDownload()
     }
@@ -174,14 +178,6 @@ const startCrawling = () => {
   }))
 }
 
-// 下载小说
-const downloadNovel = (novel) => {
-  ws.send(JSON.stringify({
-    type: 'NovelDownloadMessageListener',
-    content: {"searchResultId": novel.id},
-  }))
-}
-
 onMounted(() => {
   initWebSocket()
 })
@@ -195,8 +191,29 @@ onUnmounted(() => {
   }
 })
 
+// 中止下载相关
+const showStopConfirm = ref(false)
+const downloadingNovel = ref({})
 
+const showStopConfirmDialg = () => {
+  if (downloadingNovel.value.title) {
+    showStopConfirm.value = true
+  }
+}
 
+const closeStopConfirm = () => {
+  showStopConfirm.value = false
+}
+
+const stopDownload = () => {
+  // 发送中止请求
+  ws.send(JSON.stringify({
+    type: 'NovelDownloadMessageListener',
+    content: { action: "stop", bookUrl: downloadingNovel.value.url }
+  }));
+
+  closeStopConfirm()
+}
 
 // 下载配置相关
 const showDownloadModal = ref(false)
@@ -242,15 +259,16 @@ const confirmDownload = () => {
 
   const downloadParams = {
     searchResultId: selectedNovel.value.id,
-    downloadType: downloadType
+    downloadType: downloadType,
+    action: "start"
   }
 
   // 根据选择的类型添加额外参数
   if (downloadType === 1) { // 指定章节
-    downloadParams.startChapter = parseInt(downloadConfig.value.startChapter) || 1
-    downloadParams.endChapter = parseInt(downloadConfig.value.endChapter) || 100
+    downloadParams.startChapter = parseInt(downloadConfig.value.startChapter) || 0
+    downloadParams.endChapter = parseInt(downloadConfig.value.endChapter) || 0
   } else if (downloadType === 2) { // 最新章节
-    downloadParams.latestChapterCount = parseInt(downloadConfig.value.latestChapterCount) || 10
+    downloadParams.latestChapterCount = parseInt(downloadConfig.value.latestChapterCount) || 0
   }
 
   // 发送下载请求
@@ -259,10 +277,11 @@ const confirmDownload = () => {
     content: downloadParams
   }))
 
+  downloadingNovel.value = selectedNovel.value
+
   // 关闭弹窗
   closeDownloadModal()
 }
-
 </script>
 
 <template>
@@ -318,7 +337,7 @@ const confirmDownload = () => {
         <div class="relative">
           <div class="absolute inset-0 bg-white/20 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl"></div>
           <div class="relative p-8">
-            <h2 class="text-2xl font-semibold text-slate-800 mb-6">搜索结果</h2>
+            <h2 class="text-2xl font-semibold text-slate-800 mb-4">搜索结果</h2>
             <div
               ref="messageContainer"
               class="bg-white/30 backdrop-blur-lg rounded-xl p-4 h-96 overflow-y-auto space-y-4 mb-6"
@@ -392,12 +411,10 @@ const confirmDownload = () => {
                         </a>
                       </div>
                     </div>
-<!--                    px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 to-cyan-500 text-white hover:from-blue-500 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-blue-500/20-->
                     <button
                         @click="openDownloadModal(message.content)"
                         class=" bg-gradient-to-r from-blue-300 to-cyan-400 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-400 hover:to-cyan-500 transition-all duration-300 flex items-center gap-1 shadow-sm shadow-blue-500/20"
                     >
-
                       抓取
                     </button>
                   </div>
@@ -427,7 +444,12 @@ const confirmDownload = () => {
         <div class="relative">
           <div class="absolute inset-0 bg-white/20 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl"></div>
           <div class="relative p-8">
-            <h2 class="text-2xl font-semibold text-slate-800 mb-6">下载进度</h2>
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-2xl font-semibold text-slate-800">下载进度</h2>
+              <button @click="showStopConfirmDialg()" class=" bg-gradient-to-r from-red-300 to-red-500 text-white px-4 py-2 rounded-lg font-medium hover:from-red-400 hover:to-red-600 transition-all duration-300 flex items-center gap-1 shadow-sm shadow-red-500/20">
+                中止
+              </button>
+            </div>
             <div ref="downloadContainer" class="bg-white/30 backdrop-blur-lg rounded-xl p-4 h-96 overflow-y-auto">
               <div class="space-y-3">
                 <div
@@ -459,95 +481,6 @@ const confirmDownload = () => {
       </div>
     </div>
   </div>
-
-<!--  &lt;!&ndash; 下载配置弹窗 &ndash;&gt;-->
-<!--  <div v-if="showDownloadModal" class="fixed inset-0 z-50 flex items-center justify-center">-->
-<!--    &lt;!&ndash; 背景遮罩 &ndash;&gt;-->
-<!--    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeDownloadModal"></div>-->
-
-<!--    &lt;!&ndash; 弹窗内容 - 液态玻璃风格 &ndash;&gt;-->
-<!--    <div class="relative w-full max-w-md mx-4 bg-white/20 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl overflow-hidden">-->
-<!--      <div class="p-6">-->
-<!--        <h3 class="text-xl font-semibold text-slate-800 mb-4">下载设置</h3>-->
-
-<!--        &lt;!&ndash; 标签页切换 &ndash;&gt;-->
-<!--        <div class="flex border-b border-white/30 mb-6">-->
-<!--          <button-->
-<!--              v-for="(tab, index) in downloadTabs"-->
-<!--              :key="index"-->
-<!--              @click="selectDownloadTab(index)"-->
-<!--              class="px-4 py-2 font-medium text-sm transition-all duration-300"-->
-<!--              :class="downloadActiveTab === index ?-->
-<!--            'border-b-2 border-purple-500 text-purple-700' :-->
-<!--            'text-slate-600 hover:text-purple-500'"-->
-<!--          >-->
-<!--            {{ tab.label }}-->
-<!--          </button>-->
-<!--        </div>-->
-
-<!--        &lt;!&ndash; 全本下载 &ndash;&gt;-->
-<!--        <div v-if="downloadActiveTab === 0" class="space-y-4">-->
-<!--          <p class="text-slate-700">将下载《{{ selectedNovel.title }}》的全部章节</p>-->
-<!--        </div>-->
-
-<!--        &lt;!&ndash; 指定章节下载 &ndash;&gt;-->
-<!--        <div v-else-if="downloadActiveTab === 1" class="space-y-4">-->
-<!--          <div class="flex space-x-4">-->
-<!--            <div class="w-1/2">-->
-<!--              <label class="block text-sm text-slate-600 mb-1">开始章节</label>-->
-<!--              <input-->
-<!--                  v-model="downloadConfig.startChapter"-->
-<!--                  type="number"-->
-<!--                  min="1"-->
-<!--                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"-->
-<!--                  placeholder="开始章节"-->
-<!--              />-->
-<!--            </div>-->
-<!--            <div class="w-1/2">-->
-<!--              <label class="block text-sm text-slate-600 mb-1">结束章节</label>-->
-<!--              <input-->
-<!--                  v-model="downloadConfig.endChapter"-->
-<!--                  type="number"-->
-<!--                  min="1"-->
-<!--                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"-->
-<!--                  placeholder="结束章节"-->
-<!--              />-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
-
-<!--        &lt;!&ndash; 最新章节下载 &ndash;&gt;-->
-<!--        <div v-else-if="downloadActiveTab === 2" class="space-y-4">-->
-<!--          <div>-->
-<!--            <label class="block text-sm text-slate-600 mb-1">下载最新章节数量</label>-->
-<!--            <input-->
-<!--                v-model="downloadConfig.latestChapterCount"-->
-<!--                type="number"-->
-<!--                min="1"-->
-<!--                class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"-->
-<!--                placeholder="例如: 10"-->
-<!--            />-->
-<!--          </div>-->
-<!--        </div>-->
-
-<!--        &lt;!&ndash; 按钮区域 &ndash;&gt;-->
-<!--        <div class="flex justify-end space-x-3 mt-6">-->
-<!--          <button-->
-<!--              @click="closeDownloadModal"-->
-<!--              class="px-4 py-2 rounded-lg bg-white/30 backdrop-blur-sm text-slate-700 hover:bg-white/40 transition-all duration-300"-->
-<!--          >-->
-<!--            取消-->
-<!--          </button>-->
-<!--          <button-->
-<!--              @click="confirmDownload"-->
-<!--              class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-300"-->
-<!--          >-->
-<!--            开始下载-->
-<!--          </button>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </div>-->
 
   <!-- 下载配置弹窗 -->
   <div v-if="showDownloadModal" class="fixed inset-0 z-50 flex items-center justify-center">
@@ -637,6 +570,31 @@ const confirmDownload = () => {
               class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 to-cyan-500 text-white hover:from-blue-500 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-blue-500/20 z-20 relative"
           >
             开始下载
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 中止确认弹窗 -->
+  <div v-if="showStopConfirm" class="fixed inset-0 z-50 flex items-center justify-center">
+    <!-- 背景遮罩 -->
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeStopConfirm"></div>
+
+    <div class="relative w-full max-w-md mx-4 bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="relative p-6 z-10">
+        <h3 class="text-xl font-semibold text-slate-800 mb-4">确认</h3>
+        <!-- 内容区域 -->
+        <div class="space-y-4">
+          <p class="text-slate-700">要中止下载当前小说吗？<br>《{{ downloadingNovel.title }}》({{ downloadingNovel.url }})</p>
+        </div>
+        <!-- 按钮区域 -->
+        <div class="flex justify-end space-x-3 mt-6">
+          <button @click="closeStopConfirm" class="px-4 py-2 rounded-lg bg-white/30 backdrop-blur-sm text-slate-700 hover:bg-white/40 transition-all duration-300 border border-white/20">
+            取消
+          </button>
+          <button @click="stopDownload" class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 to-cyan-500 text-white hover:from-blue-500 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-blue-500/20 z-20 relative">
+            中止
           </button>
         </div>
       </div>

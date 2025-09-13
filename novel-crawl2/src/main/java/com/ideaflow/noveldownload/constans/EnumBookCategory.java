@@ -10,11 +10,12 @@ public enum EnumBookCategory {
     HISTORY(4, "历史,军事"),
     SCIENCE_FICTION(5, "科幻,灵异"),
     GAME(6, "游戏,网游"),
-    COMEDY(7, "女生"),
+    COMEDY(7, "女生,女频"),
     MODERN(8, "现代,体育,竞技"),
     YOUNGER(9, "青春,校园"),
     TIMETRAVEL(10, "穿越,重生"),
-    MYSTERY(11, "恐怖,悬疑,侦探");
+    MYSTERY(11, "恐怖,悬疑,侦探"),
+    LASTDAYS(12, "末世,病毒,丧尸");
 
     private final int code;
     private final String description;

@@ -47,11 +47,15 @@ public class BookParser extends Source {
             coverUrl = url.substring(0, url.indexOf(':') + 1) + coverUrl;
         }
         // 以下为非必须属性
-        String category = JsoupUtils.selectAndInvokeJs(document, r.getCategory(), getContentType(r.getCategory()));
+        String categoryStr = JsoupUtils.selectAndInvokeJs(document, r.getCategory(), getContentType(r.getCategory()));
         String latestChapter = JsoupUtils.selectAndInvokeJs(document, r.getLatestChapter(), getContentType(r.getLatestChapter()));
         String lastUpdateTime = JsoupUtils.selectAndInvokeJs(document, r.getLastUpdateTime(), getContentType(r.getLastUpdateTime()));
         String status = JsoupUtils.selectAndInvokeJs(document, r.getStatus(), getContentType(r.getStatus()));
         String wordCount = JsoupUtils.selectAndInvokeJs(document, r.getWordCount(), getContentType(r.getWordCount()));
+        EnumBookCategory category = guessCategory(categoryStr);
+        if (category == EnumBookCategory.UNKNOWN) {
+            category = guessCategory(bookName);
+        }
 
         Book book = new Book();
         book.setUrl(url);
@@ -59,8 +63,8 @@ public class BookParser extends Source {
         book.setAuthorName(author);
         book.setBookDesc(intro);
         book.setPicUrl(CoverUpdater.fetchCover(book, coverUrl));
-        book.setCatId(guessCategory(category).getCode());
-        book.setCatName(guessCategory(category).getDescription());
+        book.setCatId(category.getCode());
+        book.setCatName(category.getDescription());
         book.setLastChapterName(latestChapter);
         book.setLastUpdateTime(FormatUtils.parseDate(lastUpdateTime, null));
         book.setBookStatus(status != null && status.contains("完结") ? (byte)1 : (byte)0);

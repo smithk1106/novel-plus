@@ -68,8 +68,8 @@ public class JsoupUtils {
             return "";
         }
 
-        String[] split = query.contains(JS_SEPARATOR) ? query.split(JS_SEPARATOR) : query.split(REGEXP_SEPARATOR);
-        String actualQuery = split[0];
+        String[] parts = query.contains(JS_SEPARATOR) ? query.split(JS_SEPARATOR) : query.split(REGEXP_SEPARATOR);
+        String actualQuery = parts[0];
 
         // 根据查询条件选择元素
         Elements els = select(el, actualQuery);
@@ -81,13 +81,13 @@ public class JsoupUtils {
                 : getContentByType(els, contentType);
 
         // 追加处理
-        if (split.length == 2) {
+        if (parts.length >= 2) {
             if (query.contains(JS_SEPARATOR)) {
                 // 如果查询条件包含 JS，调用它
                 result = invokeJs(query, result);
             } else if (query.contains(REGEXP_SEPARATOR)) {
                 // 如果查询条件包含正则表达式，应用它
-                Pattern p = Pattern.compile(split[1]);
+                Pattern p = Pattern.compile(parts[1]);
                 Matcher m = p.matcher(result);
                 String needText = "";
                 while (m.find()) {
@@ -97,6 +97,7 @@ public class JsoupUtils {
                 }
                 if (!needText.isBlank()) {
                     result = needText;
+                    cn.hutool.core.lang.Console.log("[D]Pattern: {}, Matched: {}", parts[1], needText);
                 }
             }
         }

@@ -17,10 +17,13 @@ import com.ideaflow.noveldownload.entity.SearchResultEntity;
 import com.ideaflow.noveldownload.mapper.AppConfigMapper;
 import com.ideaflow.noveldownload.mapper.SearchResultMapper;
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
+import com.ideaflow.noveldownload.novel.core.ChapterFilter;
 import com.ideaflow.noveldownload.novel.core.Crawler;
 import com.ideaflow.noveldownload.novel.core.OkHttpClientFactory;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
+import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.novel.model.SearchResult;
+import com.ideaflow.noveldownload.service.AppConfigService;
 import com.ideaflow.noveldownload.service.BookService;
 import com.ideaflow.noveldownload.websocket.websocketMessage.message.NameSearchSendMessage;
 import com.ideaflow.noveldownload.websocket.websocketcore.listener.WebSocketMessageListener;
@@ -42,7 +45,7 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
     private WebSocketMessageSender webSocketMessageSender;
 
     @Resource
-    private AppConfigMapper appConfigMapper;
+    private AppConfigService appConfigService;
 
     @Resource
     private SearchResultMapper searchResultMapper;
@@ -52,9 +55,8 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
 
     @Override
     public void onMessage(WebSocketSession session, NameSearchSendMessage message) {
-        AppConfigEntity appConfigEntity = appConfigMapper.selectById(1);
+        AppConfig config = appConfigService.load();
         boolean isExact = "exact".equals(message.getSearchType()); //是否精确查询
-        AppConfig config = JSONUtil.toBean(appConfigEntity.getConfigValue(), AppConfig.class);
         if (Objects.isNull(config.getSourceId()))   {
             config.setSourceId(RandomUtil.randomInt(1, 5));
         }
@@ -62,7 +64,7 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
         HttpClientContext.set(OkHttpClientFactory.create(config, true));
 
         WebSocketContext.setSender(webSocketMessageSender);
-        WebSocketContext.set(session.getId());
+        WebSocketContext.setSessionId(session.getId());
 
         String manySourceId = config.getManySourceId();
         if (StringUtils.hasText(manySourceId)){

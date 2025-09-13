@@ -2,8 +2,6 @@ package com.ideaflow.noveldownload.novel.parse;
 
 import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
 
-import java.util.concurrent.CountDownLatch;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -59,14 +57,13 @@ public class ChapterParser extends Source {
         String content = fetchContent(chapter.getUrl(), RandomUtil.randomInt(100, 200));
         chapter.setContent(content);
         String filteredContent = new ChapterFilter(config).filter(chapter);
-        filteredContent = filteredContent.replaceAll("</(?:p|div)>", "\n").replaceAll("<[^>]*?>", "");
         chapter.setCleanContent(filteredContent);  // 设置过滤后的内容
         chapter.setWordCount(chapter.getCleanContent().length());
 
         return chapter;
     }
 
-    public Chapter parse(Chapter chapter, CountDownLatch latch) {
+    public Chapter parse(Chapter chapter) {
         try {
             long interval = CrawlUtils.randomInterval(config);
             if (config.getShowDownloadLog() == 1) {
@@ -77,18 +74,17 @@ public class ChapterParser extends Source {
             Assert.notEmpty(content, "正文内容为空");
             chapter.setContent(content);
 
-            if (StrUtil.isNotBlank(this.rule.getLanguage()) && this.rule.getLanguage().toLowerCase().contains("zh")) {
-                // 确保简繁互转最后调用
-                return ChineseConverter.convert(chapterConverter.convert(chapter), this.rule.getLanguage(), config.getLanguage());
-            } else {
-                return chapterConverter.convert(chapter);
-            }
+            return chapterConverter.convert(chapter);
+            // if (StrUtil.isNotBlank(this.rule.getLanguage()) && this.rule.getLanguage().toLowerCase().contains("zh")) {
+            //     // 确保简繁互转最后调用
+            //     return ChineseConverter.convert(chapterConverter.convert(chapter), this.rule.getLanguage(), config.getLanguage());
+            // } else {
+            //     return chapterConverter.convert(chapter);
+            // }
         } catch (Exception e) {
             e.printStackTrace();
             Chapter retryChapter = retry(chapter, e.getMessage());
             return retryChapter == null ? null : ChineseConverter.convert(retryChapter, this.rule.getLanguage(), config.getLanguage());
-        } finally {
-            latch.countDown();
         }
     }
 

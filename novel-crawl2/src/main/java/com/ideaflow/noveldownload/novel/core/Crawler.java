@@ -49,11 +49,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Crawler {
-
     private final AppConfig config;
     private String bookDir;
     private int digitCount;
-    private boolean canSaveChapter = true;
+    //private boolean canSaveChapter = true;
 
     private BookService novelService;
 
@@ -104,16 +103,21 @@ public class Crawler {
         book.setSaveType(config.getExtName().toLowerCase());
         book.setCrawlSourceId(config.getSourceId());
 
+        if (WebSocketContext.isNeedStop(bookUrl)) {
+            return null;
+        }
+
         // 检查同名的书是否存在
         List<Book> repeatBooks = novelService.getBookByName(book.getBookName(), book.getAuthorName());
         if (repeatBooks.size() > 0) {
             Book repeatBook = repeatBooks.get(0);
             book.setId(repeatBook.getId());
-            if (StrUtil.isNotBlank(repeatBook.getPicUrl()) && repeatBook.getPicUrl().startsWith("//") == false) {
+            if (toc.size() > 0 && StrUtil.isNotBlank(repeatBook.getPicUrl()) && repeatBook.getPicUrl().startsWith("//") == false) {
                 book.setPicUrl(repeatBook.getPicUrl());
             }
             book.setBookName(repeatBook.getBookName());
             book.setBookNameAlias(repeatBook.getBookNameAlias());
+            book.setWordCount(novelService.sumBookWordCount(book.getId()));
         }
 
         // 下载封面(优先下载封面是为了防止自动下载重复图片)
@@ -128,6 +132,15 @@ public class Crawler {
         // 保存小说信息
         if (novelService.saveBook(book) == 0L) {
             webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]无法保存小说:%s",book.getBookName())));
+            return null;
+        }
+
+        // 章节列表为空时直接返回小说信息
+        if (toc.isEmpty()) {
+            return book;
+        }
+
+        if (WebSocketContext.isNeedStop(bookUrl)) {
             return null;
         }
 
@@ -173,6 +186,10 @@ public class Crawler {
             webSocketMessageSender.send(sessionId,NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, "[i]下载日志已关闭，请耐心等待...");
         }
 
+        if (WebSocketContext.isNeedStop(bookUrl)) {
+            return null;
+        }
+
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         ChapterParser chapterParser = new ChapterParser(config);
@@ -181,14 +198,28 @@ public class Crawler {
         int cacheLimit = config.getThreads() * 10;
         List<Chapter> cachedChapters = new ArrayList<Chapter>();
         toc.forEach(item -> executor.execute(() -> {
+            if (WebSocketContext.isNeedStop(bookUrl)) {
+                latch.countDown();
+                return;
+            }
             try {
                 WebSocketContext.setSender(webSocketMessageSender);
-                WebSocketContext.set(sessionId);
-                Chapter chapter = chapterParser.parse(item, latch);
+                WebSocketContext.setSessionId(sessionId);
+                Chapter chapter = chapterParser.parse(item);
+                if (chapter == null || chapter.getContent().isBlank()) {
+                    String msg;
+                    if (chapter.getContent().isBlank()) {
+                        msg = String.format("[E][%d/%d]章节下载失败, 请检查'rule-{}.json'的设定是否正确。%s, %s", toc.size() - latch.getCount() + 1, toc.size(), config.getSourceId(), item.getTitle(), item.getUrl());
+                    } else {
+                        msg = String.format("[E][%d/%d]章节下载失败: %s, %s", toc.size() - latch.getCount() + 1, toc.size(), item.getTitle(), item.getUrl());
+                    }
+                    Console.log(msg);
+                    webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(msg));
+                    return;
+                }
                 chapter.setBookId(book.getId());
                 cachedChapters.add(chapter);
-                if (canSaveChapter && cachedChapters.size() % cacheLimit == 0) {
-                    canSaveChapter = false;
+                if (cachedChapters.size() % cacheLimit == 0) {
                     // 保存章节信息
                     if (novelService.saveChapters(cachedChapters, cacheLimit) > 0) {
                         for (int i = cacheLimit - 1; i >= 0; i--) {
@@ -198,7 +229,6 @@ public class Crawler {
                         // 中途保存小说字数
                         novelService.saveBook(book);
                     }
-                    canSaveChapter = true;
                 }
                 // 生成章节文件
                 if (CommonConst.SAVE_TYPE_DB.equalsIgnoreCase(config.getExtName()) == false) {
@@ -208,12 +238,13 @@ public class Crawler {
                     webSocketMessageSender.send(
                         sessionId,
                         NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER,
-                        JSONUtil.toJsonStr(String.format("[i][%d/%d]已下载: %s, %s", toc.size() - latch.getCount(), toc.size(), item.getTitle(), item.getUrl()))
+                        JSONUtil.toJsonStr(String.format("[i][%d/%d]已下载: %s, %s", toc.size() - latch.getCount() + 1, toc.size(), item.getTitle(), item.getUrl()))
                     );
                 }
             } finally {
                 WebSocketContext.clearSessionId();
-                WebSocketContext.clearSerder();
+                WebSocketContext.clearSender();
+                latch.countDown();
             }
         }));
 

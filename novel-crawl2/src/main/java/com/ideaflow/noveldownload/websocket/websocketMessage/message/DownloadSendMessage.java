@@ -6,6 +6,14 @@ import lombok.Data;
 @Data
 public class DownloadSendMessage {
     /**
+     * 请求的处理（start: 开始下载, stop: 停止下载）
+     */
+    private String action;
+    /**
+     * 小说URL
+     */
+    private String bookUrl;
+    /**
      * 书源id
      */
     private Integer sourceId;

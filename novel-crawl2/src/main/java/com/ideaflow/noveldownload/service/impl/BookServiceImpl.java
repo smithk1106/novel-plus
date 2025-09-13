@@ -79,7 +79,7 @@ public class BookServiceImpl implements BookService {
         if (bookEntity == null) {
             // 追加数据
             bookEntity = mergeBookToEntity(book, null);
-            if (novelMapper.insert(bookEntity) > 0){
+            if (novelMapper.insert(bookEntity) > 0) {
                 book.setId(bookEntity.getId());
             } else {
                 book.setId(0L);
@@ -224,7 +224,7 @@ public class BookServiceImpl implements BookService {
         }
 
         // 保存章节内容
-        if (isOK && StringUtils.hasText(chapter.getContent())) {
+        if (isOK) {
             DynamicTableHelper.setRequestData(Map.of("index_id", chapter.getId()));
             BookContentEntity bookContentEntity = new BookContentEntity();
             bookContentEntity.setIndexId(chapter.getId());
@@ -344,7 +344,7 @@ public class BookServiceImpl implements BookService {
     public int sumBookWordCount(Long bookId) {
         // 创建条件构造器
         QueryWrapper<BookIndexEntity> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("sum(word_count) as book_word_count"); 
+        queryWrapper.select("ifnull(sum(word_count), 0) as book_word_count"); 
         queryWrapper.eq("book_id", bookId);
 
         // 获取章节列表

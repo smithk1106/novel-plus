@@ -95,22 +95,18 @@ public class TocParser extends Source {
                     pageCount = FormatUtils.parseInt(r.getPageCount(), 0);
                 } else {
                     String countStr = JsoupUtils.selectAndInvokeJs(document, r.getPageCount(), ContentType.TEXT);
-                    //cn.hutool.core.lang.Console.log("[D]pageCount:{}", countStr);
-                    if (StrUtil.isNotEmpty(countStr)) {
-                        pageCount = FormatUtils.parseInt(countStr, 0);
-                    }
+                    pageCount = FormatUtils.parseInt(countStr, 0);
                 }
             } else {
                 // 页数未知时，使用一个固定值
                 pageCount = 1000;
             }
 
-            cn.hutool.core.lang.Console.log("[D]Converted pageCount:{}", pageCount);
+            cn.hutool.core.lang.Console.log("[D]Toc PageCount:{}", pageCount);
             for (int i = 2; i <= pageCount; i++) {
                 String listUrl = r.getListUrl().formatted(id, i);
                 urls.removeIf(s -> s.equalsIgnoreCase(listUrl));
                 urls.add(listUrl);
-                cn.hutool.core.lang.Console.log("[D]Added listUrl:{}", listUrl);
             }
 
             return;

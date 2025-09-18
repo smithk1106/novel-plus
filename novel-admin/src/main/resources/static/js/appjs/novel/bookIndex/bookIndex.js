@@ -59,67 +59,49 @@ function load() {
                             return arguments[2] + 1;
                         }
                     },
-                                                                        {
-                                field: 'id',
-                                title: '主键'
-                            },
-
-                        
-                                                                        {
-                                field: 'bookId',
-                                title: '小说ID'
-                            },
-
-                        
-                                                                        {
-                                field: 'indexNum',
-                                title: '目录号'
-                            },
-
-                        
-                                                                        {
-                                field: 'indexName',
-                                title: '目录名'
-                            },
-
-                        
-                                                                        {
-                                field: 'wordCount',
-                                title: '字数'
-                            },
-
-                        
-                                                                        {
-                                field: 'isVip',
-                                title: '是否收费，1：收费，0：免费'
-                            },
-
-                        
-                                                                        {
-                                field: 'bookPrice',
-                                title: '章节费用（屋币）'
-                            },
-
-                        
-                                                                        {
-                                field: 'storageType',
-                                title: '存储方式'
-                            },
-
-                        
-                                                                        {
-                                field: 'createTime',
-                                title: ''
-                            },
-
-                        
-                                                                        {
-                                field: 'updateTime',
-                                title: ''
-                            },
-
-                        
-                                        {
+                    {
+                        field: 'id',
+                        title: '主键'
+                    },
+                    {
+                        field: 'bookId',
+                        title: '小说ID'
+                    },
+                    {
+                        field: 'indexNum',
+                        title: '目录号'
+                    },
+                    {
+                        field: 'indexName',
+                        title: '目录名'
+                    },
+                    {
+                        field: 'wordCount',
+                        title: '字数'
+                    },
+                    {
+                        field: 'isVip',
+                        title: '是否收费，1：收费，0：免费'
+                    },
+                
+                    {
+                        field: 'bookPrice',
+                        title: '章节费用（屋币）'
+                    },
+                    {
+                        field: 'storageType',
+                        title: '存储方式'
+                    },
+                
+                    {
+                        field: 'createTime',
+                        title: '添加时间'
+                    },
+                    {
+                        field: 'updateTime',
+                        title: '更新时间'
+                    },
+                    {
                         title: '操作',
                         field: 'id',
                         align: 'center',
@@ -135,8 +117,10 @@ function load() {
                                 + '\')"><i class="fa fa-remove"></i></a> ';
                             return d + e + r;
                         }
-                    }]
-            });
+                    }
+                ]
+            }
+        );
 }
 function reLoad() {
     $('#exampleTable').bootstrapTable('refresh');

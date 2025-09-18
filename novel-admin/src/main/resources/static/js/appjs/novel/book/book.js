@@ -152,7 +152,7 @@ function load() {
                             var r = '<a class="btn btn-warning btn-sm ' + s_remove_h + '" href="#" title="删除"  mce_href="#" onclick="remove(\''
                                 + row.id
                                 + '\')"><i class="fa fa-remove"></i></a> ';
-                            return r;
+                            return d + e + r;
                         }
                     }
 

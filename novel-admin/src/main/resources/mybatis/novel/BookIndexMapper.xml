@@ -26,7 +26,7 @@
             <if test="id != null and id != ''">and id = #{id}</if>
             <if test="bookId != null and bookId != ''">and book_id = #{bookId}</if>
             <if test="indexNum != null and indexNum != ''">and index_num = #{indexNum}</if>
-            <if test="indexName != null and indexName != ''">and index_name = #{indexName}</if>
+            <if test="indexName != null and indexName != ''">and index_name like concat('%',#{indexName},'%')</if>
             <if test="wordCount != null and wordCount != ''">and word_count = #{wordCount}</if>
             <if test="isVip != null and isVip != ''">and is_vip = #{isVip}</if>
             <if test="bookPrice != null and bookPrice != ''">and book_price = #{bookPrice}</if>

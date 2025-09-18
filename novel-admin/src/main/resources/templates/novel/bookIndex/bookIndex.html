@@ -22,14 +22,14 @@
                     <div class="columns pull-right">
                         <button class="btn btn-success" onclick="reLoad()">查询</button>
                     </div>
-
                     <form id="searchForm">
                         <div class="columns pull-right col-md-2">
-                            <input id="id" name="id" type="text" class="form-control"
-                                   placeholder="主键">
+                            <input name="indexName" type="text" class="form-control" placeholder="章节名">
+                        </div>
+                        <div class="columns pull-right col-md-2">
+                            <input name="bookId" type="text" class="form-control" placeholder="小说ID">
                         </div>
                     </form>
-
                 </div>
                 <table id="exampleTable" data-mobile-responsive="true">
                 </table>
@@ -45,7 +45,7 @@
         var s_remove_h = 'hidden';
     </script>
 </div>
-<div shiro:hasPermission="test:order:detail">
+<div shiro:hasPermission="novel:bookIndex:detail">
     <script type="text/javascript">
         s_detail_h = '';
     </script>

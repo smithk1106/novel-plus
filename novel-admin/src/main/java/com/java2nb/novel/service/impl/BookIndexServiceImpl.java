@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+import com.java2nb.novel.dao.BookContentDao;
 import com.java2nb.novel.dao.BookIndexDao;
 import com.java2nb.novel.domain.BookIndexDO;
 import com.java2nb.novel.service.BookIndexService;
@@ -16,6 +17,9 @@ import com.java2nb.novel.service.BookIndexService;
 public class BookIndexServiceImpl implements BookIndexService {
 	@Autowired
 	private BookIndexDao bookIndexDao;
+
+	@Autowired
+	private BookContentDao bookContentDao;
 	
 	@Override
 	public BookIndexDO get(Long id){
@@ -44,12 +48,13 @@ public class BookIndexServiceImpl implements BookIndexService {
 	
 	@Override
 	public int remove(Long id){
+		bookContentDao.removeByIndexIds(new Long[]{ id });
 		return bookIndexDao.remove(id);
 	}
 	
 	@Override
 	public int batchRemove(Long[] ids){
+		bookContentDao.removeByIndexIds(ids);
 		return bookIndexDao.batchRemove(ids);
 	}
-	
 }

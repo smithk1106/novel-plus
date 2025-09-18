@@ -197,6 +197,7 @@ public class Crawler {
         // 爬取&下载章节
         int cacheLimit = config.getThreads() * 10;
         List<Chapter> cachedChapters = new ArrayList<Chapter>();
+        List<Chapter> failedChapters = new ArrayList<Chapter>();
         toc.forEach(item -> executor.execute(() -> {
             if (WebSocketContext.isNeedStop(bookUrl)) {
                 latch.countDown();
@@ -215,6 +216,7 @@ public class Crawler {
                     }
                     Console.log(msg);
                     webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(msg));
+                    failedChapters.add(item);
                     return;
                 }
                 chapter.setBookId(book.getId());
@@ -264,6 +266,16 @@ public class Crawler {
         // 保存到文件时的处理
         if (CommonConst.SAVE_TYPE_DB.equalsIgnoreCase(config.getExtName()) == false) {
             new CrawlerPostHandler(config, novelService).handle(saveDir);
+        }
+
+        // 显示失败的章节
+        if (failedChapters.size() > 0) {
+            String msg = "";
+            for (Chapter chapter : failedChapters) {
+                msg += String.format("[E][%d]章节下载失败: %s, %s\n", chapter.getOrder(), chapter.getTitle(), chapter.getUrl());
+            }
+            Console.log(msg);
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(msg));
         }
 
         stopWatch.stop();

@@ -18,14 +18,15 @@ public class RandomUA {
             "Windows NT 11.0; Win64; x64",
             "Macintosh; Intel Mac OS X 12_6",
             "Macintosh; Intel Mac OS X 13_4",
+            "Macintosh; Intel Mac OS X 10_15_7",
             "X11; Linux x86_64",
-            "X11; Ubuntu; Linux x86_64"
+            "X11; Ubuntu; Linux x86_64",
     };
 
     private final String[] BROWSERS = {"Chrome", "Firefox", "Safari", "Edge"};
 
     private final int MIN_VERSION = 100; // Minimum browser version
-    private final int MAX_VERSION = 131; // Maximum browser version
+    private final int MAX_VERSION = 138; // Maximum browser version
 
     private final Random RANDOM = new Random();
 

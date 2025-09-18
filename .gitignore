@@ -7,4 +7,4 @@
 *.code-workspace
 docker
 bak
-templates
+/templates

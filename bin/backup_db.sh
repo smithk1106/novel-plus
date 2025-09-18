@@ -1,7 +1,7 @@
 #!/bin/bash
 
 curDir=$(pwd)
-targetDir=/home/webmanager/www/book/share/bak
+targetDir=/home/webmanager/www/book/bak/db
 sqlFile=novel_plus_$(date +%Y%m%d).sql
 zipFile=novel_plus_$(date +%Y%m%d).tar.xz
 startTime=$(date +%s)

@@ -20,7 +20,8 @@ VALUES
   ('8', '0', '体育竞技', '17', null, null, null, null),
   ('9', '0', '青春校园', '18', null, null, null, null),
   ('10', '0', '穿越重生', '19', null, null, null, null),
-  ('11', '0', '恐怖悬疑', '20', null, null, null, null);
+  ('11', '0', '恐怖悬疑', '20', null, null, null, null),
+  ('12', '0', '末世求生', '21', null, null, null, null);
 
 -- ----------------------------
 -- Records of website_info

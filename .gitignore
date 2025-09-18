@@ -5,9 +5,6 @@
 **/*.iml
 **/.DS_Store
 *.code-workspace
-download
-h2db
-mysql
-share
+docker
 bak
 templates

@@ -6,13 +6,14 @@ services:
     hostname: novel-db
     environment:
       - MYSQL_ROOT_PASSWORD=${password}
+      - MYSQL_TCP_PORT=3306
     volumes:
       - ./docker/mysql/data:/var/lib/mysql
       - ./docker/share:/docker-entrypoint-initdb.d
       - ./docker/share:/share
     command: mysqld --max_allowed_packet=100M
     ports:
-      - "3306:33060"
+      - "9306:3306"
     networks:
       - novelnet
 
@@ -32,14 +33,14 @@ services:
     image: openjdk:21
     restart: always
     environment:
-      - dburl=${dburl}
-      - username=${username}
-      - password=${password}
-      - redishost=${redishost}
-      - redispwd=${redispwd}
-      - redisport=${redisport}
+      - DB_URL=${dburl}
+      - DB_USERNAME=${username}
+      - DB_PASSWORD=${password}
+      - REDIS_HOST=${redishost}
+      - REDIS_PASSWORD=${redispwd}
+      - REDIS_PORT=${redisport}
     volumes:
-      - ./novel-front/target/build:/app/front
+      - ./docker/front:/app/front
       - ./docker/download/books:/app/books
       - ./docker/download/pic:/app/pic
     working_dir: /app/front
@@ -57,14 +58,14 @@ services:
   #   image: openjdk:21
   #   restart: always
   #   environment:
-  #     - dburl=${dburl}
-  #     - username=${username}
-  #     - password=${password}
-  #     - redishost=${redishost}
-  #     - redispwd=${redispwd}
-  #     - redisport=${redisport}
+  #     - DB_URL=${dburl}
+  #     - DB_USERNAME=${username}
+  #     - DB_PASSWORD=${password}
+  #     - REDIS_HOST=${redishost}
+  #     - REDIS_PASSWORD=${redispwd}
+  #     - REDIS_PORT=${redisport}
   #   volumes:
-  #     - ./novel-admin/target/build:/app/admin
+  #     - ./docker/admin:/app/admin
   #     - ./docker/download/books:/app/books
   #     - ./docker/download/pic:/app/pic
   #   working_dir: /app/admin
@@ -82,12 +83,11 @@ services:
   #   image: openjdk:21
   #   restart: always
   #   environment:
-  #     - dburl=${dburl}
-  #     - username=${username}
-  #     - password=${password}
+  #     - DB_URL=${dburl}
+  #     - DB_USERNAME=${username}
+  #     - DB_PASSWORD=${password}
   #   volumes:
-  #     - ./novel-crawl/target/build:/app/crawl
-  #     - ./novel-crawl/target/build/config:/config
+  #     - ./docker/crawl1:/app/crawl
   #     - ./docker/download/books:/app/books
   #     - ./docker/download/pic:/app/pic
   #   command: sh -c "java -jar -Dspring.profiles.active=dev /app/crawl/novel-crawl.jar"
@@ -99,26 +99,46 @@ services:
   #   networks:
   #     - novelnet
 
-  crawler2:
-    container_name: novel-crawl2
-    image: openjdk:21
-    restart: always
-    environment:
-      - dburl=${dburl}
-      - username=${username}
-      - password=${password}
-    volumes:
-      - ./novel-crawl2/target:/app
-      - ./docker/h2db:/app/db
-      - ./docker/download:/app/download
-    working_dir: /app
-    command: java -jar -Dspring.profiles.active=dev /app/novel-crawl2.jar
-    ports:
-      - 8584:30000
-    depends_on:
-      - novel-db
-    networks:
-      - novelnet
+  # crawler2:
+  #   container_name: novel-crawl2
+  #   image: openjdk:21
+  #   restart: always
+  #   environment:
+  #     - DB_URL=${dburl}
+  #     - DB_USERNAME=${username}
+  #     - DB_PASSWORD=${password}
+  #   volumes:
+  #     - ./docker/crawl2:/app
+  #     - ./docker/h2db:/app/db
+  #     - ./docker/download:/app/download
+  #   working_dir: /app
+  #   command: java -jar -Dspring.profiles.active=dev /app/novel-crawl2.jar
+  #   ports:
+  #     - 8584:30000
+  #   depends_on:
+  #     - novel-db
+  #   networks:
+  #     - novelnet
+
+  # phpmyadmin:
+  #   container_name: phpmyadmin
+  #   image: phpmyadmin/phpmyadmin
+  #   environment:
+  #     - PMA_ARBITRARY=1
+  #     - PMA_HOST=novel-db:3306
+  #     - PMA_USER=root
+  #     - PMA_PASSWORD=${password}
+  #     - ServerName=phpmyadmin
+  #   ports:
+  #     - 8580:80
+  #   volumes:
+  #     - ./docker/phpmyadmin/sessions:/sessions
+  #   links:
+  #     - novel-db
+  #   depends_on:
+  #     - novel-db
+  #   networks:
+  #     - novelnet
 
 networks:
   novelnet:

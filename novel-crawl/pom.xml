@@ -14,6 +14,10 @@
     <name>novel-crawl</name>
     <description>WDLL文学 爬虫管理程序</description>
 
+    <properties>
+        <build.outputDir>../docker/crawl1</build.outputDir>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -57,15 +61,28 @@
                         </goals>
                         <configuration>
                             <tasks>
+                                <!-- 复制文件到目标文件夹 -->
+                                <copy todir="${basedir}/${build.outputDir}/config" overwrite="true">
+                                    <fileset dir="${basedir}/src/main/build/config">
+                                        <include name="*.*"/>
+                                    </fileset>
+                                </copy>
+                                <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                      tofile="${basedir}/${build.outputDir}/${project.artifactId}.jar"/>
+                                <copy todir="${basedir}/${build.outputDir}/bin" overwrite="true">
+                                    <fileset dir="${basedir}/../bin">
+                                        <include name="start_server.sh"/>
+                                        <include name="ReplaceEnv.*"/>
+                                    </fileset>
+                                </copy>
                                 <!-- 文件夹 -->
-                                <copy todir="${project.build.directory}/build/config" overwrite="true">
+                                <!-- <copy todir="${project.build.directory}/build/config" overwrite="true">
                                     <fileset dir="${basedir}/src/main/build/config">
                                         <include name="*.*"/>
                                     </fileset>
                                 </copy>
                                 <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
                                       tofile="${project.build.directory}/build/${project.artifactId}.jar"/>
-
                                 <fixcrlf srcdir="${basedir}/src/main/build/scripts" eol="unix"/>
                                 <copy todir="${project.build.directory}/build/bin">
                                     <fileset dir="${basedir}/src/main/build/scripts">
@@ -74,12 +91,11 @@
                                         <include name="*.bat"/>
                                     </fileset>
                                 </copy>
-                                <!-- <zip destfile='${project.build.directory}/build/${project.artifactId}.zip'>
+                                <zip destfile='${project.build.directory}/build/${project.artifactId}.zip'>
                                     <zipfileset filemode="755" dir='${project.build.directory}/build/'/>
-                                </zip> -->
-
+                                </zip>
                                 <copy file="${basedir}/src/main/build/docker/Dockerfile"
-                                      tofile="${project.build.directory}/build/Dockerfile"/>
+                                      tofile="${project.build.directory}/build/Dockerfile"/> -->
                             </tasks>
                         </configuration>
                     </execution>

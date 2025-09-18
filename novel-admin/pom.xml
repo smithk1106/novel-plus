@@ -22,6 +22,7 @@
         <java.version>21</java.version>
         <velocity.version>1.7</velocity.version>
         <shardingsphere-jdbc.version>5.5.1</shardingsphere-jdbc.version>
+        <build.outputDir>../docker/admin</build.outputDir>
     </properties>
 
     <dependencies>
@@ -278,8 +279,22 @@
                         </goals>
                         <configuration>
                             <tasks>
+                                <!-- 复制文件到目标文件夹 -->
+                                <copy todir="${basedir}/${build.outputDir}/config" overwrite="true">
+                                    <fileset dir="${basedir}/src/main/build/config">
+                                        <include name="*.*"/>
+                                    </fileset>
+                                </copy>
+                                <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                      tofile="${basedir}/${build.outputDir}/${project.artifactId}.jar"/>
+                                <copy todir="${basedir}/${build.outputDir}/bin">
+                                    <fileset dir="${basedir}/../bin">
+                                        <include name="start_server.sh"/>
+                                        <include name="ReplaceEnv.*"/>
+                                    </fileset>
+                                </copy>
                                 <!-- 文件夹 -->
-                                <copy todir="${project.build.directory}/build/config" overwrite="true">
+                                <!-- <copy todir="${project.build.directory}/build/config" overwrite="true">
                                     <fileset dir="${basedir}/src/main/build/config">
                                         <include name="*.*"/>
                                     </fileset>
@@ -295,7 +310,7 @@
                                         <include name="*.bat"/>
                                     </fileset>
                                 </copy>
-                                <!-- <zip destfile='${project.build.directory}/build/${project.artifactId}.zip'>
+                                <zip destfile='${project.build.directory}/build/${project.artifactId}.zip'>
                                     <zipfileset filemode="755" dir='${project.build.directory}/build/'/>
                                 </zip>
 

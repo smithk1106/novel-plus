@@ -1,6 +1,6 @@
 #端口号
 server:
-  port: 8081
+  port: 8083
   servlet:
     session:
       timeout: 1D
@@ -8,13 +8,41 @@ server:
 spring:
   profiles:
     active: dev
+  data:
+    redis:
+      #Redis服务器IP
+      host: ${REDIS_HOST}
+      #Redis服务器连接端口
+      port: ${REDIS_PORT}
+      #Redis服务器连接密码
+      password: ${REDIS_PASSWORD}
+      #连接超时时间（毫秒）
+      timeout: 10000
 
 #登录用户名密码
 admin:
   username: admin
   password: admin
 
+#小说内容保存配置
+content:
+  save:
+    storage: db # 小说内容存储方式：db-数据库，txt-TXT文本
+    path: /app/books  # 小说TXT文本保存路径
 
+# HTTP 代理配置
+http:
+  proxy:
+    # 是否开启 HTTP 代理，true-开启，false-不开启
+    enabled: false
+    # 代理 IP
+    ip: proxy.bestproxy.com
+    # 代理端口号
+    port: 2312
+    # 代理用户名
+    username: bestproxy_u
+    # 代理密码
+    password: bestproxy_p
 
 crawl:
   update:

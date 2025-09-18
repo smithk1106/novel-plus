@@ -11,11 +11,11 @@ spring:
     # 驱动名称
     driver-class-name: com.mysql.cj.jdbc.Driver
     # 自定义用户名
-    username: root
+    username: ${DB_USERNAME}
     # 自定义密码
-    password: Demo_20250808
+    password: ${DB_PASSWORD}
     # 数据库地址:jdbc:h2:mem:数据库名称(随意填写，会自动创建
-    url: jdbc:mysql://novel-db:3306/novel_plus?useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Tokyo
+    url: ${DB_URL}
   # sql:
   #   init:
   #     # 数据库平台内容配置项，主要有mysql、postgresql、oracle, h2等

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 projectDir="/Users/webstory/Websites/wdllstudio.com/book/src_xxy"
-remoteServer="webmanager@133.130.66.33"
+remoteServer="book_server"
 remoteDir="~/www/book"
 
 site="$1"
@@ -11,29 +11,36 @@ if [ -z "$site" ]; then
     exit 101
 fi
 
+# Delete all ".DS_Store" files
+find $projectDir/docker -maxdepth 5 -name ".DS_Store" -exec rm {} \;
+
 if [ "$site" = "all" ] || [ "$site" = "front" ]; then
-    scp "$projectDir/novel-front/target/build/novel-front.jar" book_server:$remoteDir/front/
-    scp -r "$projectDir/novel-front/target/build/config" book_server:$remoteDir/front/
-    ssh book_server "cd $remoteDir/front/templates; git pull"
+    scp "$projectDir/docker/front/novel-front.jar" $remoteServer:$remoteDir/docker/front/
+    scp -r "$projectDir/docker/front/config" $remoteServer:$remoteDir/docker/front/
+    scp -r "$projectDir/docker/front/bin" $remoteServer:$remoteDir/docker/front/
+    ssh $remoteServer "cd $remoteDir/docker/front/templates; git pull"
+    ssh $remoteServer "chmod +x $remoteDir/docker/front/bin/*.sh"
 fi
 
 if [ "$site" = "all" ] || [ "$site" = "admin" ]; then
-    scp "$projectDir/novel-admin/target/build/novel-admin.jar" book_server:$remoteDir/admin/
-    scp -r "$projectDir/novel-admin/target/build/config" book_server:$remoteDir/admin/
+    scp "$projectDir/docker/admin/novel-admin.jar" $remoteServer:$remoteDir/docker/admin/
+    scp -r "$projectDir/docker/admin/config" $remoteServer:$remoteDir/docker/admin/
+    scp -r "$projectDir/docker/admin/bin" $remoteServer:$remoteDir/docker/admin/
+    ssh $remoteServer "chmod +x $remoteDir/docker/admin/bin/*.sh"
 fi
 
 if [ "$site" = "all" ] || [ "$site" = "crawler2" ]; then
-    scp "$projectDir/novel-crawl2/target/novel-crawl2.jar" book_server:$remoteDir/crawl2/
-    scp -r "$projectDir/novel-crawl2/target/rule" book_server:$remoteDir/crawl2/
+    scp "$projectDir/docker/crawl2/novel-crawl2.jar" $remoteServer:$remoteDir/docker/crawl2/
+    scp -r "$projectDir/docker/crawl2/rule" $remoteServer:$remoteDir/docker/crawl2/
 fi
 
 if [ "$site" = "all" ] || [ "$site" = "docker" ]; then
-    scp "$projectDir/docker-compose_prod.yml" book_server:$remoteDir/docker-compose.yml
-    scp "$projectDir/.env" book_server:$remoteDir/
+    scp "$projectDir/docker-compose_prod.yml" $remoteServer:$remoteDir/docker-compose.yml
+    scp "$projectDir/.env_prod" $remoteServer:$remoteDir/.env
 fi
 
 if [ ! "$site" = "docker" ]; then
-    ssh book_server "echo -n $site > $remoteDir/restart_target.txt"
+    ssh $remoteServer "echo -n $site > $remoteDir/restart_target.txt"
 fi
 
 #scp "~/Websites/wdllstudio.com/book/src_xxy/bak/db/novel_plus_20250906.sql" book_server:"~/www/book/share/novel_plus.sql"

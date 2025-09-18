@@ -9,6 +9,15 @@ server:
 #  basic:
 #    enabled: false
 spring:
+  redis:
+    #Redis服务器IP
+    host: ${REDIS_HOST}
+    #Redis服务器连接端口
+    port: ${REDIS_PORT}
+    #Redis服务器连接密码
+    password: ${REDIS_PASSWORD}
+    #连接超时时间（毫秒）
+    timeout: 10000
   datasource:
     driverClassName: org.apache.shardingsphere.driver.ShardingSphereDriver
     url: jdbc:shardingsphere:absolutepath:${user.dir}/config/shardingsphere-jdbc.yml

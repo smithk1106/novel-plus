@@ -26,6 +26,7 @@ public class IpLocationServiceImpl implements IpLocationService {
         try {
             // 示例返回："中国|0|湖北省|武汉市|电信"
             String region = searcher.search(ip);
+            log.info("IP：{}，区域：{}", ip, region);
             String[] regions = region.split("\\|");
             if (regions.length > 0) {
                 // 国家
@@ -38,9 +39,17 @@ public class IpLocationServiceImpl implements IpLocationService {
                         return getLocation(publicIp);
                     }
                 } else if ("中国".equals(country)) {
-                    // 是中国，则返回省份（第三个字段）
-                    String province = regions.length > 2 ? regions[2] : "未知地区";
-                    // 去掉最后一个“省”字
+                    // 若为中国，则尝试返回省份（regions[2]）
+                    if (regions.length <= 2) {
+                        // 数据不足，直接返回国家
+                        return country;
+                    }
+                    String province = regions[2];
+                    if (!StringUtils.hasText(province) || "0".equals(province)) {
+                        // 省份字段为空或未知，返回国家
+                        return country;
+                    }
+                    // 去掉末尾的“省”字
                     return province.endsWith("省") ? province.substring(0, province.length() - 1) : province;
                 } else {
                     // 非中国，返回国家名

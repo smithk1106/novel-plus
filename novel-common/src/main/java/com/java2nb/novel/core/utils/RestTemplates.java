@@ -63,6 +63,8 @@ public class RestTemplates {
         connectionManager.setDefaultMaxPerRoute(300);
 
         HttpClientBuilder clientBuilder = HttpClients.custom();
+        // 禁用 Cookie 管理
+        clientBuilder.disableCookieManagement();
         if (Objects.nonNull(httpProxyProperties) && Boolean.TRUE.equals(httpProxyProperties.getEnabled())) {
             HttpHost proxy = new HttpHost(httpProxyProperties.getIp(), httpProxyProperties.getPort());
             clientBuilder.setProxy(proxy);

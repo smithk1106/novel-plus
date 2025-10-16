@@ -5,9 +5,12 @@ JAR_NAME=$APP_NAME\.jar
 PID=$APP_NAME\.pid
 
 
-#使用说明，用来提示输入参数
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+cd "$SCRIPT_DIR"/.. || exit 1
+
+# 使用说明
 usage() {
-    echo "Usage: ./novel-admin.sh [start|stop|restart|status]"
+    echo "Usage: $0 [start|stop|restart|status]"
     exit 1
 }
 

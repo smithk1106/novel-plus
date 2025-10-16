@@ -4,10 +4,12 @@ JAR_NAME=$APP_NAME\.jar
 #PID  代表是PID文件
 PID=$APP_NAME\.pid
 
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+cd "$SCRIPT_DIR"/.. || exit 1
 
-#使用说明，用来提示输入参数
+# 使用说明
 usage() {
-    echo "Usage: ./novel-front.sh [start|stop|restart|status]"
+    echo "Usage: $0 [start|stop|restart|status]"
     exit 1
 }
 

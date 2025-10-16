@@ -8,7 +8,7 @@ public interface CacheKey {
     /**
      * 首页小说设置
      */
-    String INDEX_BOOK_SETTINGS_KEY = "indexBookSettingsKey";
+    String INDEX_BOOK_SETTINGS_KEY = "indexBookSettingsKey:v2";
 
     /**
      * 首页新闻

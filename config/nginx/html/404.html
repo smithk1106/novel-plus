@@ -1,0 +1,25 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="msapplication-TileColor" content="#878787">
+    <meta name="theme-color" content="#878787">
+    <title>404 Page not found</title>
+    <style type="text/css">
+        html, body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <iframe id="innerPage" src="" style="border: 0; margin: 0; width: 100%; height: 100%;"></iframe>
+    <script type="text/javascript">
+        const i = Math.round(Math.random() * 6) + 1;
+        document.getElementById('innerPage').src = '404_' + i + '.html';
+    </script>
+</body>
+</html>

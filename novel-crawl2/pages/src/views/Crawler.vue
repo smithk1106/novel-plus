@@ -222,12 +222,16 @@ const downloadActiveTab = ref(0)
 const downloadTabs = [
   { label: '全本下载', type: 0 },
   { label: '指定章节', type: 1 },
-  { label: '最新章节', type: 2 }
+  { label: '最新章节', type: 2 },
+  { label: '指定章节ID', type: 3 }
 ]
 const downloadConfig = ref({
   startChapter: 1,
   endChapter: 100,
-  latestChapterCount: 10
+  latestChapterCount: 10,
+  chapterId: '',
+  toChapter: 0,
+  chapterCount: 1
 })
 
 // 打开下载配置弹窗
@@ -239,7 +243,10 @@ const openDownloadModal = (novel) => {
   downloadConfig.value = {
     startChapter: 1,
     endChapter: 100,
-    latestChapterCount: 10
+    latestChapterCount: 10,
+    chapterId: '',
+    toChapter: 0,
+    chapterCount: 1
   }
 }
 
@@ -269,6 +276,10 @@ const confirmDownload = () => {
     downloadParams.endChapter = parseInt(downloadConfig.value.endChapter) || 0
   } else if (downloadType === 2) { // 最新章节
     downloadParams.latestChapterCount = parseInt(downloadConfig.value.latestChapterCount) || 0
+  } else if (downloadType === 3) { // 最新章节
+    downloadParams.chapterId = downloadConfig.value.chapterId.trim()
+    downloadParams.toChapter = parseInt(downloadConfig.value.toChapter) || 0
+    downloadParams.chapterCount = parseInt(downloadConfig.value.chapterCount) || 1
   }
 
   // 发送下载请求
@@ -553,6 +564,41 @@ const confirmDownload = () => {
                 class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:bg-white/40 transition-all"
                 placeholder="例如: 10"
             />
+          </div>
+        </div>
+
+        <!-- 指定章节ID更新 -->
+        <div v-else-if="downloadActiveTab === 3" class="space-y-4">
+          <div class="flex space-x-4">
+            <div class="w-1/2">
+              <label class="block text-sm text-slate-600 mb-1">章节ID</label>
+              <input
+                  v-model="downloadConfig.chapterId"
+                  type="string"
+                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:bg-white/40 transition-all"
+                  placeholder="章节ID"
+              />
+            </div>
+            <div class="w-1/4">
+              <label class="block text-sm text-slate-600 mb-1">保存章节号</label>
+              <input
+                  v-model="downloadConfig.toChapter"
+                  type="number"
+                  min="1"
+                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:bg-white/40 transition-all"
+                  placeholder="保存章节号"
+              />
+            </div>
+            <div class="w-1/4">
+              <label class="block text-sm text-slate-600 mb-1">章节数</label>
+              <input
+                  v-model="downloadConfig.chapterCount"
+                  type="number"
+                  min="1"
+                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:bg-white/40 transition-all"
+                  placeholder="章节数"
+              />
+            </div>
           </div>
         </div>
 

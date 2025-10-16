@@ -1,6 +1,9 @@
 package com.ideaflow.noveldownload.websocket.websocketMessage;
 
 
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_RESULT_MESSAGE_LISTENER;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -10,18 +13,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.ideaflow.noveldownload.config.WebSocketContext;
-import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
-import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_RESULT_MESSAGE_LISTENER;
-import com.ideaflow.noveldownload.entity.AppConfigEntity;
 import com.ideaflow.noveldownload.entity.SearchResultEntity;
-import com.ideaflow.noveldownload.mapper.AppConfigMapper;
 import com.ideaflow.noveldownload.mapper.SearchResultMapper;
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
-import com.ideaflow.noveldownload.novel.core.ChapterFilter;
 import com.ideaflow.noveldownload.novel.core.Crawler;
 import com.ideaflow.noveldownload.novel.core.OkHttpClientFactory;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
-import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.novel.model.SearchResult;
 import com.ideaflow.noveldownload.service.AppConfigService;
 import com.ideaflow.noveldownload.service.BookService;

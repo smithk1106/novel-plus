@@ -5,7 +5,9 @@ const baselUrl = 'localhost,127.0.0.1'.indexOf(window.location.hostname) >= 0
 export const API_BASE_URL = `${baselUrl}`;
 
 // WebSocket 配置
-const websocketUrl = window.location.protocol === 'https:' ? `wss://${window.location.host}/ws` : `ws://${window.location.host}/ws`;
+const websocketUrl = 'localhost,127.0.0.1'.indexOf(window.location.hostname) >= 0
+    ? `ws://${window.location.hostname}:8584/ws`
+    : window.location.protocol === 'https:' ? `wss://${window.location.host}/ws` : `ws://${window.location.host}/ws`;
 
 // console.log('websocketUrl:', websocketUrl);
 export const WS_URL = `${websocketUrl}`;

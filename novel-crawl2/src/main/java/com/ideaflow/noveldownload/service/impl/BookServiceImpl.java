@@ -242,7 +242,7 @@ public class BookServiceImpl implements BookService {
                 isOK = (bookContentMapper.updateById(bookContentEntity) > 0);
             }
             DynamicTableHelper.removeRequestData();
-            cn.hutool.core.lang.Console.log("[D]保存章节【{}: {}】的内容到'book_content{}': {}.", chapter.getOrder(), chapter.getTitle(), chapter.getId() % 10, (isOK ? "成功" : "失败"));
+            cn.hutool.core.lang.Console.log("[D]{}章节【{}: {}】的内容到'book_content{}': {}.", (bookContentList.isEmpty() ? "插入" : "更新"), chapter.getOrder(), chapter.getTitle(), chapter.getId() % 10, (isOK ? "成功" : "失败"));
         }
 
         return chapter.getId();

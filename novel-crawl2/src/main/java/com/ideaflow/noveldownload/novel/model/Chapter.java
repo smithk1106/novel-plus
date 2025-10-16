@@ -18,5 +18,6 @@ public class Chapter {
     private Integer wordCount = 0; // 字数
     @Builder.Default
     private Integer order = 0;
-
+    @Builder.Default
+    private Integer toOrder = 0;
 }

@@ -26,15 +26,28 @@ public class DownloadSendMessage {
      */
     private Integer downloadType;
     /**
-     * 开始章节
+     * 开始章节号
      */
     private Integer startChapter;
     /**
-     * 结束章节
+     * 结束章节号
      */
     private Integer endChapter;
     /**
      * 最新章节数
      */
     private Integer latestChapterCount;
+    /**
+     * 单章ID
+     * 例： URL(https://www.dxmwx.org/read/55178_48021105.html) -> ID(55178_48021105)
+     */
+    private String chapterId;
+    /**
+     * 更新目标章节号
+     */
+    private Integer toChapter;
+    /**
+     * 更新章节数
+     */
+    private Integer chapterCount;
 }

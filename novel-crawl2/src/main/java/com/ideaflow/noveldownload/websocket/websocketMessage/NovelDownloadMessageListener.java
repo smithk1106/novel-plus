@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.ideaflow.noveldownload.config.WebSocketContext;
@@ -120,6 +121,31 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
                     } else {
                         // 清空下载章节列表
                         // downloadCatalogs.clear();
+                    }
+                } else if (message.getDownloadType() == 3) {
+                    // 指定章节ID下载
+                    int startChapter = -1;
+                    int toChapter = message.getToChapter() != null ? message.getToChapter() : 0;
+                    int count = message.getChapterCount() != null ? message.getChapterCount() : 1;
+                    if (StringUtils.hasText(message.getChapterId())) {
+                        String chapterId = message.getChapterId().trim();
+                        for (int i = 0; i < catalogs.size(); i++) {
+                            if (catalogs.get(i).getUrl().contains(chapterId)) {
+                                startChapter = i;
+                                break;
+                            }
+                        }
+                    }
+                    if (startChapter < 0 || toChapter <= 0) {
+                        webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr("[E]章节下载参数不合法，请检查后重试。"));
+                        return;
+                    }
+                    if (catalogs.size() <= startChapter + count) {
+                        count = catalogs.size() - startChapter;
+                    }
+                    for (int n = 0; n < count; n++) {
+                        downloadCatalogs.add(catalogs.get(startChapter + n));
+                        downloadCatalogs.getLast().setOrder(toChapter + n);
                     }
                 }
     

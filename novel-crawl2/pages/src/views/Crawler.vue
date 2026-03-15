@@ -263,7 +263,6 @@ const selectDownloadTab = (index) => {
 // 确认下载
 const confirmDownload = () => {
   const downloadType = downloadTabs[downloadActiveTab.value].type
-
   const downloadParams = {
     searchResultId: selectedNovel.value.id,
     downloadType: downloadType,

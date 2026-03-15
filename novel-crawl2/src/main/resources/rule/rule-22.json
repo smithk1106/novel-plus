@@ -1,0 +1,51 @@
+{
+  "id": 22,
+  "url": "https://www.piaotia.com/",
+  "name": "飘天文学",
+  "comment": "搜索、详情、章节限流",
+  "language": "zh_CN",
+  "search": {
+    "url": "https://www.piaotia.com/modules/article/search.php",
+    "method": "post",
+    "data": "{searchtype: articlename, searchkey: %s, Submit: 搜 索}",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "result": "table.grid > tr",
+    "bookUrl": "td.odd > a@attr:href",
+    "bookName": "td.odd > a",
+    "author": "td:nth-child(3)",
+    "status": "td:nth-child(6)",
+    "latestChapter":"td.even > a",
+    "lastUpdateTime": "td:nth-child(5)",
+    "pagination": false
+  },
+  "book": {
+    "url": "https://www.piaotia.com/bookinfo/(.+?)\\.html",
+    "bookName": "table[width=\"100%\"] > tr > td[valign=\"middle\"] > span > h1",
+    "author": "table[width=\"100%\"] > tr:nth-child(2) > td[width=\"25%\"]:nth-child(2)@re:：(.+)",
+    "intro": "div[style=\"float:left;width:460px;\"]@re:内容简介：</span>([\\s\\S\\n]+)",
+    "category": "table[width=\"100%\"] > tr:nth-child(2) > td[width=\"25%\"]:nth-child(1)@re:：(.+)",
+    "coverUrl": "table[cellpadding=\"3\"] > tr > td[valign=\"top\"]:nth-child(2) > a > img@attr:src",
+    "latestChapter": "table[cellpadding=\"3\"] > tr > td[valign=\"top\"]:nth-child(2) > div > a",
+    "lastUpdateTime": "table[width=\"100%\"] > tr:nth-child(3) > td[width=\"25%\"]:nth-child(1)@re:：(.+)",
+    "status": "table[width=\"100%\"] > tr:nth-child(3) > td[width=\"25%\"]:nth-child(2)@re:：(.+)"
+  },
+  "toc": {
+    "item": "li > a",
+    "pagination": false,
+    "listUrl": "https://www.piaotia.com/html/%s/index.html",
+    "filterTxt": "[(（][^）)]*?[谢为求更]+[^）)]*?[）)]",
+    "timeout": 10
+  },
+  "chapter": {
+    "title": "#outer > div > p",
+    "content": "article",
+    "paragraphTagClosed": false,
+    "paragraphTag": "p",
+    "filterTxt": "\\(本章完\\)|第\\([^\\)]+\\)页|",
+    "filterTag": "head title",
+    "pagination": true,
+    "nextPage": "#next"
+  }
+}

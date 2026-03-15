@@ -11,6 +11,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.util.StringUtils;
 
 import com.ideaflow.noveldownload.config.WebSocketContext;
 import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
@@ -75,21 +76,23 @@ public class SearchParser extends Source {
             return Collections.emptyList();
         }
 
-        Response resp;
+        String searchUrl = r.getUrl().formatted(keyword);
+        String html = "";
         Document document;
         try {
-            Request.Builder builder = new Request.Builder().url(r.getUrl().formatted(keyword));
+            Request.Builder builder = new Request.Builder().url(searchUrl);
 
-            if (StrUtil.isNotBlank(r.getCookies())) {
-                builder.addHeader("Cookie", r.getCookies());
+            if (r.getHeaders() != null && r.getHeaders().size() > 0) {
+                r.getHeaders().forEach((k, v) -> {
+                    builder.addHeader(k, v);
+                });
             }
             if ("post".equalsIgnoreCase(r.getMethod())) {
-                builder = builder.post(CrawlUtils.buildData(r.getData(), keyword));
+                builder.post(CrawlUtils.buildData(r.getData(), keyword));
             }
 
-            resp = CrawlUtils.request(client, builder, r.getTimeout());
-            document = Jsoup.parse(resp.peekBody(Long.MAX_VALUE).string(), r.getBaseUri());
-            cn.hutool.core.lang.Console.log("[D]Request Url: {}", resp.request().url().url().toString());
+            html = CrawlUtils.requestHtml(client, builder, r.getTimeout());
+            document = Jsoup.parse(html, r.getBaseUri());
         } catch (Exception e) {
             String errorMsg = e.getMessage();
             if (errorMsg != null && (errorMsg.toLowerCase().contains("timeout") || errorMsg.toLowerCase().contains("timed out"))) {
@@ -99,7 +102,11 @@ public class SearchParser extends Source {
             return Collections.emptyList();
         }
 
-        List<SearchResult> firstPageResults = getSearchResults(null, resp);
+        List<SearchResult> firstPageResults = getSearchResults(searchUrl, html);
+        if (firstPageResults.size() == 0) {
+            cn.hutool.core.lang.Console.log("[!]搜索结果为空。Html: {}", html);
+        }
+
         // 搜索结果无分页
         if (!r.isPagination()) {
             return firstPageResults;
@@ -129,26 +136,29 @@ public class SearchParser extends Source {
         return CollUtil.sub(searchResults, 0, config.getSearchLimit());
     }
 
-    private List<SearchResult> getSearchResults(String url, Response resp) {
+    private List<SearchResult> getSearchResults(String url, String html) {
         Rule.Search r = this.rule.getSearch();
         List<SearchResult> list = new ArrayList<>();
         try {
             // 搜索结果页 DOM
             Document document;
-            if (resp == null) {
-                try (Response resp2 = CrawlUtils.request(client, url, r.getTimeout())) {
-                    // peekBody 不会关闭原body流，可以拿一份副本出来
-                    document = Jsoup.parse(resp2.peekBody(Long.MAX_VALUE).string(), r.getBaseUri());
-                }
+            if (html == null) {
+                html = CrawlUtils.requestHtml(client, url, r.getTimeout());
+                document = Jsoup.parse(html, r.getBaseUri());
+                // try (Response resp2 = CrawlUtils.request(client, url, r.getTimeout())) {
+                //     // peekBody 不会关闭原body流，可以拿一份副本出来
+                //     document = Jsoup.parse(resp2.peekBody(Long.MAX_VALUE).string(), r.getBaseUri());
+                // }
             } else {
-                document = Jsoup.parse(resp.peekBody(Long.MAX_VALUE).string(), r.getBaseUri());
+                document = Jsoup.parse(html, r.getBaseUri());
             }
 
             Elements resultEls = document.select(r.getResult());
+            cn.hutool.core.lang.Console.log("[D]Search result: {}", resultEls.html());
 
             // 部分书源完全匹配时会直接跳转到详情页（搜索结果为空 && 书名不为空），故需要构造搜索结果
             if (resultEls.isEmpty() && !document.select(this.rule.getBook().getBookName()).isEmpty()) {
-                String bookUrl = resp.request().url().toString();
+                String bookUrl = url;
                 BookParser bookParser = new BookParser(config);
                 Book book = bookParser.parse(bookUrl);
                 cn.hutool.core.lang.Console.log("[D][{}]Found book {}({})", this.rule.getName(), book.getBookName(), book.getAuthorName());
@@ -165,7 +175,8 @@ public class SearchParser extends Source {
                         .latestChapter(book.getLastChapterName())
                         .lastUpdateTime(DateUtil.format(book.getLastUpdateTime(), "yyyy-MM-dd HH:mm:ss"))
                         .build();
-                list.add(ChineseConverter.convert(sr, this.rule.getLanguage(), config.getLanguage()));
+                list.add(sr);
+                //list.add(ChineseConverter.convert(sr, this.rule.getLanguage(), config.getLanguage()));
                 Thread.sleep(CrawlUtils.randomInterval(config));
 
                 return list;
@@ -179,7 +190,16 @@ public class SearchParser extends Source {
 
             for (Element el : limitResultEls) {
                 // jsoup 不支持一次性获取属性的值
-                String href = JsoupUtils.selectAndInvokeJs(el, r.getBookName(), ContentType.ATTR_HREF);
+                String href = "";
+                if (StringUtils.hasText(r.getBookUrl())) {
+                    if (r.getBookUrl().startsWith("http")) {
+                        href = r.getBookUrl();
+                    } else {
+                        href = JsoupUtils.selectAndInvokeJs(el, r.getBookUrl());
+                    }
+                } else {
+                    href = JsoupUtils.selectAndInvokeJs(el, r.getBookName(), ContentType.ATTR_HREF);
+                }
                 String bookName = JsoupUtils.selectAndInvokeJs(el, r.getBookName());
                 // 以下为非必须属性
                 String author = JsoupUtils.selectAndInvokeJs(el, r.getAuthor());
@@ -204,15 +224,12 @@ public class SearchParser extends Source {
                         .wordCount(wordCount)
                         .build();
 
-                list.add(ChineseConverter.convert(sr, this.rule.getLanguage(), config.getLanguage()));
+                list.add(sr);
+                //list.add(ChineseConverter.convert(sr, this.rule.getLanguage(), config.getLanguage()));
             }
         } catch (Exception e) {
             Console.error(e);
             return Collections.emptyList();
-        } finally {
-            if (resp != null) {
-                resp.close();
-            }
         }
 
         return list;

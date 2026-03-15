@@ -1,5 +1,7 @@
 package com.ideaflow.noveldownload.novel.model;
 
+import java.util.Map;
+
 import lombok.Data;
 
 
@@ -27,7 +29,9 @@ public class Rule {
         private String method;
         private String data;
         private String cookies;
+        private Map<String, String> headers;
         private String result;
+        private String bookUrl;
         private String bookName;
         private String author;
         private String category;

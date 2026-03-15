@@ -5,13 +5,32 @@
   "comment": "搜索有CF",
   "language": "zh_CN",
   "needProxy": true,
+  "search": {
+    "url": "https://www.69shuba.com/modules/article/search.php",
+    "method": "post",
+    "data": "{searchkey: %s, Submit: 搜索}",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Origin": "https://www.69shuba.com"
+    },
+    "result": "div.newbox > ul > li",
+    "coverUrl": "img@attr:data-src",
+    "bookUrl": "div.newnav > h3 > a@attr:href",
+    "bookName": "div.newnav > h3 > a",
+    "author": "div.newnav > div.labelbox > label:nth-child(1)",
+    "category": "div.newnav > div.labelbox > label:nth-child(2)",
+    "status": "div.newnav > div.labelbox > label:nth-child(3)",
+    "latestChapter": "div.newnav > div.zxzj > p@re:<span>最近章节</span>(.+)",
+    "lastUpdateTime": "div.newnav > div.zxzj > span",
+    "pagination": false
+  },
   "book": {
     "url": "https://www.69shuba.com/book/(.*?).htm",
     "bookName": "meta[property=\"og:novel:book_name\"]",
     "author": "meta[property=\"og:novel:author\"]",
     "intro": "meta[property=\"og:description\"]",
     "category": "meta[property=\"og:novel:category\"]",
-    "coverUrl": "meta[property=\"og:image\"]",
+    "coverUrl": "img[property=\"data-src\"]",
     "latestChapter": "meta[property=\"og:novel:latest_chapter_name\"]",
     "lastUpdateTime": "meta[property=\"og:novel:update_time\"]",
     "status": "meta[property=\"og:novel:status\"]"

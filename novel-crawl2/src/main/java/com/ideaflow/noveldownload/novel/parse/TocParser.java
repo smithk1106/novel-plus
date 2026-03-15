@@ -71,10 +71,8 @@ public class TocParser extends Source {
         List<String> urls = new ArrayList<>();
         urls.add(url);
 
-        Document document;
-        try (Response resp = CrawlUtils.request(client, url, ruleBook.getTimeout())) {
-            document = Jsoup.parse(resp.body().string(), ruleToc.getBaseUri());
-        }
+        String html = CrawlUtils.requestHtml(client, url, ruleBook.getTimeout());
+        Document document = Jsoup.parse(html, ruleToc.getBaseUri());
 
         if (ruleToc.isPagination()) {
             extractPaginationUrls(urls, document, ruleToc);
@@ -140,9 +138,8 @@ public class TocParser extends Source {
             if (StrUtil.isEmpty(nextUrl) || !Validator.isUrl(nextUrl)) break;
             urls.add(nextUrl);
 
-            try (Response resp = CrawlUtils.request(client, nextUrl, r.getTimeout())) {
-                document = Jsoup.parse(resp.body().string(), this.rule.getToc().getBaseUri());
-            }
+            String html = CrawlUtils.requestHtml(client, nextUrl, r.getTimeout());
+            document = Jsoup.parse(html, this.rule.getToc().getBaseUri());
 
             Thread.sleep(CrawlUtils.randomInterval(config));
         }
@@ -160,14 +157,11 @@ public class TocParser extends Source {
 
         // TODO 多线程优化
         for (String url : urls) {
-            Document document;
-            try (Response resp = CrawlUtils.request(client, url, r.getTimeout())) {
-                if (resp.isSuccessful()) {
-                    document = Jsoup.parse(resp.body().string(), this.rule.getToc().getBaseUri());
-                } else {
-                    break;
-                }
+            String html = CrawlUtils.requestHtml(client, url, r.getTimeout());
+            if (StrUtil.isEmpty(html)) {
+                break;
             }
+            Document document = Jsoup.parse(html, this.rule.getToc().getBaseUri());
 
             // TODO rule.toc.item 实现 JS 语法，在此调用比 addChapter 性能更好
             List<Element> elements;

@@ -8,7 +8,9 @@
     "url": "https://www.shuhaige.net/search.html",
     "method": "post",
     "data": "{searchkey: %s, searchtype: all}",
-    "cookies": "waf_sc=''; HMACCOUNT=''",
+    "headers": {
+      "Cookie": "waf_sc=''; HMACCOUNT=''"
+    },
     "result": "#sitembox > dl",
     "bookName": "dd > h3 > a",
     "author": "dd:nth-child(3) > span:nth-child(1)",
@@ -33,13 +35,13 @@
   "toc": {
     "item": "#list > dl > dd > a",
     "offset": 12,
-    "filterTxt": "（.+?更）"
+    "filterTxt": "[(（][^）)]*?[谢为求更]+[^）)]*?[）)]"
   },
   "chapter": {
     "title": ".bookname > h1",
     "content": "#content",
     "paragraphTagClosed": true,
-    "filterTxt": "本小章还未完，请点击下一页继续阅读后面精彩内容！|小主，这个章节后面还有哦，请点击下一页继续阅读，后面更精彩！|这章没有结束，请点击下一页继续阅读！|<p>喜欢.+?请大家收藏：(.*?).*?书海阁小说网更新速度全网最快。|\\(本章完\\)",
+    "filterTxt": "本小章还未完.+?！|小主.+?后面更精彩！|这章没有结束.+?！|<p>喜欢.+?请大家收藏：(.*?).*?书海阁小说网更新速度全网最快。|\\(本章完\\)",
     "filterTag": "div hr script table",
     "pagination": true,
     "nextPage": "#pager_next"

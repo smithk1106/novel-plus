@@ -28,13 +28,14 @@
   },
   "toc": {
     "url": "https://www.dxmwx.org/chapter/%s.html",
-    "item": "div:nth-child(2n+5) > span > a"
+    "item": "div:nth-child(2n+5) > span > a",
+    "filterTxt": "[(（][^）)]*?[谢为求更]+[^）)]*?[）)]"
   },
   "chapter": {
     "title": "#ChapterTitle",
     "content": "#Lab_Contents",
     "paragraphTagClosed": true,
-    "filterTxt": "\\(本章完\\)|\\(.*?未完.*?\\)|[\\(（].*?如果您喜欢.*?[\\)）]",
+    "filterTxt": "\\(本章完\\)|\\(本章未完.*?\\)|第\\([1-9/]+\\)页",
     "filterTag": ""
   }
 }

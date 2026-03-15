@@ -24,6 +24,7 @@ import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.novel.model.SearchResult;
 import com.ideaflow.noveldownload.novel.parse.TocParser;
+import com.ideaflow.noveldownload.novel.util.CrawlUtils;
 import com.ideaflow.noveldownload.service.AppConfigService;
 import com.ideaflow.noveldownload.service.BookService;
 import com.ideaflow.noveldownload.websocket.config.WebSocketThreadLocal;
@@ -151,6 +152,18 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
     
                 String r1 =  String.format("[i]你选择了《%s》(%s)，共计 %s 章 数据源:%s %s,开始下载全本,请稍后",searchResult.getBookName(),searchResult.getAuthor(),catalogs.size(),config.getSourceId(),searchResult.getUrl());
                 webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(r1));
+                
+                // 为防止被屏蔽，取得章节后稍等一下
+                long interval = CrawlUtils.randomInterval(config);
+                long waitTime = 0;
+                while (waitTime < interval) {
+                    Thread.sleep(1000);
+                    if (WebSocketContext.isNeedStop(searchResult.getUrl())) {
+                        webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]下载中止！")));
+                        return;
+                    }
+                    waitTime += 1000;
+                }
     
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
@@ -168,6 +181,8 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
                 } else {
                     webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]下载中止！总耗时 %s秒", NumberUtil.round(totalTimeSeconds, 2))));
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             } finally {
                 WebSocketContext.clearSessionId();
                 WebSocketContext.clearSender();

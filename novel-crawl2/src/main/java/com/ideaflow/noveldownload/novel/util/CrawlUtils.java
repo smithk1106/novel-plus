@@ -6,10 +6,18 @@ import com.ideaflow.noveldownload.novel.model.AppConfig;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import okhttp3.*;
-
+import okio.Buffer;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.springframework.http.HttpStatusCode;
+import org.springframework.web.client.HttpClientErrorException;
 
 
 /**
@@ -22,21 +30,21 @@ public class CrawlUtils {
 
     // 构建 POST Body
     public static RequestBody buildData(String jsonStr, String... args) {
-        FormBody.Builder from = new FormBody.Builder();
+        FormBody.Builder form = new FormBody.Builder();
         AtomicInteger i = new AtomicInteger(0);
 
         JSONUtil.parseObj(jsonStr)
                 .forEach((key, value) -> {
                     if ("%s".equals(value)) {
                         if (i.get() < args.length) {
-                            from.add(key, args[i.getAndIncrement()]);
+                            form.add(key, args[i.getAndIncrement()]);
                         }
                     } else {
-                        from.add(key, value.toString());
+                        form.add(key, value.toString());
                     }
                 });
 
-        return from.build();
+        return form.build();
     }
 
     public long randomInterval(AppConfig config) {
@@ -64,25 +72,95 @@ public class CrawlUtils {
                     .replaceAll("[\\r\\n]+", "\n");
     }
 
-    @SneakyThrows
-    public Response request(OkHttpClient client, String url, int timeout) {
-        Call call = client.newCall(new Request.Builder()
-                .url(url)
-                .addHeader("User-Agent", RandomUA.generate()).build());
-        call.timeout().timeout(timeout, TimeUnit.SECONDS);
+    // @SneakyThrows
+    // public Response request(OkHttpClient client, String url, int timeout) {
+    //     Call call = client.newCall(new Request.Builder()
+    //             .url(url)
+    //             .addHeader("User-Agent", RandomUA.generate())
+    //             .build());
+    //     call.timeout().timeout(timeout, TimeUnit.SECONDS);
+    //     dumpRequestInfo(call.request());    // DEBUG
 
-        return call.execute();
-    }
+    //     return call.execute();
+    // }
+
+    // @SneakyThrows
+    // public Response request(OkHttpClient client, Request.Builder builder, int timeout) {
+    //     Call call = client.newCall(builder
+    //             .addHeader("User-Agent", RandomUA.generate())
+    //             .build()
+    //     );
+    //     call.timeout().timeout(timeout, TimeUnit.SECONDS);
+    //     dumpRequestInfo(call.request());    // DEBUG
+
+    //     return call.execute();
+    // }
 
     @SneakyThrows
-    public Response request(OkHttpClient client, Request.Builder builder, int timeout) {
+    public String requestHtml(OkHttpClient client, Request.Builder builder, int timeout) {
         Call call = client.newCall(builder
                 .addHeader("User-Agent", RandomUA.generate())
                 .build()
         );
         call.timeout().timeout(timeout, TimeUnit.SECONDS);
+        dumpRequestInfo(call.request());    // DEBUG
 
-        return call.execute();
+        String html = "";
+        try (Response resp = call.execute()) {
+            byte[] htmlBytes = resp.body().bytes();
+            if (resp.isSuccessful()) {
+                // Get text encoding from header
+                if (resp.body().contentType() != null) {
+                    Charset charset = resp.body().contentType().charset();
+                    cn.hutool.core.lang.Console.log("[D]Response charset from header: {}", charset);
+                    if (charset != null) {
+                        html = new String(htmlBytes, charset);
+                    }
+                }
+
+                // Get text encoding from html
+                if (html.length() == 0) {
+                    String tmpHtml = new String(htmlBytes, StandardCharsets.UTF_8);
+                    Pattern extractCharset = Pattern.compile("<meta charset=\"([^\"]+)\">");
+                    Matcher matcher = extractCharset.matcher(tmpHtml);
+                    if (matcher.find()) {
+                        cn.hutool.core.lang.Console.log("[D]Response charset from body: {}", matcher.group(1));
+                        html = new String(htmlBytes, matcher.group(1));
+                    }
+                }
+
+                // Default
+                if (html.length() == 0) {
+                    html = new String(htmlBytes, StandardCharsets.UTF_8);
+                }
+            } else {
+                cn.hutool.core.lang.Console.log("[E]Code: {}, Html: {}", resp.code(), new String(htmlBytes, StandardCharsets.UTF_8));
+                throw new HttpClientErrorException(HttpStatusCode.valueOf(resp.code()), resp.message());
+            }
+        }
+
+        return html;
     }
 
+    @SneakyThrows
+    public String requestHtml(OkHttpClient client, String url, int timeout) {
+        return requestHtml(client, new Request.Builder().url(url), timeout);
+    }
+
+    private void dumpRequestInfo(Request request) {
+        cn.hutool.core.lang.Console.log("[D]{} {}", request.method(), request.url().url().toString());
+        cn.hutool.core.lang.Console.log("[D]Headers");
+        request.headers().forEach(header -> {
+            cn.hutool.core.lang.Console.log("  {}: {}", header.component1(), header.component2());
+        });
+        if (request.body() != null) {
+            try {
+                final Buffer buf = new Buffer();
+                request.body().writeTo(buf);
+                cn.hutool.core.lang.Console.log("[D]Data: [{}]{}", request.body().contentLength(), buf.readUtf8());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

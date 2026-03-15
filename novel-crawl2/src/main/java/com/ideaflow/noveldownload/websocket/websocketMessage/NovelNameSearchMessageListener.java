@@ -77,8 +77,6 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
         webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]数据源:%s", config.getSourceId())));
         // 查找数据
         List<SearchResult> results = new Crawler(config, novelService).search(message.getBookName());
-
-
         List<SearchResultEntity> insertList = results.stream().filter(v->{
             if (isExact){
                 if ( v.getBookName().equals(message.getBookName()) || v.getAuthor().equals(message.getBookName()) ) {

@@ -5,6 +5,7 @@ import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CON
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.ideaflow.noveldownload.config.WebSocketContext;
 import com.ideaflow.noveldownload.novel.context.BookContext;
@@ -46,12 +47,9 @@ public class ChapterParser extends Source {
     @SneakyThrows
     public Chapter testParse(Chapter chapter) {
         Rule.Chapter r = this.rule.getChapter();
-        Document document;
         OkHttpClient client = HttpClientContext.get();
-
-        try (Response resp = CrawlUtils.request(client, chapter.getUrl(), r.getTimeout())) {
-            document = Jsoup.parse(resp.body().string(), r.getBaseUri());
-        }
+        String html = CrawlUtils.requestHtml(client, chapter.getUrl(), r.getTimeout());
+        Document document = Jsoup.parse(html, r.getBaseUri());
 
         chapter.setTitle(JsoupUtils.selectAndInvokeJs(document, r.getTitle()));
         String content = fetchContent(chapter.getUrl(), RandomUtil.randomInt(100, 200));
@@ -81,10 +79,14 @@ public class ChapterParser extends Source {
             // } else {
             //     return chapterConverter.convert(chapter);
             // }
+        } catch (HttpClientErrorException e) {
+            log.error(String.format("[E]Bad response: %d %s", e.getStatusCode().value(), e.getMessage()));
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             Chapter retryChapter = retry(chapter, e.getMessage());
-            return retryChapter == null ? null : ChineseConverter.convert(retryChapter, this.rule.getLanguage(), config.getLanguage());
+            return retryChapter;
+            //return retryChapter == null ? null : ChineseConverter.convert(retryChapter, this.rule.getLanguage(), config.getLanguage());
         }
     }
 
@@ -138,9 +140,11 @@ public class ChapterParser extends Source {
     @SneakyThrows
     private String fetchSinglePageContent(String url, long interval, Rule.Chapter r) {
         OkHttpClient client = HttpClientContext.get();
+        String html = CrawlUtils.requestHtml(client, url, r.getTimeout());
 
-        try (Response resp = CrawlUtils.request(client, url, r.getTimeout())) {
-            Document doc = Jsoup.parse(resp.body().string(), r.getBaseUri());
+        if (StrUtil.isNotBlank(html)) {
+            //cn.hutool.core.lang.Console.log("[D]Html: {}", html);
+            Document doc = Jsoup.parse(html, r.getBaseUri());
 
             Elements contentEls = JsoupUtils.select(doc, r.getContent());
             JsoupUtils.clearAllAttributes(contentEls);
@@ -149,6 +153,7 @@ public class ChapterParser extends Source {
 
             return JsoupUtils.invokeJs(r.getContent(), contentEls.html());
         }
+        return "";
     }
 
     @SneakyThrows
@@ -158,10 +163,8 @@ public class ChapterParser extends Source {
         OkHttpClient client = HttpClientContext.get();
 
         while (true) {
-            Document doc;
-            try (Response resp = CrawlUtils.request(client, nextUrl, r.getTimeout())) {
-                doc = Jsoup.parse(resp.body().string(), r.getBaseUri());
-            }
+            String html = CrawlUtils.requestHtml(client, nextUrl, r.getTimeout());
+            Document doc = Jsoup.parse(html, r.getBaseUri());
 
             String content = JsoupUtils.selectAndInvokeJs(doc, r.getContent(), ContentType.HTML);
             // String ==> Elements

@@ -19,7 +19,6 @@ import com.ideaflow.noveldownload.novel.util.JsoupUtils;
 import cn.hutool.core.util.StrUtil;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
-import okhttp3.Response;
 
 
 public class BookParser extends Source {
@@ -34,24 +33,25 @@ public class BookParser extends Source {
     public Book parse(String url) {
         Rule.Book r = this.rule.getBook();
 
-        Document document;
-        try (Response resp = CrawlUtils.request(client, url, r.getTimeout())) {
-            document = Jsoup.parse(resp.body().string(), r.getBaseUri());
-        }
+        String html = CrawlUtils.requestHtml(client, url, r.getTimeout());
+        Document document = Jsoup.parse(html, r.getBaseUri());
 
-        String bookName = JsoupUtils.selectAndInvokeJs(document, r.getBookName(), getContentType(r.getBookName()));
-        String author = JsoupUtils.selectAndInvokeJs(document, r.getAuthor(), getContentType(r.getAuthor()));
-        String intro = CrawlUtils.replaceIntroTags(JsoupUtils.selectAndInvokeJs(document, r.getIntro(), getContentType(r.getIntro(), ContentType.HTML)));
-        String coverUrl = JsoupUtils.selectAndInvokeJs(document, r.getCoverUrl(), getContentType(r.getCoverUrl(), ContentType.ATTR_SRC));
+        String bookName = JsoupUtils.selectAndInvokeJs(document, r.getBookName());
+        String author = JsoupUtils.selectAndInvokeJs(document, r.getAuthor());
+        String intro = CrawlUtils.replaceIntroTags(JsoupUtils.selectAndInvokeJs(document, r.getIntro(), JsoupUtils.getContentType(r.getIntro(), ContentType.HTML)));
+        if (intro.length() > 2000) {
+            intro = intro.substring(0, 1995) + "...";
+        }
+        String coverUrl = JsoupUtils.selectAndInvokeJs(document, r.getCoverUrl(), JsoupUtils.getContentType(r.getCoverUrl(), ContentType.ATTR_SRC));
         if (StrUtil.isNotBlank(coverUrl) && coverUrl.startsWith("//")) {
             coverUrl = url.substring(0, url.indexOf(':') + 1) + coverUrl;
         }
         // 以下为非必须属性
-        String categoryStr = JsoupUtils.selectAndInvokeJs(document, r.getCategory(), getContentType(r.getCategory()));
-        String latestChapter = JsoupUtils.selectAndInvokeJs(document, r.getLatestChapter(), getContentType(r.getLatestChapter()));
-        String lastUpdateTime = JsoupUtils.selectAndInvokeJs(document, r.getLastUpdateTime(), getContentType(r.getLastUpdateTime()));
-        String status = JsoupUtils.selectAndInvokeJs(document, r.getStatus(), getContentType(r.getStatus()));
-        String wordCount = JsoupUtils.selectAndInvokeJs(document, r.getWordCount(), getContentType(r.getWordCount()));
+        String categoryStr = JsoupUtils.selectAndInvokeJs(document, r.getCategory());
+        String latestChapter = JsoupUtils.selectAndInvokeJs(document, r.getLatestChapter());
+        String lastUpdateTime = JsoupUtils.selectAndInvokeJs(document, r.getLastUpdateTime());
+        String status = JsoupUtils.selectAndInvokeJs(document, r.getStatus());
+        String wordCount = JsoupUtils.selectAndInvokeJs(document, r.getWordCount());
         EnumBookCategory category = guessCategory(categoryStr);
         if (category == EnumBookCategory.UNKNOWN) {
             category = guessCategory(bookName);
@@ -67,7 +67,7 @@ public class BookParser extends Source {
         book.setCatName(category.getDescription());
         book.setLastChapterName(latestChapter);
         book.setLastUpdateTime(FormatUtils.parseDate(lastUpdateTime, null));
-        book.setBookStatus(status != null && status.contains("完结") ? (byte)1 : (byte)0);
+        book.setBookStatus(status != null && (status.contains("完结") || status.contains("全本")) ? (byte)1 : (byte)0);
         book.setWordCount(FormatUtils.parseInt(wordCount, 0));
         book.setSaveType(config.getExtName());
 
@@ -103,24 +103,4 @@ public class BookParser extends Source {
 
         return bookCategory;
     }
-    
-
-    private ContentType getContentType(String query, ContentType defContentType) {
-        if (StrUtil.isEmpty(query)) {
-            return defContentType;
-        }
-        ContentType contentType = defContentType;
-        if (query.startsWith("meta[")) {
-            contentType = ContentType.ATTR_CONTENT;
-        } else if (query.endsWith("img") || query.lastIndexOf("img@") >= 0) {
-            contentType = ContentType.ATTR_SRC;
-        }
-
-        return contentType;
-    }
-
-    private ContentType getContentType(String query) {
-        return getContentType(query, ContentType.TEXT);
-    }
-
 }

@@ -93,6 +93,7 @@ public class Crawler {
      */
     @SneakyThrows
     public Book crawl(String bookUrl, List<Chapter> toc, int digitCount) {
+        cn.hutool.core.lang.Console.log("[D]BookUrl: {}, Chapters: {}", bookUrl, toc.size());
         Book book = new BookParser(config).parse(bookUrl);
         BookContext.set(book);
         WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
@@ -209,7 +210,7 @@ public class Crawler {
                 Chapter chapter = chapterParser.parse(item);
                 if (chapter == null || chapter.getContent().isBlank()) {
                     String msg;
-                    if (chapter.getContent().isBlank()) {
+                    if (chapter != null && chapter.getContent().isBlank()) {
                         msg = String.format("[E][%d/%d]章节下载失败, 请检查'rule-%s.json'的设定是否正确。%s, %s", toc.size() - latch.getCount() + 1, toc.size(), config.getSourceId(), item.getTitle(), item.getUrl());
                     } else {
                         msg = String.format("[E][%d/%d]章节下载失败: %s, %s", toc.size() - latch.getCount() + 1, toc.size(), item.getTitle(), item.getUrl());

@@ -30,7 +30,7 @@ public class BookSpVO {
 
     private Long updatePeriod;
 
-    @Pattern(regexp = "^(last_index_update_time|word_count|visit_count)$")
+    @Pattern(regexp = "^(last_index_update_time|word_count|visit_count|last_added)$")
     private String sort;
 
 

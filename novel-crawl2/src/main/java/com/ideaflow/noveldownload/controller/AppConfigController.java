@@ -53,7 +53,9 @@ public class AppConfigController {
             new SourceInfoVO(18, "悠久小说网", true, false, true, ""),
             new SourceInfoVO(19, "阅读库", true, true, true, ""),
             new SourceInfoVO(20, "顶点小说", true, true, true, "搜索、详情、章节限流"),
-            new SourceInfoVO(21, "笔趣阁", true, true, true, "搜索、详情、章节限流")
+            new SourceInfoVO(21, "笔趣阁", true, true, true, "搜索、详情、章节限流"),
+            new SourceInfoVO(22, "飘天文学", true, true, true, "搜索、详情"),
+            new SourceInfoVO(23, "台灣小說網", true, true, true, "搜索、详情")
         );
         return CommonResult.success(sourceInfoVOS);
     }

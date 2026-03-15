@@ -1,0 +1,42 @@
+{
+  "id": 23,
+  "url": "https://twkan.com/",
+  "name": "台灣小說網",
+  "comment": "搜索无限流",
+  "language": "zh_Hant",
+  "search": {
+    "url": "https://twkan.com/search/%s/1.html",
+    "method": "get",
+    "result": "#article_list_content > li",
+    "bookName": "a.imgbox > img@attr:alt",
+    "author": "div.labelbox > label:nth-child(1)",
+    "category": "div.labelbox > label:nth-child(2)",
+    "status": "div.labelbox > label:nth-child(3)",
+    "latestChapter": "div.zxzj > p > a",
+    "pagination": false
+  },
+  "book": {
+    "url": "https://twkan.com/book/(.+?)\\.html",
+    "bookName": "meta[property=\"og:novel:book_name\"]",
+    "author": "meta[property=\"og:novel:author\"]",
+    "coverUrl": "div.bookimg2 > img",
+    "category": "meta[property=\"og:novel:category\"]",
+    "intro": "meta[property=\"og:description\"]",
+    "latestChapter": "meta[property=\"og:novel:latest_chapter_name\"]",
+    "lastUpdateTime": "meta[property=\"og:novel:update_time\"]",
+    "status": "meta[property=\"og:novel:status\"]"
+  },
+  "toc": {
+    "url": "https://twkan.com/ajax_novels/chapterlist/%s.html",
+    "item": "ul > li > a",
+    "filterTxt": "[(（][^）)]*?(求月票|求訂閱)+[^）)]*?[）)]"
+  },
+  "chapter": {
+    "title": "div.txtnav > h1",
+    "content": "#txtcontent0",
+    "paragraphTagClosed": false,
+    "filterTxt": "[【（].*?台灣小說網.*?[）】]",
+    "filterTag": "",
+    "pagination": false
+  }
+}

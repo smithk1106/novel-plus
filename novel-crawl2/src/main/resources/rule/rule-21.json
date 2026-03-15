@@ -9,6 +9,7 @@
     "method": "get",
     "data": "{q: %s, Submit: 搜索}",
     "result": "section > div.container > div > div.row > div",
+    "bookUrl": "dl > dd > h3 > a@attr:href",
     "bookName": "dl > dd > h3 > a@re:\\[[^\\]]+\\](.+)",
     "author": "dl > dd > span@re:(.+)<*",
     "status": "dl > dd:nth-child(4)@re:状态：(.+)",
@@ -33,7 +34,7 @@
     "bookUrl": "/biquge/(.*?)/",
     "listUrl": "https://www.fsshu.com/biquge/%s/index_%d.html",
     "pageCount": "ul.pagination > li:nth-child(1) > a.page-link@re:[0-9]+/([0-9]+)",
-    "filterTxt": "（.+?更）",
+    "filterTxt": "[(（][^）)]*?[谢为求更]+[^）)]*?[）)]",
     "timeout": 10
   },
   "chapter": {
@@ -41,7 +42,7 @@
     "content": "article",
     "paragraphTagClosed": false,
     "paragraphTag": "p",
-    "filterTxt": "\\(本章完\\)|第\\([^\\)]+\\)页",
+    "filterTxt": "\\(本章完\\)|第\\([^\\)]+\\)页|",
     "filterTag": "head title",
     "pagination": true,
     "nextPage": "#next"

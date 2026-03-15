@@ -20,8 +20,10 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class JsoupUtils {
 
+    public static final String SEPARATOR_PATTERN = "@[a-z]+?:";
     public static final String JS_SEPARATOR = "@js:";
     public static final String REGEXP_SEPARATOR = "@re:";
+    public static final String ATTR_SEPARATOR = "@attr:";
 
     /**
      * 使用查询条件选择元素
@@ -55,7 +57,7 @@ public class JsoupUtils {
     }
 
     public String selectAndInvokeJs(Element el, String query) {
-        return selectAndInvokeJs(el, query, ContentType.TEXT);
+        return selectAndInvokeJs(el, query, getContentType(query, ContentType.TEXT));
     }
 
     /**
@@ -68,7 +70,7 @@ public class JsoupUtils {
             return "";
         }
 
-        String[] parts = query.contains(JS_SEPARATOR) ? query.split(JS_SEPARATOR) : query.split(REGEXP_SEPARATOR);
+        String[] parts = query.split(SEPARATOR_PATTERN);
         String actualQuery = parts[0];
 
         // 根据查询条件选择元素
@@ -76,30 +78,29 @@ public class JsoupUtils {
         if (els.isEmpty()) return "";
 
         // 获取选中元素的内容
-        String result = els.size() == 1
-                ? getContentByType(els.first(), contentType)
-                : getContentByType(els, contentType);
-
-        // 追加处理
-        if (parts.length >= 2) {
-            if (query.contains(JS_SEPARATOR)) {
-                // 如果查询条件包含 JS，调用它
-                result = invokeJs(query, result);
-            } else if (query.contains(REGEXP_SEPARATOR)) {
-                // 如果查询条件包含正则表达式，应用它
-                Pattern p = Pattern.compile(parts[1]);
-                Matcher m = p.matcher(result);
-                String needText = "";
-                while (m.find()) {
-                    for (int i = 1; i <= m.groupCount(); i++) {
-                        needText += m.group(i).trim();
-                    }
-                }
-                if (!needText.isBlank()) {
-                    result = needText;
-                    cn.hutool.core.lang.Console.log("[D]Pattern: {}, Matched: {}", parts[1], needText);
+        Object element = els.size() == 1 ? els.first() : els;
+        String result = "";
+        if (query.contains(ATTR_SEPARATOR)) {
+            result = getContentByType(element, ATTR_ANY, parts[1].trim());
+        } else if (query.contains(JS_SEPARATOR)) {
+            // 如果查询条件包含 JS，调用它
+            result = invokeJs(query, getContentByType(element, contentType, ""));
+        } else if (query.contains(REGEXP_SEPARATOR)) {
+            // 如果查询条件包含正则表达式，应用它
+            Pattern p = Pattern.compile(parts[1].trim());
+            Matcher m = p.matcher(getContentByType(element, HTML, ""));
+            String needText = "";
+            while (m.find()) {
+                for (int i = 1; i <= m.groupCount(); i++) {
+                    needText += m.group(i).trim();
                 }
             }
+            if (!needText.isBlank()) {
+                result = needText;
+                cn.hutool.core.lang.Console.log("[D]Pattern: {}, Matched: {}", parts[1], needText);
+            }
+        } else {
+            result = getContentByType(element, contentType, "");
         }
 
         return result;
@@ -117,33 +118,65 @@ public class JsoupUtils {
         return StrUtil.isNotEmpty(js) ? invokeJs(js, result) : result;
     }
 
+    public ContentType getContentType(String query, ContentType defContentType) {
+        if (StrUtil.isEmpty(query)) {
+            return defContentType;
+        }
+        ContentType contentType = defContentType;
+        if (query.startsWith("meta[")) {
+            contentType = ContentType.ATTR_CONTENT;
+        } else if (query.endsWith("img") || query.lastIndexOf("img@") >= 0) {
+            contentType = ContentType.ATTR_SRC;
+        }
+
+        return contentType;
+    }
+
+    public ContentType getContentType(String query) {
+        return getContentType(query, ContentType.TEXT);
+    }
+
     /**
      * 提取内容的公共方法
      */
-    private String getContentByType(Object obj, ContentType contentType) {
+    private String getContentByType(Object obj, ContentType contentType, String attribute) {
+        String result = "";
         if (obj instanceof Element el) {
-            return switch (contentType) {
-                case TEXT -> el.text();
-                case HTML -> el.html();
-                case ATTR_SRC -> el.absUrl(ATTR_SRC.getValue());
-                case ATTR_HREF -> el.absUrl(ATTR_HREF.getValue());
-                // 以下 2 个切勿改为 absUrl
-                case ATTR_CONTENT -> el.attr(ATTR_CONTENT.getValue());
-                case ATTR_VALUE -> el.attr(ATTR_VALUE.getValue());
-            };
-
+            if (contentType == ATTR_ANY) {
+                if (attribute.toLowerCase().contains(ATTR_SRC.getValue()) || attribute.toLowerCase().contains(ATTR_HREF.getValue())) {
+                    result = el.absUrl(attribute);
+                } else {
+                    result = el.attr(attribute);
+                }
+            } else {
+                result = switch (contentType) {
+                    case TEXT -> el.text();
+                    case HTML -> el.html();
+                    case ATTR_SRC -> el.absUrl(ATTR_SRC.getValue());
+                    case ATTR_HREF -> el.absUrl(ATTR_HREF.getValue());
+                    // 以下 2 个切勿改为 absUrl
+                    case ATTR_CONTENT -> el.attr(ATTR_CONTENT.getValue());
+                    case ATTR_VALUE -> el.attr(ATTR_VALUE.getValue());
+                    case ATTR_ANY -> el.attr(attribute);
+                };
+            }
         } else if (obj instanceof Elements els) {
-            return switch (contentType) {
+            result = switch (contentType) {
                 case TEXT -> els.text();
                 case HTML -> els.html();
                 case ATTR_SRC -> els.attr(ATTR_SRC.getValue());
                 case ATTR_HREF -> els.attr(ATTR_HREF.getValue());
                 case ATTR_CONTENT -> els.attr(ATTR_CONTENT.getValue());
                 case ATTR_VALUE -> els.attr(ATTR_VALUE.getValue());
+                case ATTR_ANY -> els.attr(attribute);
             };
         }
 
-        return "";
+        return result;
+    }
+
+    private String getContentByType(Object obj, ContentType contentType) {
+        return getContentByType(obj, contentType, "");
     }
 
     /**
@@ -154,6 +187,4 @@ public class JsoupUtils {
             el.clearAttributes();
         }
     }
-
-
 }

@@ -28,7 +28,7 @@
     "item": "div:nth-child(4) > ul > li > a",
     "pagination": true,
     "nextPage": "#indexselect > option",
-    "filterTxt": "（.+?更）"
+    "filterTxt": "[(（][^）)]*?[谢为求更]+[^）)]*?[）)]"
   },
   "chapter": {
     "title": ".title",

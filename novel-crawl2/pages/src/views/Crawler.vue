@@ -231,7 +231,8 @@ const downloadConfig = ref({
   latestChapterCount: 10,
   chapterId: '',
   toChapter: 0,
-  chapterCount: 1
+  chapterCount: 1,
+  allowOverwrite: false
 })
 
 // 打开下载配置弹窗
@@ -246,7 +247,8 @@ const openDownloadModal = (novel) => {
     latestChapterCount: 10,
     chapterId: '',
     toChapter: 0,
-    chapterCount: 1
+    chapterCount: 1,
+    allowOverwrite: false
   }
 }
 
@@ -266,6 +268,7 @@ const confirmDownload = () => {
   const downloadParams = {
     searchResultId: selectedNovel.value.id,
     downloadType: downloadType,
+    allowOverwrite: downloadConfig.value.allowOverwrite,
     action: "start"
   }
 
@@ -598,6 +601,13 @@ const confirmDownload = () => {
                   placeholder="章节数"
               />
             </div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="w-full py-2">
+            <input id="chkAllowOverwrite" type="checkbox" v-model="downloadConfig.allowOverwrite" class="px-4" />
+            <label for="chkAllowOverwrite" class="text-sm text-slate-600">覆盖现有章节</label>
           </div>
         </div>
 

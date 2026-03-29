@@ -201,13 +201,23 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    public boolean isChapterExists(Chapter chapter) {
+        LambdaQueryWrapper<BookIndexEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.allEq(Map.of(
+            BookIndexEntity::getBookId, chapter.getBookId(),
+            BookIndexEntity::getIndexNum, chapter.getOrder()
+        ));
+        return bookIndexMapper.exists(queryWrapper);
+    }
+
+    @Override
     public Long saveChapter(Chapter chapter) {
         LambdaQueryWrapper<BookIndexEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.allEq(Map.of(
             BookIndexEntity::getBookId, chapter.getBookId(),
             BookIndexEntity::getIndexNum, chapter.getOrder()
         ));
-        Boolean isOK = true;
+        boolean isOK = true;
         BookIndexEntity entity = bookIndexMapper.selectOne(queryWrapper);
         if (entity == null) {
             BookIndexEntity bookIndexEntity = mergeChapterToEntity(chapter, null);

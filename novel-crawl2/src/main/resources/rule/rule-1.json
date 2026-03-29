@@ -1,36 +1,40 @@
 {
   "id": 1,
-  "url": "http://www.xbiqugu.la/",
-  "name": "香书小说",
-  "comment": "无限流",
+  "url": "https://www.hetushu.com/",
+  "name": "和图书",
+  "comment": "限流",
   "language": "zh_CN",
   "search": {
-    "url": "http://www.xbiqugu.la/modules/article/waps.php",
-    "method": "post",
-    "data": "{searchkey: %s}",
-    "result": "#checkform > table > tbody > tr",
-    "bookName": "td.even > a",
-    "author": "td:nth-of-type(3)",
-    "latestChapter": "td.odd > a",
-    "lastUpdateTime": "td:nth-of-type(4)"
+    "useBrowser": true,
+    "url": "https://www.hetushu.com/search/?keyword=%s",
+    "method": "get",
+    "headers": {
+      "Referer": "https://www.hetushu.com/"
+    },
+    "result": "#body > dd",
+    "bookName": "h4 > a",
+    "author": "h4 > span@re:[/ ]+(.+?)[/ ]+"
   },
   "book": {
-    "bookName": "meta[property=\"og:novel:book_name\"]",
-    "author": "meta[property=\"og:novel:author\"]",
-    "intro": "meta[property=\"og:description\"]",
-    "category": "meta[property=\"og:novel:category\"]",
-    "coverUrl": "meta[property=\"og:image\"]"
+    "bookName": "div.book_info > h2",
+    "author": "div.book_info > div:nth-child(3) > a",
+    "intro": "div.intro",
+    "category": "div.book_info > div:nth-child(4)@re:类型：(.+)",
+    "coverUrl": "div.book_info > img",
+    "status": "div.finish > h2"
   },
   "toc": {
-    "item": "#list > dl > dd > a",
+    "item": "#dir > dd > a",
     "offset": 0
   },
   "chapter": {
-    "title": ".bookname > h1",
+    "useBrowser": true,
+    "title": "h2.h2",
     "content": "#content",
-    "paragraphTagClosed": false,
-    "paragraphTag": "<br>+",
-    "filterTxt": "一秒记住【文学巴士&nbsp;】，精彩无弹窗免费阅读！|(www.xbiquge.la 新笔趣阁)，高速全文字在线阅读！|天才一秒记住本站地址：.+。手机版阅读网址：m.|手机用户请浏览阅读，更优质的阅读体验。|天才壹秒記住.+，為您提供精彩小說閱讀。|\\(本章完\\)",
-    "filterTag": "div p script"
+    "paragraphTagClosed": true,
+    "paragraphTag": "div",
+    "pagination": false,
+    "filterTxt": "\\(本章完\\)|和.{0,5}图.{0,5}书",
+    "filterTag": "h2 acronym bdo big cite code dfn kbd q s samp strike tt u var"
   }
 }

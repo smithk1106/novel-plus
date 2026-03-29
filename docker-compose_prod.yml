@@ -31,7 +31,7 @@ services:
   front:
     container_name: novel-front
     image: openjdk:21
-    restart: always
+    #restart: always
     environment:
       - DB_URL=${dburl}
       - DB_USERNAME=${username}
@@ -57,7 +57,7 @@ services:
   admin:
     container_name: novel-admin
     image: openjdk:21
-    restart: always
+    #restart: always
     environment:
       - DB_URL=${dburl}
       - DB_USERNAME=${username}
@@ -105,7 +105,7 @@ services:
   crawler2:
     container_name: novel-crawl2
     image: openjdk:21
-    restart: always
+    #restart: always
     environment:
       - DB_URL=${dburl}
       - DB_USERNAME=${username}
@@ -129,7 +129,7 @@ services:
   #   environment:
   #     - PMA_ARBITRARY=1
   #     - PMA_HOST=novel-db:3306
-  #     - PMA_USER=root
+  #     - PMA_USER=${username}
   #     - PMA_PASSWORD=${password}
   #     - ServerName=phpmyadmin
   #   ports:

@@ -32,6 +32,7 @@ import com.ideaflow.noveldownload.novel.parse.ChapterParser;
 import com.ideaflow.noveldownload.novel.parse.SearchParser;
 import com.ideaflow.noveldownload.novel.util.FileUtils;
 import com.ideaflow.noveldownload.novel.util.FormatUtils;
+import com.ideaflow.noveldownload.novel.util.PlaywrightUtils;
 import com.ideaflow.noveldownload.service.BookService;
 import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
 
@@ -92,7 +93,7 @@ public class Crawler {
      * @param toc     章节目录
      */
     @SneakyThrows
-    public Book crawl(String bookUrl, List<Chapter> toc, int digitCount) {
+    public Book crawl(String bookUrl, List<Chapter> toc, int digitCount, boolean isSkipExistChapter) {
         cn.hutool.core.lang.Console.log("[D]BookUrl: {}, Chapters: {}", bookUrl, toc.size());
         Book book = new BookParser(config).parse(bookUrl);
         BookContext.set(book);
@@ -199,6 +200,7 @@ public class Crawler {
         int cacheLimit = config.getThreads() * 10;
         List<Chapter> cachedChapters = new ArrayList<Chapter>();
         List<Chapter> failedChapters = new ArrayList<Chapter>();
+        List<Chapter> skippedChapters = new ArrayList<Chapter>();
         toc.forEach(item -> executor.execute(() -> {
             if (WebSocketContext.isNeedStop(bookUrl)) {
                 latch.countDown();
@@ -207,6 +209,15 @@ public class Crawler {
             try {
                 WebSocketContext.setSender(webSocketMessageSender);
                 WebSocketContext.setSessionId(sessionId);
+                item.setBookId(book.getId());
+                // Skip exists chapter
+                if (novelService.isChapterExists(item) && isSkipExistChapter) {
+                    skippedChapters.add(item);
+                    String msg = String.format("[D][%d]跳过已存在章节: %s, %s", item.getOrder(), item.getTitle(), item.getUrl());
+                    Console.log(msg);
+                    //webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(msg));
+                    return;
+                }
                 Chapter chapter = chapterParser.parse(item);
                 if (chapter == null || chapter.getContent().isBlank()) {
                     String msg;
@@ -220,7 +231,6 @@ public class Crawler {
                     failedChapters.add(item);
                     return;
                 }
-                chapter.setBookId(book.getId());
                 cachedChapters.add(chapter);
                 if (cachedChapters.size() % cacheLimit == 0) {
                     // 保存章节信息
@@ -248,6 +258,7 @@ public class Crawler {
                 WebSocketContext.clearSessionId();
                 WebSocketContext.clearSender();
                 latch.countDown();
+                PlaywrightUtils.close();
             }
         }));
 
@@ -267,6 +278,13 @@ public class Crawler {
         // 保存到文件时的处理
         if (CommonConst.SAVE_TYPE_DB.equalsIgnoreCase(config.getExtName()) == false) {
             new CrawlerPostHandler(config, novelService).handle(saveDir);
+        }
+
+        // 显示跳过章节
+        if (skippedChapters.size() > 0) {
+            String msg = String.format("[i]共跳过已存在章节: %d个", skippedChapters.size());
+            Console.log(msg);
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(msg));
         }
 
         // 显示失败的章节

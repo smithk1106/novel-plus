@@ -14,6 +14,7 @@ public interface BookService {
     List<Book> getBookByName(String bookName, String authorName);
     Page<Book> getBookList(AppConfig config, String keyword, Integer pageNo, Integer pageSize);
 
+    boolean isChapterExists(Chapter chapter);
     int saveChapters(List<Chapter> chapters, int count);
     Long saveChapter(Chapter chapter);
     Chapter getChapterById(Long id);

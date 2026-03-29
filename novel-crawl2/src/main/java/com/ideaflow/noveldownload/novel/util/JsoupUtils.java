@@ -8,6 +8,8 @@ import org.jsoup.select.Elements;
 
 import static com.ideaflow.noveldownload.novel.model.ContentType.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +34,7 @@ public class JsoupUtils {
      */
     public Elements select(Element e, String query) {
         // 分割查询条件以提取 XPath 或 CSS 查询
-        String actualQuery = StrUtil.subBefore(query, JS_SEPARATOR, false);
+        String actualQuery = query.split(SEPARATOR_PATTERN)[0];
         // 根据查询条件选择元素
         return actualQuery.matches("^(/|//|\\(/).*") ? e.selectXpath(actualQuery) : e.select(actualQuery);
     }
@@ -70,8 +72,8 @@ public class JsoupUtils {
             return "";
         }
 
-        String[] parts = query.split(SEPARATOR_PATTERN);
-        String actualQuery = parts[0];
+        Map<String, String> queryInfo = splitQuery(query);
+        String actualQuery = queryInfo.get("query");
 
         // 根据查询条件选择元素
         Elements els = select(el, actualQuery);
@@ -80,14 +82,14 @@ public class JsoupUtils {
         // 获取选中元素的内容
         Object element = els.size() == 1 ? els.first() : els;
         String result = "";
-        if (query.contains(ATTR_SEPARATOR)) {
-            result = getContentByType(element, ATTR_ANY, parts[1].trim());
-        } else if (query.contains(JS_SEPARATOR)) {
+        if (ATTR_SEPARATOR.equals(queryInfo.get("actionType"))) {
+            result = getContentByType(element, ATTR_ANY, queryInfo.get("action"));
+        } else if (JS_SEPARATOR.equals(queryInfo.get("actionType"))) {
             // 如果查询条件包含 JS，调用它
             result = invokeJs(query, getContentByType(element, contentType, ""));
-        } else if (query.contains(REGEXP_SEPARATOR)) {
+        } else if (REGEXP_SEPARATOR.equals(queryInfo.get("actionType"))) {
             // 如果查询条件包含正则表达式，应用它
-            Pattern p = Pattern.compile(parts[1].trim());
+            Pattern p = Pattern.compile(queryInfo.get("action"));
             Matcher m = p.matcher(getContentByType(element, HTML, ""));
             String needText = "";
             while (m.find()) {
@@ -97,7 +99,9 @@ public class JsoupUtils {
             }
             if (!needText.isBlank()) {
                 result = needText;
-                cn.hutool.core.lang.Console.log("[D]Pattern: {}, Matched: {}", parts[1], needText);
+                //cn.hutool.core.lang.Console.log("[D]Pattern '{}' is matched '{}'.", queryInfo.get("action"), needText);
+            } else {
+                cn.hutool.core.lang.Console.log("[D]Pattern '{}' is NOT matched '{}'!", queryInfo.get("action"), needText);
             }
         } else {
             result = getContentByType(element, contentType, "");
@@ -134,6 +138,23 @@ public class JsoupUtils {
 
     public ContentType getContentType(String query) {
         return getContentType(query, ContentType.TEXT);
+    }
+
+    public Map<String, String> splitQuery(String query) {
+        HashMap<String, String> map = new HashMap<>();
+        Pattern pattern = Pattern.compile(SEPARATOR_PATTERN);
+        Matcher matcher = pattern.matcher(query);
+        if (matcher.find()) {
+            map.put("query", query.substring(0, matcher.start()).trim());
+            map.put("action", query.substring(matcher.end()).trim());
+            map.put("actionType", matcher.group());
+        } else {
+            map.put("query", query.trim());
+            map.put("action", "");
+            map.put("actionType", "");
+        }
+
+        return map;
     }
 
     /**

@@ -171,7 +171,7 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
                 WebSocketContext.setSender(webSocketMessageSender);
                 WebSocketContext.setSessionId(session.getId());
     
-                Book book = new Crawler(config, bookService).crawl(searchResult.getUrl(), downloadCatalogs, String.valueOf(catalogs.size()).length());
+                Book book = new Crawler(config, bookService).crawl(searchResult.getUrl(), downloadCatalogs, String.valueOf(catalogs.size()).length(), !message.getAllowOverwrite());
     
                 stopWatch.stop();
     

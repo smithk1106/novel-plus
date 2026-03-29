@@ -23,6 +23,7 @@ public class Rule {
 
     @Data
     public static class Search {
+        private boolean useBrowser = false;
         private String baseUri;
         private Integer timeout;
         private String url;
@@ -47,6 +48,7 @@ public class Rule {
 
     @Data
     public static class Book {
+        private boolean useBrowser = false;
         private String baseUri;
         private Integer timeout;
         private String url;
@@ -64,6 +66,7 @@ public class Rule {
 
     @Data
     public static class Toc {
+        private boolean useBrowser = false;
         private String baseUri;
         private Integer timeout;
         private String url;
@@ -83,10 +86,12 @@ public class Rule {
 
     @Data
     public static class Chapter {
+        private boolean useBrowser = false;
         private String baseUri;
         private Integer timeout;
         // 用于测试
         private String title;
+
         private String content;
         private boolean paragraphTagClosed;
         private String paragraphTag;

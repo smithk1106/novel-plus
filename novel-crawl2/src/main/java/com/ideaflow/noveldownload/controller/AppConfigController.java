@@ -34,7 +34,7 @@ public class AppConfigController {
     public CommonResult<List<SourceInfoVO>> getSourceInfo() {
         // 这里直接硬编码返回，实际可从配置或数据库读取
         List<SourceInfoVO> sourceInfoVOS = List.of(
-            new SourceInfoVO(1, "香书小说", true, false, true, ""),
+            new SourceInfoVO(1, "和图书", true, true, true, ""),
             new SourceInfoVO(2, "书海阁小说网", true, true, true, "搜索限流 (Unexpected end of file from server)"),
             new SourceInfoVO(3, "梦书中文", true, false, true, "搜索限流 (Connect timed out)"),
             new SourceInfoVO(4, "鸟书网", true, false, true, "搜索限流 (Read timed out)，数量15w+"),

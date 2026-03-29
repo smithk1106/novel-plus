@@ -2,7 +2,14 @@ package com.ideaflow.noveldownload.novel.util;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+
+import com.ideaflow.noveldownload.novel.context.HttpClientContext;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
+import com.ideaflow.noveldownload.novel.model.ContentType;
+import com.ideaflow.noveldownload.novel.model.Rule;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.LoadState;
+
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import okhttp3.*;
@@ -17,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.http.HttpStatusCode;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 
 
@@ -72,32 +80,69 @@ public class CrawlUtils {
                     .replaceAll("[\\r\\n]+", "\n");
     }
 
-    // @SneakyThrows
-    // public Response request(OkHttpClient client, String url, int timeout) {
-    //     Call call = client.newCall(new Request.Builder()
-    //             .url(url)
-    //             .addHeader("User-Agent", RandomUA.generate())
-    //             .build());
-    //     call.timeout().timeout(timeout, TimeUnit.SECONDS);
-    //     dumpRequestInfo(call.request());    // DEBUG
+    @SneakyThrows
+    public String browseHtml(String url, String javascript) {
+        String html = "";
 
-    //     return call.execute();
-    // }
+        try (Page page = PlaywrightUtils.createPage(url)) {
+            // イベントが発火するまで待機（HTMLの読み込みと解析が完了した状態）
+            page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+            html = page.content();
+            // 少なくとも500msの間、ネットワーク接続が0になるまで待機
+            page.waitForLoadState(LoadState.NETWORKIDLE);
 
-    // @SneakyThrows
-    // public Response request(OkHttpClient client, Request.Builder builder, int timeout) {
-    //     Call call = client.newCall(builder
-    //             .addHeader("User-Agent", RandomUA.generate())
-    //             .build()
-    //     );
-    //     call.timeout().timeout(timeout, TimeUnit.SECONDS);
-    //     dumpRequestInfo(call.request());    // DEBUG
+            if (StringUtils.hasText(javascript)) {
+                html = (String)page.evaluate(javascript);
+            } else {
+                html = page.content();
+            }
+        } catch (Exception e) {
+            cn.hutool.core.lang.Console.log("[E]Error: {} {}, browerHtml: {}", e.getClass().getName(), e.getMessage(), html);
+            e.printStackTrace();
+            if (!StringUtils.hasText(html)) {
+                throw e;
+            }
+        }
 
-    //     return call.execute();
-    // }
+        return html;
+    }
+
+    @SneakyThrows
+    public String[] browseChapterHtml(String url, Rule.Chapter r) {
+        String[] htmlInfo = {"", ""};
+        String html = "";
+
+        try (Page page = PlaywrightUtils.createPage(url)) {
+            page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+            html = page.content();
+            page.waitForLoadState(LoadState.NETWORKIDLE);
+            
+            // Full html
+            htmlInfo[0] = page.content();
+
+            // Extracted html
+            html = PlaywrightUtils.queryContent(page, r.getContent(), true, ContentType.TEXT);
+            if (StringUtils.hasText(html)) {
+                htmlInfo[1] = "<div class=\"real_content\">" + html + "</div>";
+                //cn.hutool.core.lang.Console.log("[D]Extracted Html: {}", html);
+            }
+        } catch (Exception e) {
+            cn.hutool.core.lang.Console.log("[E]Error: {} {}, browerHtml: {}", e.getClass().getName(), e.getMessage(), html);
+            e.printStackTrace();
+            if (!StringUtils.hasText(html)) {
+                throw e;
+            }
+            htmlInfo[0] = html;
+        }
+
+        return htmlInfo;
+    }
 
     @SneakyThrows
     public String requestHtml(OkHttpClient client, Request.Builder builder, int timeout) {
+        if (client == null) {
+            client = HttpClientContext.get();
+        }
         Call call = client.newCall(builder
                 .addHeader("User-Agent", RandomUA.generate())
                 .build()

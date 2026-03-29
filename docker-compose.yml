@@ -1,62 +1,37 @@
 services:
-  novel-db:
-    container_name: novel-db
-    image: mysql:8.0
-    restart: always
-    hostname: novel-db
-    environment:
-      - MYSQL_ROOT_PASSWORD=${password}
-      - MYSQL_TCP_PORT=3306
-    volumes:
-      - ./docker/mysql/data:/var/lib/mysql
-      - ./docker/share:/docker-entrypoint-initdb.d
-      - ./docker/share:/share
-    command: mysqld --max_allowed_packet=100M
-    ports:
-      - "9306:3306"
-    networks:
-      - novelnet
+  # novel-db:
+  #   container_name: novel-db
+  #   image: mysql:8.0
+  #   #restart: always
+  #   hostname: novel-db
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=${password}
+  #     - MYSQL_TCP_PORT=3306
+  #   volumes:
+  #     - ./docker/mysql/data:/var/lib/mysql
+  #     - ./docker/share:/docker-entrypoint-initdb.d
+  #     - ./docker/share:/share
+  #   command: mysqld --max_allowed_packet=100M
+  #   ports:
+  #     - "9306:3306"
+  #   networks:
+  #     - novelnet
 
-  novel-redis:
-    container_name: novel-redis
-    image: redis:7.0
-    restart: always
-    hostname: novel-redis
-    command: redis-server --save 60 1 --loglevel warning --requirepass "${redispwd}"
-    ports:
-      - "6379:6379"
-    networks:
-      - novelnet
+  # novel-redis:
+  #   container_name: novel-redis
+  #   image: redis:7.0
+  #   #restart: always
+  #   hostname: novel-redis
+  #   command: redis-server --save 60 1 --loglevel warning --requirepass "${redispwd}"
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - novelnet
 
-  front:
-    container_name: novel-front
-    image: openjdk:21
-    restart: always
-    environment:
-      - DB_URL=${dburl}
-      - DB_USERNAME=${username}
-      - DB_PASSWORD=${password}
-      - REDIS_HOST=${redishost}
-      - REDIS_PASSWORD=${redispwd}
-      - REDIS_PORT=${redisport}
-    volumes:
-      - ./docker/front:/app/front
-      - ./docker/download/books:/app/books
-      - ./docker/download/pic:/app/pic
-    working_dir: /app/front
-    command: sh -c "java -jar -Dspring.profiles.active=dev /app/front/novel-front.jar"
-    ports:
-      - 8581:8085
-    depends_on:
-      - novel-db
-      - novel-redis
-    networks:
-      - novelnet
-
-  # admin:
-  #   container_name: novel-admin
+  # front:
+  #   container_name: novel-front
   #   image: openjdk:21
-  #   restart: always
+  #   #restart: always
   #   environment:
   #     - DB_URL=${dburl}
   #     - DB_USERNAME=${username}
@@ -64,12 +39,39 @@ services:
   #     - REDIS_HOST=${redishost}
   #     - REDIS_PASSWORD=${redispwd}
   #     - REDIS_PORT=${redisport}
+  #     - PROFILE=dev
+  #   volumes:
+  #     - ./docker/front:/app/front
+  #     - ./docker/download/books:/app/books
+  #     - ./docker/download/pic:/app/pic
+  #   working_dir: /app/front
+  #   command: bin/start_server.sh /app/front/novel-front.jar
+  #   ports:
+  #     - 8581:8085
+  #   depends_on:
+  #     - novel-db
+  #     - novel-redis
+  #   networks:
+  #     - novelnet
+
+  # admin:
+  #   container_name: novel-admin
+  #   image: openjdk:21
+  #   #restart: always
+  #   environment:
+  #     - DB_URL=${dburl}
+  #     - DB_USERNAME=${username}
+  #     - DB_PASSWORD=${password}
+  #     - REDIS_HOST=${redishost}
+  #     - REDIS_PASSWORD=${redispwd}
+  #     - REDIS_PORT=${redisport}
+  #     - PROFILE=dev
   #   volumes:
   #     - ./docker/admin:/app/admin
   #     - ./docker/download/books:/app/books
   #     - ./docker/download/pic:/app/pic
   #   working_dir: /app/admin
-  #   command: sh -c "java -jar -Dspring.profiles.active=dev /app/admin/novel-admin.jar"
+  #   command: bin/start_server.sh /app/admin/novel-admin.jar
   #   ports:
   #     - 8582:8088
   #   depends_on:
@@ -81,16 +83,17 @@ services:
   # crawler1:
   #   container_name: novel-crawl1
   #   image: openjdk:21
-  #   restart: always
+  #   #restart: always
   #   environment:
   #     - DB_URL=${dburl}
   #     - DB_USERNAME=${username}
   #     - DB_PASSWORD=${password}
+  #     - PROFILE=dev
   #   volumes:
   #     - ./docker/crawl1:/app/crawl
   #     - ./docker/download/books:/app/books
   #     - ./docker/download/pic:/app/pic
-  #   command: sh -c "java -jar -Dspring.profiles.active=dev /app/crawl/novel-crawl.jar"
+  #   command: bin/start_server.sh /app/crawl/novel-crawl.jar"
   #   ports:
   #     - 8583:8083
   #   depends_on:
@@ -102,8 +105,9 @@ services:
   # crawler2:
   #   container_name: novel-crawl2
   #   image: openjdk:21
-  #   restart: always
+  #   # restart: always
   #   environment:
+  #     - TZ=Asia/Tokyo
   #     - DB_URL=${dburl}
   #     - DB_USERNAME=${username}
   #     - DB_PASSWORD=${password}
@@ -112,33 +116,54 @@ services:
   #     - ./docker/h2db:/app/db
   #     - ./docker/download:/app/download
   #   working_dir: /app
-  #   command: java -jar -Dspring.profiles.active=dev /app/novel-crawl2.jar
+  #   command: java -jar -Dspring.profiles.active=prod /app/novel-crawl2.jar
   #   ports:
   #     - 8584:30000
-  #   depends_on:
-  #     - novel-db
+  #   # depends_on:
+  #   #   - novel-db
   #   networks:
   #     - novelnet
+  
+  crawler2:
+    container_name: novel-crawl2
+    image: mcr.microsoft.com/playwright/java:v1.58.0-noble
+    # restart: always
+    environment:
+      - TZ=Asia/Tokyo
+      - DB_URL=${dburl}
+      - DB_USERNAME=${username}
+      - DB_PASSWORD=${password}
+    volumes:
+      - ./docker/crawl2:/app
+      - ./docker/h2db:/app/db
+      - ./docker/download:/app/download
+    working_dir: /app
+    # command: java -jar -Dspring.profiles.active=prod /app/novel-crawl2.jar
+    entrypoint: /usr/bin/java -jar -Dspring.profiles.active=prod /app/novel-crawl2.jar
+    ports:
+      - 8584:30000
+    # depends_on:
+    #   - novel-db
+    networks:
+      - novelnet
 
-  # phpmyadmin:
-  #   container_name: phpmyadmin
-  #   image: phpmyadmin/phpmyadmin
-  #   environment:
-  #     - PMA_ARBITRARY=1
-  #     - PMA_HOST=novel-db:3306
-  #     - PMA_USER=root
-  #     - PMA_PASSWORD=${password}
-  #     - ServerName=phpmyadmin
-  #   ports:
-  #     - 8580:80
-  #   volumes:
-  #     - ./docker/phpmyadmin/sessions:/sessions
-  #   links:
-  #     - novel-db
-  #   depends_on:
-  #     - novel-db
-  #   networks:
-  #     - novelnet
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=163.44.124.47:9306
+      - PMA_USER=${username}
+      - PMA_PASSWORD=${password}
+      - ServerName=phpmyadmin
+    ports:
+      - 8580:80
+    volumes:
+      - ./docker/phpmyadmin/sessions:/sessions
+    # depends_on:
+    #   - novel-db
+    networks:
+      - novelnet
 
 networks:
   novelnet:

@@ -41,7 +41,6 @@ import cn.hutool.json.JSONUtil;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 /**
  * 搜索解析器，负责处理搜索请求和结果解析
  * <p>
@@ -80,18 +79,21 @@ public class SearchParser extends Source {
         String html = "";
         Document document;
         try {
-            Request.Builder builder = new Request.Builder().url(searchUrl);
+            if (r.isUseBrowser()) {
+                html = CrawlUtils.browseHtml(searchUrl, "");
+            } else {
+                Request.Builder builder = new Request.Builder().url(searchUrl);
 
-            if (r.getHeaders() != null && r.getHeaders().size() > 0) {
-                r.getHeaders().forEach((k, v) -> {
-                    builder.addHeader(k, v);
-                });
+                if (r.getHeaders() != null && r.getHeaders().size() > 0) {
+                    r.getHeaders().forEach((k, v) -> {
+                        builder.addHeader(k, v);
+                    });
+                }
+                if ("post".equalsIgnoreCase(r.getMethod())) {
+                    builder.post(CrawlUtils.buildData(r.getData(), keyword));
+                }
+                html = CrawlUtils.requestHtml(client, builder, r.getTimeout());
             }
-            if ("post".equalsIgnoreCase(r.getMethod())) {
-                builder.post(CrawlUtils.buildData(r.getData(), keyword));
-            }
-
-            html = CrawlUtils.requestHtml(client, builder, r.getTimeout());
             document = Jsoup.parse(html, r.getBaseUri());
         } catch (Exception e) {
             String errorMsg = e.getMessage();
@@ -104,7 +106,7 @@ public class SearchParser extends Source {
 
         List<SearchResult> firstPageResults = getSearchResults(searchUrl, html);
         if (firstPageResults.size() == 0) {
-            cn.hutool.core.lang.Console.log("[!]搜索结果为空。Html: {}", html);
+            cn.hutool.core.lang.Console.log("[!][{}]搜索结果为空。Html: {}", this.rule.getName(), html);
         }
 
         // 搜索结果无分页
@@ -143,7 +145,11 @@ public class SearchParser extends Source {
             // 搜索结果页 DOM
             Document document;
             if (html == null) {
-                html = CrawlUtils.requestHtml(client, url, r.getTimeout());
+                if (r.isUseBrowser()) {
+                    html = CrawlUtils.browseHtml(url, "");
+                } else {
+                    html = CrawlUtils.requestHtml(client, url, r.getTimeout());
+                }
                 document = Jsoup.parse(html, r.getBaseUri());
                 // try (Response resp2 = CrawlUtils.request(client, url, r.getTimeout())) {
                 //     // peekBody 不会关闭原body流，可以拿一份副本出来
@@ -154,7 +160,7 @@ public class SearchParser extends Source {
             }
 
             Elements resultEls = document.select(r.getResult());
-            cn.hutool.core.lang.Console.log("[D]Search result: {}", resultEls.html());
+            //cn.hutool.core.lang.Console.log("[D]Search result: {}", resultEls.html());
 
             // 部分书源完全匹配时会直接跳转到详情页（搜索结果为空 && 书名不为空），故需要构造搜索结果
             if (resultEls.isEmpty() && !document.select(this.rule.getBook().getBookName()).isEmpty()) {
@@ -177,7 +183,7 @@ public class SearchParser extends Source {
                         .build();
                 list.add(sr);
                 //list.add(ChineseConverter.convert(sr, this.rule.getLanguage(), config.getLanguage()));
-                Thread.sleep(CrawlUtils.randomInterval(config));
+                //Thread.sleep(CrawlUtils.randomInterval(config));
 
                 return list;
             }

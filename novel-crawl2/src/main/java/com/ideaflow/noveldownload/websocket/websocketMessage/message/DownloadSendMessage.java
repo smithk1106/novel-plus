@@ -50,4 +50,8 @@ public class DownloadSendMessage {
      * 更新章节数
      */
     private Integer chapterCount;
+    /**
+     * 是否覆盖现存章节
+     */
+    private Boolean allowOverwrite = false;
 }

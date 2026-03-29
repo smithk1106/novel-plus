@@ -15,7 +15,6 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HtmlUtil;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -28,7 +27,7 @@ public class PlaywrightUtils {
         if (playwright.get() == null) {
             playwright.set(Playwright.create());
             browser.set(playwright.get().chromium().launch());
-            browser.set(playwright.get().chromium().connect("ws://playwright:3000/"));
+            //browser.set(playwright.get().chromium().connect("ws://playwright:3000/"));
         }
 
         Page page = browser.get().newPage();
